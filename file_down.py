@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup as bs
-from datetime import datetime
+from datetime import datetime,timedelta
 import time
 import pandas as pd
 from urllib import request,parse
@@ -21,29 +21,29 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
-
 class FileDown:
-    now_y = 0
-    now_m = 0
-    now_str_d = ""
+    d = None
     browser = None
     path = None
 
-    def __init__(self,y,m, path):
+    def __init__(self,str_d,path):
         self.path = path
-        self.now_y=y
-        self.now_m=m
-        self.now_str_d = str(self.now_y) + (str(self.now_m).zfill(2))
+        self.d = datetime.strptime(str_d, '%Y%m')
 
-        # self.filedown_1(str(self.now_y), str(self.now_m-2))
-        # self.filedown_2_20(str(self.now_y),str(self.now_m-3))
-        # self.filedown_21()
+        # 20일자
+        self.filedown_1(str((self.d - timedelta(days=30*2)).year), str((self.d - timedelta(days=30*2)).month))
+        self.filedown_2_20(str((self.d - timedelta(days=30*3)).year),str((self.d - timedelta(days=30*3)).month))
+        self.filedown_21()
         self.filedown_22()
-        # self.filedown_23()
-        # self.filedown_55(str(self.now_y),str(self.now_m-2))
-        # self.filedown_57()
+        self.filedown_23()
+        self.filedown_38()
+        self.filedown_42()
+        self.filedown_55(str((self.d - timedelta(days=30*2)).year),str((self.d - timedelta(days=30*2)).month))
+        self.filedown_56()
+        self.filedown_57()
 
     def filedown_1(self,y,m):
+        print("1")
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
@@ -69,9 +69,9 @@ class FileDown:
                         break
 
                 request.urlretrieve(down_url,f"{folder_path}/1.{file_type}")
-                print("1")
 
     def filedown_2_20(self,y,m):
+        print("2~20")
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=TSPIA')
         soup = bs(page.text, "html.parser")
@@ -94,10 +94,10 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url,f"data/{self.now_str_d}/raw_data/{file_name}")
+                request.urlretrieve(down_url,f"{folder_path}/{file_name}")
 
         # 시트나누기
-        row_down_path = f"data/{self.now_str_d}/raw_data/{file_name}"
+        row_down_path = f"{folder_path}/{file_name}"
         pd.read_excel(row_down_path, sheet_name='매매_공동주택').to_csv(f"{folder_path}/2.csv",index=False,encoding='cp949')
         pd.read_excel(row_down_path, sheet_name='매매_공동주택_계절조정').to_csv(f"{folder_path}/3.csv", index=False,encoding='cp949')
         pd.read_excel(row_down_path, sheet_name='규모별 매매_아파트').to_csv(f"{folder_path}/4.csv", index=False,encoding='cp949')
@@ -117,9 +117,9 @@ class FileDown:
         pd.read_excel(row_down_path, sheet_name='규모별 매매 평균_연립 다세대').to_csv(f"{folder_path}/18.csv", index=False, encoding='cp949')
         pd.read_excel(row_down_path, sheet_name='매매 중위_연립 다세대').to_csv(f"{folder_path}/19.csv", index=False, encoding='cp949')
         pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
-        print("2~20")
 
     def filedown_21(self):
+        print(21)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(3,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
@@ -130,9 +130,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        # 이름바꾸기
         self.change_last_file(folder_path,"21.xlsx")
-        print(21)
 
     def filedown_22(self):
         print(22)
@@ -166,10 +164,11 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, "22.xlsx")
 
-
     def filedown_23(self):
-        browser = self.kosis_init_broswer()
-        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
+        print(23)
+        folder_path = f"{self.path}\\20일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
         browser.switch_to.frame('iframe_rightMenu')
@@ -191,12 +190,33 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
+        self.change_last_file(folder_path, "23.xlsx")
 
     def filedown_38(self):
-        #???
-        pass
+        print(38)
+        folder_path = f"{self.path}\\20일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=5328&hDivEng=&month_yn=',))
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fileDownBtn"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
+
+        self.change_last_file(folder_path, "38.csv")
+
+    def filedown_42(self):
+        print(42)
+        folder_path = f"{self.path}\\20일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=419&hFormId=5882&hDivEng=&month_yn=',))
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="fileDownBtn"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
+
+        self.change_last_file(folder_path, "42.csv")
 
     def filedown_55(self, y, m):
+        print(55)
+        folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
 
@@ -213,14 +233,26 @@ class FileDown:
                 for file in files:
                     if "지가지수" in file["fileNm"]:
                         file_name = file["fileNm"]
+                        file_type = file_name.split('.')[-1]
                         down_key = file["dwldUrl"]
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url, f"data/{self.now_str_d}/raw_data/{file_name}")
+                request.urlretrieve(down_url, f"{folder_path}/55.{file_type}")
+
+    def filedown_56(self):
+        print(56)
+        folder_path = f"{self.path}\\20일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ("https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=LFR_13200",))
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="S_FileBox"]').click)
+
+        self.change_last_file(folder_path, "56.xlsx")
 
     def filedown_57(self):
-        browser = self.kosis_init_broswer()
+        print(57)
+        folder_path = f"{self.path}\\20일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
@@ -231,7 +263,7 @@ class FileDown:
         # 계정코드별
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_1"]').click) #아래탭 내리기
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fancytree_1Btn"]').click) #전체해제
-        self.delay_after_func(1,  browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #목록 보이기
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #목록 보이기
 
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/span/span[@class="fancytree-checkbox"]').click)  #맨위 체크박스 체크
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[1]/span/span[@class="fancytree-checkbox"]').click) #주택담보대출
@@ -241,6 +273,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
+        self.change_last_file(folder_path, "57.xlsx")
 
     def kosis_init_broswer(self,folder_path):
         chrome_options = webdriver.ChromeOptions()
