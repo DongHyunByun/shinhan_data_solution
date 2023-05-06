@@ -22,25 +22,68 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
 class FileDown:
+    str_d = None
     d = None
     browser = None
     path = None
 
     def __init__(self,str_d,path):
         self.path = path
+        self.str_d = str_d
         self.d = datetime.strptime(str_d, '%Y%m')
 
-        # 20일자
-        self.filedown_1(str((self.d - timedelta(days=30*2)).year), str((self.d - timedelta(days=30*2)).month))
-        self.filedown_2_20(str((self.d - timedelta(days=30*3)).year),str((self.d - timedelta(days=30*3)).month))
-        self.filedown_21()
-        self.filedown_22()
-        self.filedown_23()
-        self.filedown_38()
-        self.filedown_42()
-        self.filedown_55(str((self.d - timedelta(days=30*2)).year),str((self.d - timedelta(days=30*2)).month))
-        self.filedown_56()
-        self.filedown_57()
+        self.make_d_dir()
+
+        # # 20일자
+        # self.filedown_1(str((self.d - timedelta(days=30*2)).year), str((self.d - timedelta(days=30*2)).month))
+        # self.filedown_2_20(str((self.d - timedelta(days=30*3)).year),str((self.d - timedelta(days=30*3)).month))
+        # self.filedown_21()
+        # self.filedown_22()
+        # self.filedown_23()
+        # self.filedown_38()
+        # self.filedown_42()
+        # self.filedown_55(str((self.d - timedelta(days=30*2)).year),str((self.d - timedelta(days=30*2)).month))
+        # self.filedown_56()
+        # self.filedown_57()
+        #
+        # # 말일자
+        # self.filedown_27()
+        # self.filedown_28()
+        # # self.filedown_29() # 해야함
+        # self.filedown_34()
+        # self.filedown_36()
+        # self.filedown_39()
+        # self.filedown_41()
+        # self.filedown_43()
+        # self.filedown_44()
+
+    def make_d_dir(self):
+        '''
+        폴더가 없으면 폴더를 만든다
+
+        path/YYYYMM
+          I
+          I___20일
+              I
+              I__원천
+          I
+          I___말일
+              I
+              I__원천
+          I
+          I___kb단지
+              I
+              I__원천
+        '''
+        if not os.path.isdir(self.path):
+            os.mkdir(self.path)
+
+        for folder in ["20일","말일","kb단지"]:
+            if not os.path.isdir(f"{self.path}\\{folder}"):
+                os.mkdir(f"{self.path}\\{folder}")
+
+            if not os.path.isdir(f"{self.path}\\{folder}\\원천"):
+                os.mkdir(f"{self.path}\\{folder}\\원천")
 
     def filedown_1(self,y,m):
         print("1")
@@ -119,7 +162,8 @@ class FileDown:
         pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
 
     def filedown_21(self):
-        print(21)
+        file_num = "21"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(3,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
@@ -130,10 +174,11 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path,"21.xlsx")
+        self.change_last_file(folder_path,file_num)
 
     def filedown_22(self):
-        print(22)
+        file_num = "22"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1J20112&orgId=101&listId=P2_6&dbUser=NSI.&language=ko',))
@@ -162,10 +207,11 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, "22.xlsx")
+        self.change_last_file(folder_path, file_num)
 
     def filedown_23(self):
-        print(23)
+        file_num = "23"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
@@ -190,10 +236,134 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, "23.xlsx")
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_27(self):
+        file_num = "27"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6905&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
+
+        # 설정창 열기
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+
+        # 계정코드별
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-1"]/li/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]/span[@class="fancytree-checkbox"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)  # 시점 탭 선택
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAllM"]').click)  # 날짜 전체선택 해재
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-5"]/li/span[@class="fancytree-node fancytree-exp-n fancytree-ico-c"]/span[@class="fancytree-checkbox"]').click)  # 최신날짜선택
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_28(self):
+        file_num = "28"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6906&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
+
+        # 설정창 열기
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+
+        # 계정코드별
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-1"]/li/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]/span[@class="fancytree-checkbox"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)  # 시점 탭 선택
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAllM"]').click)  # 날짜 전체선택 해재
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-5"]/li/span[@class="fancytree-node fancytree-exp-n fancytree-ico-c"]/span[@class="fancytree-checkbox"]').click)  # 최신날짜선택
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_34(self):
+        file_num = "34"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1946&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
+
+        # 행렬교체
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시도별상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le4"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_36(self):
+        file_num = "36"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1952&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
+
+        # 행렬교체(상자옮기기)
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le4"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시도별상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 조회설정
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="tabClassText_4"]/span[@class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-e"]').click) # 시도별 리스트 내리기
+
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-5"]/li[2]/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]').click)  # 시도별 리스트 내리기
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-5"]/li[6]/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]').click)  # 시도별 리스트 내리기
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 시점설정
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btn_time"]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="timePopListMBtn"]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="ft-id-7"]/li[1]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnTimeAccept"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
 
     def filedown_38(self):
-        print(38)
+        file_num = "38"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=5328&hDivEng=&month_yn=',))
@@ -201,10 +371,64 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, "38.csv")
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_39(self):
+        file_num = "39"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2080&orgId=116&listId=I1_2&dbUser=NSI.&language=ko',))
+
+        # 행렬교체(상자옮기기)
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 부문상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri2"]').click)  # 규모상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 다운로드
+        self.kosis_download(browser,"csv")
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_41(self):
+        file_num = "41"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2082&orgId=116&listId=I1_2&dbUser=NSI.&language=ko',))
+
+        # 행렬교체(상자옮기기)
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 다운로드
+        self.kosis_download(browser, "csv")
+        self.change_last_file(folder_path, file_num)
 
     def filedown_42(self):
-        print(42)
+        file_num = "42"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=419&hFormId=5882&hDivEng=&month_yn=',))
@@ -212,10 +436,80 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, "42.csv")
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_43(self):
+        file_num = "43"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5373&orgId=116&listId=116_11626_003&dbUser=NSI.&language=ko',))
+
+        # 행렬교체(상자옮기기)
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 조회설정
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_2"]').click) # 대분류
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[1]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[2]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 시점
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="btn_time"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-7"]/li[2]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-7"]/li[3]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-7"]/li[4]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnTimeAccept"]').click) #적용
+
+        # 다운로드
+        self.kosis_download(browser, "xlsx")
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_44(self):
+        file_num = "44"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5387&orgId=116&listId=116_11626_002&dbUser=NSI.&language=ko',))
+
+        # 행렬교체(상자옮기기)
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
+        # 조회설정
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_2"]').click) # 대분류
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[1]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[2]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드(시점후 바로 다운로드창으로)
+        self.kosis_download(browser, "xlsx")
+        self.change_last_file(folder_path, file_num)
 
     def filedown_55(self, y, m):
-        print(55)
+        file_num = "55"
+        print(file_num)
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
@@ -238,19 +532,21 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url, f"{folder_path}/55.{file_type}")
+                request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_type}")
 
     def filedown_56(self):
-        print(56)
+        file_num = "56"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ("https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=LFR_13200",))
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="S_FileBox"]').click)
 
-        self.change_last_file(folder_path, "56.xlsx")
+        self.change_last_file(folder_path, file_num)
 
     def filedown_57(self):
-        print(57)
+        file_num = "57"
+        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
@@ -273,7 +569,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, "57.xlsx")
+        self.change_last_file(folder_path, file_num)
 
     def kosis_init_broswer(self,folder_path):
         chrome_options = webdriver.ChromeOptions()
@@ -286,8 +582,10 @@ class FileDown:
         browser = webdriver.Chrome(chrome_options=chrome_options, executable_path="chromedriver.exe")
         return browser
 
-    def kosis_download(self,browser):
+    def kosis_download(self,browser,type="excel"):
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_download"]').click)
+        if type=="csv":
+            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="csvradio"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="downDesc"]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="pop_downgrid2"]/div[@class="pop_content2"]/div[@class="btn_lay"]/span[@class="confirmBtn"]/a').click)
 
@@ -337,4 +635,5 @@ class FileDown:
 
     def change_last_file(self,folder_path, new_name):
         filename = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
-        shutil.move(filename, os.path.join(folder_path, new_name))
+        file_type = filename.split(".")[-1]
+        shutil.move(filename, os.path.join(folder_path, f"{new_name}.{file_type}"))
