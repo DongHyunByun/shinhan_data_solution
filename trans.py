@@ -3,6 +3,7 @@ from tabulate import tabulate as tb
 import re
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import numpy as np
 
 ## 이번달 작업 외 수행 시 아래 코드 사용
 ## yyyymm = '2022.09월' # (현재 년월)
@@ -13,17 +14,21 @@ class Trans:
     today = datetime.now().strftime('%Y.%m월')
     refer = "refer"
 
-    def __init__(self,path,d):
-        self.path = path
+    def __init__(self,data_path,d):
+        self.path = f"{data_path}\\{d}"
+        self.refer_path = f"{data_path}\\refer"
         self.d = d
 
         # self.trans_21()
         # self.trans_22()
         # self.trans_23()
-        self.trans_38()
+        # self.trans_38()
+        # self.trans_42()
+        # self.trans_55()
+        self.trans_56()
 
     def trans_21(self):
-        file_name1 = f"{self.path}/20일/원천/21.csv"
+        file_name1 = f"{self.path}/20일/원천/21.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
         df = pd.read_excel(file_name1, dtype='str', engine='openpyxl', sheet_name='데이터')
@@ -73,7 +78,7 @@ class Trans:
 
         df = df.loc[:, col_list]
 
-        out = pd.read_csv('refer/22_품목별 소비자물가지수_구분명.dat', dtype='str', sep='|', header=None, encoding='ANSI')
+        out = pd.read_csv(f'{self.refer_path}/22_품목별 소비자물가지수_구분명.dat', dtype='str', sep='|', header=None, encoding='ANSI')
 
         out = pd.merge(out, df, how='left', left_on=[1, 4], right_on=['시도별', '품목별'])
         out.drop(['시도별', '품목별'], axis=1, inplace=True)
@@ -137,7 +142,6 @@ class Trans:
     def trans_38(self):
         file_path = f"{self.path}/20일/원천/38.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
-        file_path3 = 'refer/'
 
         unsold = pd.read_csv(file_path, encoding='cp949')
         unsold.fillna('0', inplace=True)
@@ -159,16 +163,15 @@ class Trans:
         unsold = unsold.loc[:, ['자료발표일자', '시도시군구', '부문_규모', '호', '자료기준년월']]
 
         # 이번달 제공해야할 기준월 자료만 추출
-        today = datetime.now().strftime('%Y%m')
+        today = self.d
         today = datetime.strptime(today, '%Y%m') - relativedelta(months=2)
-        print(today)
         today = today.strftime('%Y%m')
         print(today)
         unsold = unsold.loc[unsold['자료기준년월'] == today, :]
 
         # 코드값 붙일 파일 불러오기
-        sido = pd.read_csv(file_path3 + '38_공사완료후_미분양현황_시도시군구.dat', sep='|', encoding='ANSI')
-        scale = pd.read_csv(file_path3 + '38_공사완료후_미분양현황_부문규모.dat', sep='|', encoding='ANSI')
+        sido = pd.read_csv(f'{self.refer_path}/38_공사완료후_미분양현황_시도시군구.dat', sep='|', encoding='ANSI')
+        scale = pd.read_csv(f'{self.refer_path}/38_공사완료후_미분양현황_부문규모.dat', sep='|', encoding='ANSI')
 
         unsold = pd.merge(sido, unsold, how='left', on='시도시군구')
         unsold = pd.merge(unsold, scale, how='left', on='부문_규모')
@@ -181,5 +184,137 @@ class Trans:
 
         unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.csv',sep='|', header=False, index=False, encoding='ANSI')
 
+    def trans_42(self):
+        file_path1 = f"{self.path}/20일/원천/42.csv"
+        file_path2 = f"{self.path}/20일/원천_처리후/"
+
+        # 원천 파일 불러오기
+        df = pd.read_csv(file_path1, dtype='str', encoding='cp949')
+        df = df.set_index(['월(Monthly)', '구분']).stack().reset_index()
+
+        # 필요한 년월에 해당하는 파일 불러오기
+        now = datetime.now()
+        now = now - relativedelta(months=2)
+        now = now.strftime('%Y-%m')
+        df = df.loc[df['월(Monthly)'] == now, :]
+
+        # 시도 값 수정
+        df['구분'] = df['구분'].apply(lambda x: re.sub('특별자치도|특별자치시|특별시|광역시|도|청|라|상', '', x))
+
+        # 코드값 파일 불러오기
+        code = pd.read_csv(f"{self.refer_path}/42_공동주택현황_코드.dat", dtype='str', sep='|', encoding='ANSI')
+
+        # 코드값에 붙여넣어서 작업파일과 유사하게 맞춰주기
+        df = pd.merge(code, df, how='left', left_on=['시도명', '단지동호수구분명'], right_on=['구분', 'level_2'])
+
+        # 자료월, 자료기준년월 맞춰주기
+        df = df.loc[:, ['월(Monthly)', 'KED분류시도구분', '시도명', '단지동호수구분', '단지동호수구분명', 0]]
+        df['자료기준년월'] = df['월(Monthly)'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m') + relativedelta(months=1)).strftime('%Y%m'))
+        df['월(Monthly)'] = df['월(Monthly)'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m') + relativedelta(months=1)).strftime('%Y%m%d'))
+
+        print(tb(df.head(10), headers='keys', tablefmt='pretty'))
+
+        # 파일 저장
+        df.to_csv(f"{file_path2}/42.rtp_gdhse_now_yyyymmdd.dat", sep='|', header=None, index=False, encoding='ANSI')
+
+    def trans_55(self):
+        ## 이번달 작업 외 수행 시 아래 코드 사용
+        ## yyyymm = '2022.09월' # (현재 년월)
+
+        file_path1 = f"{self.path}/20일/원천/55.xls"
+        file_path3 = f"{self.path}/20일/원천_처리후/"
+
+        jiga = pd.read_excel(file_path1, header=4, dtype='str')
+
+        # 필요한 컬럼만 추출
+        jiga = jiga.iloc[:, [0, 1, 12, 13, 14, 15, 16, 17, 18]]
+        jiga.columns = ['CODE', '행정구역', '전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타']
+
+        # 필요없는 데이터 지우기
+        jiga.dropna(subset=['전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타'], how='all', inplace=True)
+
+        # 행정구역에 한글 제외하고 모두 삭제
+        jiga['행정구역'] = jiga['행정구역'].apply(lambda x: re.sub('[\W\d]', '', x))
+        sido_list = ['전국', '서울특별시', '인천광역시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시',
+                     '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주자치도']
+        jiga['시도'] = [sido if sido in sido_list else np.nan for sido in jiga['행정구역']]
+        jiga['시도'].fillna(method='ffill', inplace=True)
+
+        # sido_list에 해당하는 행정구역 삭제하기 위한 함수 만들기
+        def del_nm(x):
+            for item in sido_list:
+                x = re.sub(item, '', x)
+            return x
+
+        jiga['행정구역'] = jiga['행정구역'].apply(lambda x: del_nm(x))
+        jiga['시도시군구'] = jiga['시도'] + jiga['행정구역']
+        jiga = jiga.loc[:, ['시도시군구', '전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타']]
+
+        jiga.fillna('', inplace=True)
+
+        # 형태에 맞춰주기 위해 Transpose 하기
+        jiga.set_index('시도시군구', drop=True, inplace=True)
+        jiga = jiga.stack()
+        jiga = pd.DataFrame(jiga.reset_index())
+
+        jiga.columns = ['시도시군구', '이용상황구분명', '값']
+
+        # 코드값 불러와서 붙이기
+        sido_df = pd.read_csv(f"{self.refer_path}/55_이용상황별 지가지수_시도시군구.dat" , sep='|', encoding='ANSI')
+        gubun = pd.read_csv(f"{self.refer_path}/55_이용상황별 지가지수_구분명.dat", sep='|', dtype='str', encoding='ANSI')
+
+        jiga = pd.merge(sido_df, jiga, how='left', on='시도시군구')
+        jiga = pd.merge(jiga, gubun, how='left', on='이용상황구분명')
+        # 필요한 컬럼만 추출
+        jiga = jiga.loc[:, ['시군구CODE', '시군구명', '시도시군구', '이용상황구분', '이용상황구분명', '값']]
+        # 정렬
+        jiga.sort_values(['시군구CODE', '이용상황구분'], inplace=True)
+
+        jiga['값'].replace('-', '', inplace=True)
+        jiga.drop_duplicates(inplace=True)
+
+        print(tb(jiga, headers='keys', tablefmt='pretty'))
+        jiga.to_csv(f"{file_path3}/55.rtp_usecase_jg_index_inf_yyyymmdd.dat", sep='|', index=False, encoding='ANSI')
+
+    def trans_56(self):
+        ## 이번달 작업 외 수행 시 아래 코드 사용
+        ## yyyymm = '2022.09월' # (현재 년월)
+
+        file_path1 = f"{self.path}/20일/원천/56.xlsx"
+        file_path2 = f"{self.path}/20일/원천_처리후/"
+
+        # 지역 추가시에 변경
+        dic = {'부산': '0',
+               '대구': '1',
+               '울산': '2',
+               '강원': '3',
+               '충북': '4',
+               '전북': '5',
+               '전남': '6',
+               '경북': '7',
+               '경남': '8',
+               '제주': '9'}
+
+        df = pd.read_excel(file_path1, header=10, dtype='str', engine='openpyxl', sheet_name='Sheet1')
+
+        col_nm = df.columns[0]
+        df_fin = df.set_index(col_nm).stack().reset_index()
+        df_fin.columns = ['지역', '자료기준년월', '값']
+
+        df_fin['자료기준년월'] = df_fin['자료기준년월'].apply(lambda x: (datetime.strptime(x, '%Y년 %m월') + relativedelta(months=1)).strftime('%Y%m01'))
+        df_fin['지역코드'] = df_fin['지역'].replace(dic)
+
+        # 지수기준년월 변경 시 변경
+        df_fin['지수기준년월'] = '202210'
+
+        df_fin = df_fin[['자료기준년월', '지역코드', '지역', '값', '지수기준년월']]
+        print(tb(df_fin, headers='keys', tablefmt='pretty'))
+
+        df_fin.to_csv(f"{file_path2}/56.rtp_hyuksin_city_jg_index_inf_yyyymmdd.dat", sep='|', index=False,header=None, encoding='ANSI')
+
+
 if __name__ == "__main__":
-    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data\\202304',"202304")
+    str_d = "202305"
+    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d)

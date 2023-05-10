@@ -35,22 +35,21 @@ class FileDown:
         self.make_d_dir()
 
         # 20일자
-        # self.try_twice(self.filedown_1, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_2_20, self.return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_21)
-        # self.try_twice(self.filedown_22)
-        # self.try_twice(self.filedown_23)
-        self.try_twice(self.filedown_29)
-        # self.try_twice(self.filedown_38)
-        # self.try_twice(self.filedown_42)
-        # self.try_twice(self.filedown_55, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_56)
-        # self.try_twice(self.filedown_57)
+        self.try_twice(self.filedown_1, self.return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_2_20, self.return_y_m_before_n(self.d, 3))
+        self.try_twice(self.filedown_21)
+        self.try_twice(self.filedown_22)
+        self.try_twice(self.filedown_23)
+        self.try_twice(self.filedown_38)
+        self.try_twice(self.filedown_42)
+        self.try_twice(self.filedown_55, self.return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_56)
+        self.try_twice(self.filedown_57)
         #
         # # 말일자
         # self.try_twice(self.filedown_27)
         # self.try_twice(self.filedown_28)
-        # # self.filedown_29() # 해야함
+        # self.try_twice(self.filedown_29)
         # self.try_twice(self.filedown_34)
         # self.try_twice(self.filedown_36)
         # self.try_twice(self.filedown_39)
@@ -76,6 +75,9 @@ class FileDown:
                 break
             except:
                 pass
+
+            if i==n-1:
+                print("실패", end=" ")
 
     def return_y_m_before_n(self,d,n):
         '''
@@ -164,34 +166,34 @@ class FileDown:
 
                 request.urlretrieve(down_url,f"{folder_path}/{file_name}")
 
-        # 시트나누기
-        row_down_path = f"{folder_path}/{file_name}"
-        pd.read_excel(row_down_path, sheet_name='매매_공동주택').to_csv(f"{folder_path}/2.csv",index=False,encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매_공동주택_계절조정').to_csv(f"{folder_path}/3.csv", index=False,encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매_아파트').to_csv(f"{folder_path}/4.csv", index=False,encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 전세_아파트').to_csv(f"{folder_path}/5.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='분기별_매매 증감률_아파트').to_csv(f"{folder_path}/6.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매_아파트').to_csv(f"{folder_path}/7.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='전세_아파트').to_csv(f"{folder_path}/8.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매 중위_아파트').to_csv(f"{folder_path}/9.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매 평균_아파트').to_csv(f"{folder_path}/10.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매 중위_아파트').to_csv(f"{folder_path}/11.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매 평균_아파트').to_csv(f"{folder_path}/12.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='전세 중위_아파트').to_csv(f"{folder_path}/13.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='전세 평균_아파트').to_csv(f"{folder_path}/14.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매_연립다세대').to_csv(f"{folder_path}/15.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매_연립다세대').to_csv(f"{folder_path}/16.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매 중위_연립 다세대').to_csv(f"{folder_path}/17.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='규모별 매매 평균_연립 다세대').to_csv(f"{folder_path}/18.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매 중위_연립 다세대').to_csv(f"{folder_path}/19.csv", index=False, encoding='cp949')
-        pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
+        # # 시트나누기
+        # row_down_path = f"{folder_path}/{file_name}"
+        # pd.read_excel(row_down_path, sheet_name='매매_공동주택').to_csv(f"{folder_path}/2.csv",index=False,encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매_공동주택_계절조정').to_csv(f"{folder_path}/3.csv", index=False,encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매_아파트').to_csv(f"{folder_path}/4.csv", index=False,encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 전세_아파트').to_csv(f"{folder_path}/5.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='분기별_매매 증감률_아파트').to_csv(f"{folder_path}/6.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매_아파트').to_csv(f"{folder_path}/7.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='전세_아파트').to_csv(f"{folder_path}/8.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매 중위_아파트').to_csv(f"{folder_path}/9.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매 평균_아파트').to_csv(f"{folder_path}/10.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매 중위_아파트').to_csv(f"{folder_path}/11.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매 평균_아파트').to_csv(f"{folder_path}/12.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='전세 중위_아파트').to_csv(f"{folder_path}/13.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='전세 평균_아파트').to_csv(f"{folder_path}/14.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매_연립다세대').to_csv(f"{folder_path}/15.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매_연립다세대').to_csv(f"{folder_path}/16.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매 중위_연립 다세대').to_csv(f"{folder_path}/17.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='규모별 매매 평균_연립 다세대').to_csv(f"{folder_path}/18.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매 중위_연립 다세대').to_csv(f"{folder_path}/19.csv", index=False, encoding='cp949')
+        # pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
 
     def filedown_21(self):
         file_num = "21"
         print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
         browser.switch_to.frame('iframe_rightMenu')
@@ -223,11 +225,18 @@ class FileDown:
 
         # 품목별
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_2"]').click)
-        self.delay_after_func(1, Select(browser.find_element(By.ID, "fancytree_2CheckOption")).select_by_value, ("allLowLevel",))
-        self.delay_after_func(1, browser.switch_to.alert.accept)
+        # self.delay_after_func(1, Select(browser.find_element(By.ID, "fancytree_2CheckOption")).select_by_value, ("allLowLevel",))
+        # self.delay_after_func(1, browser.switch_to.alert.accept)
 
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[1]/span/span[@class="fancytree-checkbox"]').click) # 전체
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/span/span[@class="fancytree-checkbox"]').click) # 집세
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fancytree_2Btn"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[1]/span/span[@class="fancytree-checkbox"]').click) # 총지수
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/span/span[@class="fancytree-expander"]').click) # 집세내리기1
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/ul/li/span/span[@class="fancytree-expander"]').click)  # 집세내리기2
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/ul/li/span/span[@class="fancytree-checkbox"]').click)  # 집세체크
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/ul/li/ul/li[1]/span/span[@class="fancytree-checkbox"]').click)  # 전세체크
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[5]/ul/li/ul/li[2]/span/span[@class="fancytree-checkbox"]').click)  # 전세체크
+
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
 
         # 다운로드
@@ -257,7 +266,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/span/span[@class="fancytree-checkbox"]').click)  #총지수 체크
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[2]/span/span[@class="fancytree-checkbox"]').click) #비주거건물인대
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[4]/span/span[@class="fancytree-checkbox"]').click) #비주거용부동산관리
-        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
 
         # 다운로드
         self.kosis_download(browser)
@@ -439,6 +448,10 @@ class FileDown:
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=5328&hDivEng=&month_yn=',))
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]/option[3]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="main"]/div/div[@class="search-wrap"]/div[@class="search-form unfold"]/div[@class="search-item-detail"]/div[@class="search-item-group"]/div[@class="search-form-item"]/div[@class="mu-item-group"]/button').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fileDownBtn"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
@@ -504,6 +517,11 @@ class FileDown:
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=419&hFormId=5882&hDivEng=&month_yn=',))
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]/option[3]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="main"]/div/div[@class="search-wrap"]/div[@class="search-form unfold"]/div[@class="search-item-detail"]/div[@class="search-item-group"]/div[@class="search-form-item"]/div[@class="mu-item-group"]/button').click)
+
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="fileDownBtn"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
@@ -712,11 +730,13 @@ class FileDown:
         self.change_last_file(folder_path, file_num)
 
     def filedown_57(self):
-        file_num = "57"
-        print(file_num)
         folder_path = f"{self.path}\\20일\\원천"
+
+        # 첫번째
+        file_num = "57_1"
+        print(file_num)
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
         browser.switch_to.frame('iframe_rightMenu')
@@ -733,6 +753,19 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[2]/span/span[@class="fancytree-checkbox"]').click)  # 주택담보대출
 
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click) # 조회
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
+
+        # 두번째
+        file_num = "57_2"
+        print(file_num)
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
+
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
 
         # 다운로드
         self.kosis_download(browser)
@@ -777,7 +810,6 @@ class FileDown:
                     sys.exit("3회 시도 실패로 강제종료")
                 print(f"{i + 1}번째 연결실패, 15초 후 재시도")
                 time.sleep(15)
-
 
     def save_download(self,down_folder,down_path):
         '''
