@@ -35,16 +35,16 @@ class FileDown:
         self.make_d_dir()
 
         # 20일자
-        self.try_twice(self.filedown_1, self.return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_2_20, self.return_y_m_before_n(self.d, 3))
-        self.try_twice(self.filedown_21)
-        self.try_twice(self.filedown_22)
-        self.try_twice(self.filedown_23)
-        self.try_twice(self.filedown_38)
-        self.try_twice(self.filedown_42)
-        self.try_twice(self.filedown_55, self.return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_56)
-        self.try_twice(self.filedown_57)
+        # self.try_twice(self.filedown_1, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_2_20, self.return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_21)
+        # self.try_twice(self.filedown_22)
+        # self.try_twice(self.filedown_23)
+        # self.try_twice(self.filedown_38)
+        # self.try_twice(self.filedown_42)
+        # self.try_twice(self.filedown_55, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_56)
+        # self.try_twice(self.filedown_57)
         #
         # # 말일자
         # self.try_twice(self.filedown_27)
@@ -61,7 +61,7 @@ class FileDown:
         # self.try_twice(self.filedown_47)
         # self.try_twice(self.filedown_48)
         # self.try_twice(self.filedown_49)
-        # self.try_twice(self.filedown_51)
+        self.filedown_51()
         # # 53, 54해야함
 
     def try_twice(self,func,param=(),n=3):
@@ -301,7 +301,7 @@ class FileDown:
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6906&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
+        self.delay_after_func(30,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6906&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
         browser.switch_to.frame('iframe_rightMenu')
@@ -533,7 +533,7 @@ class FileDown:
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5373&orgId=116&listId=116_11626_003&dbUser=NSI.&language=ko',))
+        self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5373&orgId=116&listId=116_11626_003&dbUser=NSI.&language=ko',))
 
         # 행렬교체(상자옮기기)
         browser.switch_to.frame('iframe_rightMenu')
@@ -571,7 +571,7 @@ class FileDown:
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5387&orgId=116&listId=116_11626_002&dbUser=NSI.&language=ko',))
+        self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5387&orgId=116&listId=116_11626_002&dbUser=NSI.&language=ko',))
 
         # 행렬교체(상자옮기기)
         browser.switch_to.frame('iframe_rightMenu')
@@ -689,7 +689,7 @@ class FileDown:
                 df_tp = pd.read_html(rq.text, encoding='UTF-8')[5]
                 df_tp.insert(0, '기준년월', yyyymm)
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
-            time.sleep(5)
+            time.sleep(2)
         df.to_csv(f"{self.path}\\말일\\원천\\KREMAP_CRW.csv", index=False, encoding='ANSI')
 
     def filedown_55(self, y, m):

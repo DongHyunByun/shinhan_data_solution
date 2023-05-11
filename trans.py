@@ -19,13 +19,258 @@ class Trans:
         self.refer_path = f"{data_path}\\refer"
         self.d = d
 
+        # 20일자
+        self.trans_1()
+        # self.trans_2_20()  # ipy로부터 작업 필요
         # self.trans_21()
         # self.trans_22()
         # self.trans_23()
         # self.trans_38()
         # self.trans_42()
         # self.trans_55()
-        self.trans_56()
+        # self.trans_56()
+        # self.trans_57()
+
+        # 말일자
+
+
+
+
+    def trans_1(self):
+        file_path1 = f"{self.path}/20일/원천/1.xls"
+        file_path3 = f"{self.path}/20일/원천_처리후"
+
+        jiga = pd.read_excel(file_path1, header=3, dtype='str')
+
+        # 필요한 컬럼만 추출
+        jiga = jiga.iloc[1:, [0, 1, 12, 13, 14, 15, 16, 17, 18]]
+        jiga.columns = ['CODE', '행정구역', '전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타']
+
+        jiga.dropna(subset=['행정구역'], how='all', inplace=True)
+        jiga.dropna(subset=['전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타'], how='all', inplace=True)
+
+        jiga['행정구역'] = jiga['행정구역'].apply(lambda x: re.sub('[\W\d]', '', x))
+        sido_list = ['전국', '서울특별시', '인천광역시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시',
+                     '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주자치도']
+        jiga['시도'] = [sido if sido in sido_list else np.nan for sido in jiga['행정구역']]
+        jiga['시도'].fillna(method='ffill', inplace=True)
+
+        def del_nm(x):
+            for item in sido_list:
+                x = re.sub(item, '', x)
+            return x
+
+        jiga['행정구역'] = jiga['행정구역'].apply(lambda x: del_nm(x))
+        jiga['시도시군구'] = jiga['시도'] + jiga['행정구역']
+        jiga = jiga.loc[:, ['시도시군구', '전', '답', '주거용_대', '상업용_대', '임야', '공장', '기타']]
+        jiga.columns = ['시도시군구', '전', '답', '주거용(대)', '상업용(대)', '임야', '공장용지', '기타']
+
+        jiga.fillna('', inplace=True)
+        jiga.replace('-', '9999', inplace=True)
+
+        # 형태에 맞춰주기 위해 Transpose 하기
+        jiga.set_index('시도시군구', drop=True, inplace=True)
+        jiga = jiga.stack()
+        jiga = pd.DataFrame(jiga.reset_index())
+
+        jiga.columns = ['시도시군구', '이용상황구분명', '값']
+
+        # 코드값 불러와서 붙이기
+        sido_df = pd.read_csv(f"{self.refer_path}/55_이용상황별 지가지수_시도시군구.dat",sep='|', encoding='ANSI')
+        gubun = pd.read_csv(f"{self.refer_path}/1_이용상황별 지가변동률_구분명.dat",sep='|', dtype='str', encoding='ANSI')
+
+        jiga = pd.merge(sido_df, jiga, how='left', on='시도시군구')
+        jiga = pd.merge(jiga, gubun, how='left', on='이용상황구분명')
+
+        # 필요한 컬럼만 추출
+        jiga = jiga.loc[:, ['시군구CODE', '시군구명', '시도시군구', '이용상황구분', '이용상황구분명', '값']]
+        # 정렬
+        jiga.sort_values(['시군구CODE', '이용상황구분'], inplace=True)
+
+        jiga['값'].replace('-', '', inplace=True)
+        jiga.drop_duplicates(inplace=True)
+
+        jiga.to_csv(f'{file_path3}/1.rtp_usecase_jg_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
+
+    def trans_2_20(self):
+        today = datetime.now().strftime('%Y.%m월')
+        # 이번달 작업 외 수행 시 아래 코드 사용
+        # today = '2022.11월' # (현재 년월)
+
+        # 파일 경로 설정
+        file_path1 = '../' + today + '/원천/'
+        file_path2 = '../파이썬코드/'
+        file_path3 = '../' + today + '/수기작업/'
+
+        file_name = input('파일명을 입력해주세요.  ex)23.1월 공동주택 실거래가격지수 통계표 : ')
+
+        no_list = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        sheets = [['매매_공동주택', '매매 증감률_공동주택'], '매매_공동주택_계절조정', '규모별 매매_아파트', '규모별 전세_아파트', ['매매_아파트', '매매 증감률_아파트'],
+                  '전세_아파트', '규모별 매매 중위_아파트', '규모별 매매 평균_아파트', '매매 중위_아파트', '매매 평균_아파트', '전세 중위_아파트', '전세 평균_아파트',
+                  '규모별 매매_연립다세대', '매매_연립다세대', '규모별 매매 중위_연립 다세대', '규모별 매매 평균_연립 다세대', '매매 중위_연립 다세대', '매매 평균_연립 다세대']
+
+        for i in range(len(no_list)):
+            print(no_list[i], ' : ', sheets[i])
+
+        jibang = pd.read_csv(file_path2 + '지방도.dat', dtype='str', sep='|', encoding='ANSI')
+
+        # 2번
+        df1 = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=1, sheet_name=sheets[0][0],
+                            engine='openpyxl')
+        df1.columns = [re.sub('[^가-힣]', '', col) for col in df1.columns]
+        df1 = df1.set_index('지역구분년월').stack(level=0).reset_index()
+        df1.columns = ['자료발표일자', 'KED시도구분명', '실거래가격지수값']
+        df1['자료발표일자'] = df1['자료발표일자'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m-%d %H:%M:%S') + relativedelta(months=1)).strftime('%Y%m%d'))
+        df1['자료기준년월'] = '201711'
+
+        df2 = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=1, sheet_name=sheets[0][1],
+                            engine='openpyxl')
+        df2.columns = [re.sub('[^가-힣]', '', col) for col in df2.columns]
+        df2 = pd.DataFrame(df2.iloc[-1, :]).transpose()
+        df2 = df2.set_index('지역구분년월').stack(level=0).reset_index()
+        df2['지역구분년월'] = df2['지역구분년월'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m(잠정)') + relativedelta(months=1)).strftime('%Y%m%d'))
+        df2.columns = ['자료발표일자', 'KED시도구분명', '잠정증감율']
+        df2['자료기준년월'] = df2['자료발표일자'].apply(lambda x: x[:-2])
+
+        df = pd.concat([df1, df2], ignore_index=True)
+        df.fillna('0', inplace=True)
+        df = df.merge(jibang, how='inner', left_on='KED시도구분명', right_on='cdnm')
+        df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '잠정증감율', '자료기준년월']].sort_values(by = ['자료발표일자', 'cd'], ascending = [False, True])
+
+        df.to_csv(file_path3 + '2.rtp_gdhse_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        # 3번
+        df = pd.read_excel(file_path1 + file_name + '.xlsm', header=1, sheet_name=sheets[1], engine='openpyxl')
+        df.columns = [re.sub('[^가-힣]', '', col) for col in df.columns]
+        df = df.set_index('지역구분년월').stack(level=0).reset_index()
+        df.columns = ['자료발표일자', 'KED시도구분명', '실거래가격지수값']
+        df['자료발표일자'] = df['자료발표일자'].apply(lambda x: (x + relativedelta(months=1)).strftime('%Y%m%d'))
+        df['자료기준년월'] = '201711'
+        df = df.merge(jibang, how='inner', left_on='KED시도구분명', right_on='cdnm')
+        df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '자료기준년월']].sort_values(by=['자료발표일자', 'cd'],
+                                                                                ascending=[False, True])
+
+        scale_cd = pd.read_csv(file_path2 + '규모시군구.dat', sep='|', dtype='str', encoding='ANSI')
+        df.to_csv(file_path3 + '3.rtp_gdhse_sea_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+
+        # 4번 데이터
+        df = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=[1, 2], sheet_name=sheets[2],
+                           engine='openpyxl')
+        dic = {}
+        for i in df.columns:
+            for j in i:
+                dic[j] = re.sub('[^가-힣]', '', j)
+
+        df.rename(columns=dic, inplace=True)
+        df = df.set_index(df.columns[0]).stack(level=[0, 1]).reset_index()
+        df.columns = ['자료발표일자', 'KED시도구분명', '규모', '실거래가격지수값']
+        df['자료발표일자'] = df['자료발표일자'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m-%d %H:%M:%S') + relativedelta(months=1)).strftime('%Y%m%d'))
+        df = df.merge(scale_cd, how='inner', left_on='KED시도구분명', right_on='key')
+        df = df.merge(scale_cd, how='inner', left_on='규모', right_on='key')
+        df['지수기준년월'] = '201711'
+        df = df[['자료발표일자', 'cd_x', 'KED시도구분명', 'cd_y', 'cdnm_y', '실거래가격지수값', '지수기준년월']]
+        df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
+
+        # 5번 데이터
+        df = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=[1, 2], sheet_name=sheets[3],
+                           engine='openpyxl')
+        dic = {}
+        for i in df.columns:
+            for j in i:
+                dic[j] = re.sub('[^가-힣]', '', j)
+
+        df.rename(columns=dic, inplace=True)
+        df = df.set_index(df.columns[0]).stack(level=[0, 1]).reset_index()
+        df.columns = ['자료발표일자', 'KED시도구분명', '규모', '실거래가격지수값']
+        df['자료발표일자'] = df['자료발표일자'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m') + relativedelta(months=1)).strftime('%Y%m%d'))
+        df = df.merge(scale_cd, how='inner', left_on='KED시도구분명', right_on='key')
+        df = df.merge(scale_cd, how='inner', left_on='규모', right_on='key')
+        df['지수기준년월'] = '201711'
+        df = df[['자료발표일자', 'cd_x', 'KED시도구분명', 'cd_y', 'cdnm_y', '실거래가격지수값', '지수기준년월']]
+        df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
+        df.to_csv(file_path3 + '5.rtp_sz_apt_js_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+
+        sido_cd = pd.read_csv(file_path2 + '시도.dat', sep='|', dtype='str', encoding='ANSI')
+        sido_cd.tail()
+
+        # 7번 데이터
+        df1 = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=[1, 2], sheet_name=sheets[4][0],
+                            engine='openpyxl')
+        dic = {}
+        for i in df1.columns:
+            for j in i:
+                dic[j] = re.sub('[^가-힣]', '', j)
+
+        df1.rename(columns=dic, inplace=True)
+        strftime = []
+        for item in df1.iloc[:, 0]:
+            try:
+                strftime.append(
+                    (datetime.strptime(item, '%Y-%m-%d %H:%M:%S') + relativedelta(months=1)).strftime('%Y%m01'))
+            except:
+                strftime.append(np.nan)
+        df1.iloc[:, 0] = strftime
+        df1.set_index('지역구분년월', inplace=True)
+        df1 = df1.stack(level=[0, 1]).reset_index()
+        df1.dropna(subset=['지역구분년월'], inplace=True)
+        df1.loc[df1['level_2'] == '', 'level_2'] = df1.loc[df1['level_2'] == '', 'level_1']
+        df1 = df1[['지역구분년월', 'level_2', 0]]
+        df1.columns = ['자료발표일자', 'KED시도구분명', '실거래가격지수값']
+        df1['지수기준년월'] = '201711'
+
+        df2 = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=[1, 2], sheet_name=sheets[4][1],
+                            engine='openpyxl')
+        df2 = pd.DataFrame(df2.iloc[-1, :]).transpose()
+        dic = {}
+        for i in df2.columns:
+            for j in i:
+                dic[j] = re.sub('[^가-힣]', '', j)
+
+        df2.rename(columns=dic, inplace=True)
+        df2 = df2.set_index('지역구분년월').stack(level=[0, 1]).reset_index()
+        df2.loc[df2['level_2'] == '', 'level_2'] = df2.loc[df2['level_2'] == '', 'level_1']
+        df2 = df2[['지역구분년월', 'level_2', 0]]
+        df2.columns = ['자료발표일자', 'KED시도구분명', '잠정증감율']
+        df2['자료발표일자'] = df2['자료발표일자'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m(잠정)') + relativedelta(months=1)).strftime('%Y%m%d'))
+        df2['지수기준년월'] = df2['자료발표일자'].apply(lambda x: x[:6])
+
+        df = pd.concat([df1, df2], ignore_index=True)
+        df.fillna('', inplace=True)
+        df = df.merge(sido_cd, how='inner', left_on='KED시도구분명', right_on='cdnm')
+        df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '잠정증감율', '지수기준년월']].sort_values(by=['자료발표일자', 'cd'],
+                                                                                         ascending=[False, True])
+        df.to_csv(file_path3 + '7.rtp_apt_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+
+        # 8번 데이터
+        df = pd.read_excel(file_path1 + file_name + '.xlsm', dtype='str', header=[1, 2], sheet_name=sheets[5],
+                           engine='openpyxl')
+        dic = {}
+        for i in df.columns:
+            for j in i:
+                dic[j] = re.sub('[^가-힣]', '', j)
+
+        df.rename(columns=dic, inplace=True)
+        strftime = []
+        for item in df.iloc[:, 0]:
+            try:
+                strftime.append(
+                    (datetime.strptime(item, '%Y-%m-%d %H:%M:%S') + relativedelta(months=1)).strftime('%Y%m01'))
+            except:
+                strftime.append(np.nan)
+        df.iloc[:, 0] = strftime
+        df.set_index('지역구분년월', inplace=True)
+        df = df.stack(level=[0, 1]).reset_index()
+        df.dropna(subset=['지역구분년월'], inplace=True)
+        df.loc[df['level_2'] == '', 'level_2'] = df.loc[df['level_2'] == '', 'level_1']
+        df = df[['지역구분년월', 'level_2', 0]]
+        df.columns = ['자료발표일자', 'KED시도구분명', '실거래가격지수값']
+        df['지수기준년월'] = '201711'
+        df = df.merge(sido_cd, how='inner', left_on='KED시도구분명', right_on='cdnm')
+        df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '지수기준년월']].sort_values(by=['자료발표일자', 'cd'], ascending=[False, True])
 
     def trans_21(self):
         file_name1 = f"{self.path}/20일/원천/21.xlsx"
@@ -314,6 +559,64 @@ class Trans:
 
         df_fin.to_csv(f"{file_path2}/56.rtp_hyuksin_city_jg_index_inf_yyyymmdd.dat", sep='|', index=False,header=None, encoding='ANSI')
 
+    def trans_57(self):
+        file_1 = f"{self.path}/20일/원천/57_1.xlsx"
+        file_2 = f"{self.path}/20일/원천/57_2.xlsx"
+        file_path2 = f"{self.path}/20일/원천_처리후/"
+
+        # file_name3 = '42_공동주택현황_코드'
+
+        df1 = pd.read_excel(file_1,sheet_name='데이터', engine='openpyxl')
+        df1.fillna(method='ffill', inplace=True)
+
+        df2 = pd.read_excel(file_2,sheet_name='데이터', engine='openpyxl')
+        df2.fillna(method='ffill', inplace=True)
+
+        code_nm = []
+        for i in df1['계정항목별']:
+            if '주택담보대출' in i:
+                code_nm.append('주택담보대출')
+            elif '기타대출' in i:
+                code_nm.append('기타대출')
+            else:
+                code_nm.append('예금취급기관')
+        df1['계정항목별'] = code_nm
+        code_nm = []
+        for i in df2['계정항목별']:
+            if '주택담보대출' in i:
+                code_nm.append('주택담보대출')
+            elif '기타대출' in i:
+                code_nm.append('기타대출')
+            elif '비은행예금취급기관' in i:
+                code_nm.append('예금취급기관')
+            else:
+                code_nm.append('')
+        df2['계정항목별'] = code_nm
+        print(list(df1.columns))
+        yyyymm = input('사용할 컬럼명을 입력해주세요 ex)2022.03 (작업월-3) : ')
+        df1 = df1.loc[df1['계정항목별'].apply(lambda x: x in ['예금취급기관', '주택담보대출', '기타대출']), ['계정항목별', '지역코드별'] + [yyyymm]]
+        print(list(df2.columns))
+        yyyymm = input('사용할 컬럼명을 입력해주세요 ex)2022.03 (작업월-3) : ')
+        df2 = df2.loc[df2['계정항목별'].apply(lambda x: x in ['예금취급기관', '주택담보대출', '기타대출']), ['계정항목별', '지역코드별'] + [yyyymm]]
+
+        df = pd.merge(df1, df2, how='inner', on=['계정항목별', '지역코드별'])
+        df['값'] = df[yyyymm + '_x'] + df[yyyymm + '_y']
+        df['값'] = df['값'].apply(lambda x: round(x, 1))
+        gubun = pd.read_csv(f"{self.refer_path}/57_예금취급기관의 가계대출_구분값.dat", sep='|', dtype='str', header=None, encoding='ANSI')
+        gubun.columns = ['code', '계정항목별']
+        sido = pd.read_csv(f"{self.refer_path}/57_예금취급기관의 가계대출_시도.dat", sep='|', dtype='str', encoding='ANSI')
+        df = pd.merge(df, gubun, how='inner', on='계정항목별')
+        df = pd.merge(df, sido, how='inner', on='지역코드별')
+        df = df.loc[:, ['sido_code', '지역코드별', 'code', '계정항목별', '값']]
+        yyyymmdd = (datetime.strptime(yyyymm, '%Y.%m') + relativedelta(months=1)).strftime('%Y%m%d')
+        yyyymm = yyyymmdd[:-2]
+        df.insert(0, '자료발표일자', yyyymmdd)
+        df['자료기준년월'] = yyyymm
+
+        print('하나라도 다른게 있다면 확인 必必必必')
+        print(df1.shape[0], ' / ', df2.shape[0], ' / ', df.shape[0], sep='')
+
+        df.to_csv(f"{file_path2}/57.rtp_householdloan_yyyymmdd.dat", sep='|', index=False, header=False, encoding='ANSI')
 
 if __name__ == "__main__":
     str_d = "202305"
