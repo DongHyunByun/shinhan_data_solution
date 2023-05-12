@@ -46,7 +46,7 @@ class FileDown:
         # self.try_twice(self.filedown_56)
         # self.try_twice(self.filedown_57)
         #
-        # # 말일자
+        # 말일자
         # self.try_twice(self.filedown_27)
         # self.try_twice(self.filedown_28)
         # self.try_twice(self.filedown_29)
@@ -63,6 +63,7 @@ class FileDown:
         # self.try_twice(self.filedown_49)
         self.filedown_51()
         # # 53, 54해야함
+
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -141,7 +142,8 @@ class FileDown:
                 request.urlretrieve(down_url,f"{folder_path}/1.{file_type}")
 
     def filedown_2_20(self,y,m):
-        print("2~20")
+        file_num = "2-20"
+        print(file_num)
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=TSPIA')
         soup = bs(page.text, "html.parser")
@@ -159,12 +161,12 @@ class FileDown:
                 files = self.try_request(down_file_response).json()["nttFileList"]
                 for file in files:
                     if "공동주택 실거래가격지수 통계표" in file["fileNm"]:
-                        file_name = file["fileNm"]
+                        # file_name = file["fileNm"]
                         down_key = file["dwldUrl"]
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url,f"{folder_path}/{file_name}")
+                request.urlretrieve(down_url,f"{folder_path}/{file_num}.xlsm")
 
         # # 시트나누기
         # row_down_path = f"{folder_path}/{file_name}"
@@ -356,6 +358,7 @@ class FileDown:
         # 항목 하나씩 선택
         L=[0,0,"콘크리트","철골","철골철근콘크리트","조적","목조","기타"]
         for i in range(2,8):
+            # print(L[i])
             if i != 2:
                 self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i-1}]/span').click)
             self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
@@ -686,7 +689,10 @@ class FileDown:
             for sido in sido_cd:
                 URL = 'https://kremap.krihs.re.kr/menu4/SystemIntro?area_cd=' + sido + '&item_cd=0&Gbn=MONTH&year=' + yyyymm[:4] + '&month=' + yyyymm[4:]
                 rq = requests.get(URL, headers=headers, verify=False)
-                df_tp = pd.read_html(rq.text, encoding='UTF-8')[5]
+                try:
+                    df_tp = pd.read_html(rq.text, encoding='UTF-8')[5] #에러?
+                except:
+                    break
                 df_tp.insert(0, '기준년월', yyyymm)
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
             time.sleep(2)
@@ -832,7 +838,8 @@ class FileDown:
         df = pd.DataFrame(total_dict)
         df.to_excel(down_path,index=False)
 
-    def change_last_file(self,folder_path, new_name):
+    def change_last_file(self,folder_path, new_name, file_type=None):
         filename = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
-        file_type = filename.split(".")[-1]
+        if not file_type:
+            file_type = filename.split(".")[-1]
         shutil.move(filename, os.path.join(folder_path, f"{new_name}.{file_type}"))
