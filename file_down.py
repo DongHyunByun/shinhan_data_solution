@@ -20,6 +20,10 @@ from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.keys import Keys
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
 class FileDown:
     str_d = None
@@ -56,12 +60,13 @@ class FileDown:
         # self.try_twice(self.filedown_41)
         # self.try_twice(self.filedown_43)
         # self.try_twice(self.filedown_44)
+        self.try_twice(self.filedown_45_49)
         # self.try_twice(self.filedown_45)
         # self.try_twice(self.filedown_46)
         # self.try_twice(self.filedown_47)
         # self.try_twice(self.filedown_48)
         # self.try_twice(self.filedown_49)
-        self.filedown_51()
+        # self.try_twice(self.filedown_51)
         # # 53, 54해야함
 
 
@@ -466,6 +471,22 @@ class FileDown:
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2080&hDivEng=&month_yn=',))
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]/option[3]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="main"]/div/div[@class="search-wrap"]/div[@class="search-form unfold"]/div[@class="search-item-detail"]/div[@class="search-item-group"]/div[@class="search-form-item"]/div[@class="mu-item-group"]/button').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fileDownBtn"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
+
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_39_kosis(self):
+        file_num = "39"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2080&orgId=116&listId=I1_2&dbUser=NSI.&language=ko',))
 
         # 행렬교체(상자옮기기)
@@ -491,6 +512,22 @@ class FileDown:
         self.change_last_file(folder_path, file_num)
 
     def filedown_41(self):
+        file_num = "41"
+        print(file_num)
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2082&hDivEng=&month_yn=',))
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="sStart"]/option[3]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="main"]/div/div[@class="search-wrap"]/div[@class="search-form unfold"]/div[@class="search-item-detail"]/div[@class="search-item-group"]/div[@class="search-form-item"]/div[@class="mu-item-group"]/button').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fileDownBtn"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
+
+        self.change_last_file(folder_path, file_num)
+
+    def filedown_41_kosis(self):
         file_num = "41"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
@@ -600,7 +637,44 @@ class FileDown:
         self.kosis_download(browser, "xlsx")
         self.change_last_file(folder_path, file_num)
 
-    def filedown_45(self):
+    def filedown_45_49(self):
+        index_to_file_num={2:"45", 3:"46",4:"48",5:"49",6:"47"}
+        def move_back_year():
+            # 날짜설정
+            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_BusinessSdate"]').click)
+            for i in range(11):  # 11년 전
+                self.delay_after_func(0.5, browser.find_element(By.XPATH, '//*[@id="changeLeft"]').click)
+            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="content"]/table/tbody/tr[2]/td[3]').click)  # 7월
+            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_complete"]').click)  # 조회클릭
+
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://kremap.krihs.re.kr/grid/grid?jisu=167',))
+
+        # 45~49 하나씩 다운로드
+        for i in range(2,7):
+            file_num = index_to_file_num[i]
+            print(file_num)
+
+            self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[{i}]').click)  # 조회클릭
+
+            move_back_year()
+
+            # 엑셀다운로드
+            button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_excel_down"]')
+            self.delay_after_func(3, ActionChains(browser).move_to_element(button).click(button).perform)
+            self.change_last_file(folder_path, file_num)
+
+        # browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[4]').click()  # n번째
+        # button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]')
+        # self.delay_after_func(3, ActionChains(browser).move_to_element(button).click(button).perform)  # 조회클릭
+        #
+        # button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[3]')
+        # self.delay_after_func(1, ActionChains(browser).move_to_element(button).click(button).perform)
+
+        # browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[3]').click()
+
+    def filedown_45_kosis(self):
         file_num = "45"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
@@ -614,7 +688,7 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_46(self):
+    def filedown_46_kosis(self):
         file_num = "46"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
@@ -628,7 +702,7 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_47(self):
+    def filedown_47_kosis(self):
         file_num = "47"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
@@ -642,7 +716,7 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_48(self):
+    def filedown_48_kosis(self):
         file_num = "48"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"
@@ -656,7 +730,7 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_49(self):
+    def filedown_49_kosis(self):
         file_num = "49"
         print(file_num)
         folder_path = f"{self.path}\\말일\\원천"

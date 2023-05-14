@@ -8,12 +8,14 @@ import os
 from bs4 import BeautifulSoup as bs
 
 class Trans:
+    data_path = None
     path = None
     d = None
     today = datetime.now().strftime('%Y.%m월')
     refer = "refer"
 
     def __init__(self,data_path,d):
+        self.data_path = data_path
         self.path = f"{data_path}\\{d}"
         self.refer_path = f"{data_path}\\refer"
         self.d = d
@@ -35,7 +37,9 @@ class Trans:
         # 말일자
         # self.trans_27()
         # self.trans_29()
-        # 39, 41, 45-49 # 이건있음
+        # self.trans_39()
+        # self.trans_41()
+        # self.trans_45_49()
         # 34, 36, 43, 44, 51, 53, 54는 코드없음(잘 안틀림)
 
     def make_d_dir(self):
@@ -697,6 +701,81 @@ class Trans:
 
         unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.csv',sep='|', header=False, index=False, encoding='ANSI')
 
+    def trans_39(self):
+        file_path1 = f"{self.path}/말일/원천/39.csv"
+        file_path3 = f"{self.path}/말일/원천_처리후/"
+
+        # 원천 파일 불러오기
+        unsold = pd.read_csv(file_path1, encoding='ANSI')
+
+        # 사용할 월 컬럼명 입력
+        print([i for i in unsold.iloc[:, 0].drop_duplicates()])
+        unsold = unsold.loc[unsold.iloc[:, 0] == input('사용할 월을 입력해주세요 ex) 2022-02 : '), :]
+
+        # 컬럼의 월(Month)를 월로 바꿔주기
+        unsold.columns = [re.sub(r'\([^)]*\)', '', i) for i in unsold.columns]
+        # 부문과 규모를 합친 값 만들기
+        unsold['부문_규모'] = unsold['부문'] + '_' + unsold['규모']
+        # 필요한 컬럼만 뽑아내기
+        unsold = unsold.loc[unsold['규모'].apply(lambda x: x not in ('총합', '소계')), ['월', '시도', '부문_규모', '호']]
+
+        # 부문_규모 데이터 만들기
+        scale = {'부문_규모': ['민간부문_40∼60㎡', '민간부문_60∼85㎡', '민간부문_85㎡초과', '민간부문_40㎡이하', '공공부문_공공부문'],
+                 '부문_규모_코드': ['2', '3', '4', '6', '7']
+                 }
+        scale = pd.DataFrame(scale)
+
+        # 시도 코드 데이터 불러오기
+        sido = pd.read_csv(f'{self.refer_path}/규모별_미분양현황_Ked.dat',
+                           sep='|', encoding='ANSI', header=None, names=['시도', '시도_코드'])
+
+        # 부문_규모 및 시도_코드 합치기
+        unsold = pd.merge(unsold, sido, how='left', on='시도')
+        unsold = pd.merge(unsold, scale, how='left', on='부문_규모')
+        unsold['월'] = unsold['월'].apply(
+            lambda x: (datetime.strptime(x, '%Y-%m') + relativedelta(months=1)).strftime('%Y%m%d'))
+        unsold = unsold[['월', '시도_코드', '시도', '부문_규모_코드', '부문_규모', '호']]
+        unsold['기준년월'] = unsold['월'].apply(lambda x: x[:-2])
+        print(tb(unsold.head(), headers='keys', tablefmt='pretty'))
+
+        unsold.to_csv(file_path3 + '39.rtp_sz_us_yyyymmdd.dat',
+                      index=False, sep='|', header=None, encoding='ANSI')
+
+    def trans_41(self):
+        # 파일 경로 설정
+        file_path1 = f"{self.path}/말일/원천/41.csv"
+        file_path3 = f"{self.path}/말일/원천_처리후"
+
+        unsold = pd.read_csv(file_path1,dtype='str', encoding='ANSI')
+
+        yyyymm = datetime.now() - relativedelta(months=2)  # 변경 필수
+        yyyymm_bf = yyyymm.strftime('%Y-%m')
+
+        unsold = unsold.loc[unsold.iloc[:, 0] == yyyymm_bf, :]
+        unsold['시군구'].replace({'계': '', '세종시': ''}, inplace=True)
+
+        unsold.columns = ['월', '구분', '시군구', '호']
+
+        unsold['시도시군구'] = unsold['구분'] + unsold['시군구']
+        unsold = unsold.loc[:, ['시도시군구', '호']]
+
+        sido = pd.read_csv(f'{self.refer_path}/시군구별 미분양현황_sido.dat', sep='|', dtype='str', encoding='ANSI')
+        sido.fillna('', inplace=True)
+        sido['시도시군구'] = sido['시도'] + sido['시군구']
+        sido = sido.loc[:, ['시군구CODE', '시군구명', '시도시군구']]
+
+        unsold = pd.merge(sido, unsold, how='left', on='시도시군구')
+        yyyymm_af = yyyymm + relativedelta(months=1)
+        unsold['자료발표일자'] = yyyymm_af.strftime('%Y%m01')
+        unsold['자료기준년월'] = yyyymm_af.strftime('%Y%m')
+
+        unsold = unsold.loc[:, ['자료발표일자', '시군구CODE', '시군구명', '호', '자료기준년월']]
+        unsold.drop_duplicates(inplace=True)
+
+        print(tb(unsold, headers='keys', tablefmt='pretty'))
+
+        unsold.to_csv(f'{file_path3}/41.rtp_sigungu_us_' + str(datetime.now().strftime('%Y%m')) + '.dat',  sep='|', index=False, encoding='ANSI')
+
     def trans_42(self):
         file_path1 = f"{self.path}/20일/원천/42.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
@@ -731,6 +810,88 @@ class Trans:
 
         # 파일 저장
         df.to_csv(f"{file_path2}/42.rtp_gdhse_now_yyyymmdd.dat", sep='|', header=None, index=False, encoding='ANSI')
+
+    def trans_45_49(self):
+        '''
+        ************************************
+        파일명 수정 필수 ex)부동산시장소비심리지수, 주택매매시장소비심리지수
+        ************************************
+        '''
+
+        # # 지난달 작업파일 찾는 쿼리
+        # l_month = (datetime.now() - relativedelta(months=1)).strftime('%Y%m')
+        #
+        # def find_name(list):
+        #     answer = [i for i in list if '제공' in i]
+        #     answer = [j for j in answer if l_month in j]
+        #     return answer[0]
+        #
+        # def find_name2(list, nm):
+        #     answer = [i for i in list if 'dat' in i]
+        #     answer = [j for j in answer if nm in j]
+        #     return answer[0]
+        #
+        # os.getcwd()
+        # os.chdir(path='../')
+        # dir_ = find_name(list(os.listdir()))
+        #
+        # # 저장한 폴더에 들어가기
+        # os.chdir(path='./' + dir_)
+        #
+        # lfile_list = os.listdir()
+        # lfile_path = os.getcwd()
+        #
+        # print(lfile_list)
+        # print(lfile_path)
+
+
+        # 파일 경로 설정
+        last_month = (datetime.strptime(self.d,"%Y%m") - relativedelta(months=1)).strftime('%Y%m')
+        last_month_path = f"{self.data_path}/{last_month}/말일/원천_처리후"
+
+        file_path1 = f"{self.path}/말일/원천/"
+        file_path3 = f"{self.path}/말일/원천_처리후/"
+
+        filenm1 = ['45', '46', '47', '48', '49']
+        filenm2 = ['45.rtp_re_csi_inf_', '46.rtp_hse_csi_inf_', '47.rtp_ld_csi_inf_', '48.rtp_hse_t_csi_inf_',
+                   '49.rtp_hse_js_csi_inf_']
+
+        # 원천 파일 읽기
+        for fn_1, fn_2 in zip(filenm1, filenm2):
+            #   file_name = input('원천 파일명을 입력해주세요. (.xlsx제외)  ex)' + item1 + '시장소비심리지수 : ')
+            sy = pd.read_excel(f'{file_path1}/{fn_1}.xlsx', dtype='str')
+
+            # 현재 년월을 기준으로 데이터 처리
+            yyyymm = datetime.strptime(self.d,"%Y%m") - relativedelta(months=1)
+            yyyymm_bf = yyyymm.strftime('%Y-%m')
+
+            try:
+                sy = sy.loc[:, ['지역명', yyyymm_bf]]
+            except:
+                yyyymm_bf = input('원천파일에 지난달에 해당하는 컬럼이 없습니다. 필요시 년월을 입력해주세요 ex)yyyy-mm : ')
+                sy = sy.loc[:, ['지역명', yyyymm_bf]]
+
+            yyyymm_af = datetime.strptime(yyyymm_bf, '%Y-%m') + relativedelta(months=1)
+
+            code = pd.read_csv(f'{self.refer_path}/소비심리지수_sido.dat', sep='|', dtype='str', encoding='ANSI')
+
+            sy_tp = pd.merge(code, sy, how='right', right_on='지역명', left_on='KED시장시도구분명')
+            print(tb(sy_tp.loc[sy_tp['KED시장시도구분명'].isna(), ['지역명']], headers='keys', tablefmt='pretty'))
+            if input('전국, 수도권, 비수도권을 제외한 새로운 지역명이 생겼을 경우, 코드수정 필요시 press n : ') == 'n':
+                quit()
+
+            sy = pd.merge(code, sy, how='left', right_on='지역명', left_on='KED시장시도구분명')
+            sy['자료발표일'] = yyyymm_af.strftime('%Y%m01')
+            sy['자료기준년월'] = yyyymm_af.strftime('%Y%m')
+            sy = sy.loc[:, ['자료발표일', 'KED시장시도구분', 'KED시장시도구분명', yyyymm_bf, '자료기준년월']]
+            sy.columns = ['자료발표일', 'KED시장시도구분', 'KED시장시도구분명', '소비심리지수값', '자료기준년월']
+
+            print(tb(sy, headers='keys', tablefmt='pretty'))
+            ldf = pd.read_csv(f"{last_month_path}/{fn_2}{last_month}30.dat", header=None, sep='|', dtype='str',encoding='ANSI')
+            ldf.columns = ['자료발표일', 'KED시장시도구분', 'KED시장시도구분명', '소비심리지수값', '자료기준년월']
+            sy = pd.concat([sy, ldf], axis=0, ignore_index=True)
+
+            sy.to_csv(f'{file_path3}/{fn_2}yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
     def trans_55(self):
         ## 이번달 작업 외 수행 시 아래 코드 사용
