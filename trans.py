@@ -32,7 +32,7 @@ class Trans:
         # self.trans_42()
         # self.trans_55()
         # self.trans_56()
-        # self.trans_57()
+        self.trans_57()
 
         # 말일자
         # self.trans_27()
@@ -40,7 +40,9 @@ class Trans:
         # self.trans_39()
         # self.trans_41()
         # self.trans_45_49()
-        # 34, 36, 43, 44, 51, 53, 54는 코드없음(잘 안틀림)
+        # 34, 36, 43, 44는 상원님이 만드는중
+        # 51은 kreamap 코드로 있음,
+        # 53, 54는 sas로
 
     def make_d_dir(self):
         '''
@@ -63,6 +65,7 @@ class Trans:
                 os.mkdir(f"{self.path}\\{folder}\\원천_처리후")
 
     def trans_1(self):
+        print(1)
         file_path1 = f"{self.path}/20일/원천/1.xls"
         file_path3 = f"{self.path}/20일/원천_처리후"
 
@@ -435,6 +438,7 @@ class Trans:
         df.to_csv(f'{file_path3}/14.rtp_apt_js_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
 
     def trans_21(self):
+        print(21)
         file_name1 = f"{self.path}/20일/원천/21.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
@@ -464,6 +468,7 @@ class Trans:
         df.to_csv(f"{file_path2}/21.rtp_cei_inf_yyyymmdd.dat",sep='|', index=False, encoding='ANSI')
 
     def trans_22(self):
+        print(22)
         pd.set_option('display.float_format', '{:, %g}'.format)
 
         file_path1 = f"{self.path}/20일/원천/22.xlsx"
@@ -478,7 +483,7 @@ class Trans:
 
         print(list(df.columns))
         col_list = list(df.columns)[:2]
-        yyyymm = input('사용할 컬럼명을 작성해주세요((원천=DB-1)  ex)2022.05  : ')
+        yyyymm = (datetime.now() - relativedelta(months=1)).strftime('%Y.%m')
         col_list += [yyyymm]
         yyyymm = datetime.strptime(yyyymm, '%Y.%m') + relativedelta(months=1)
         yyyymm = yyyymm.strftime('%Y%m%d')
@@ -510,6 +515,7 @@ class Trans:
         비주거용건물임대 (2015=100)	103.66	103.66
         비주거용부동산관리 (2015=100)	108.29	108.43
         '''
+        print(23)
         file_path1 = f"{self.path}/20일/원천/23.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
@@ -547,6 +553,7 @@ class Trans:
         df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
 
     def trans_27(self):
+        print(27)
         file_path1 = f"{self.path}/말일/원천/27.xlsx"
         file_path2 = f"{self.path}/말일/원천_처리후/"
 
@@ -578,6 +585,7 @@ class Trans:
         df.to_csv(f'{file_path2}/27.rtp_d_alsqr_st_yyyymm.dat', sep='|', index=False, header=None, encoding='ANSI')
 
     def trans_29(self):
+        print(29)
         to_path = f"{self.path}/말일/원천_처리후/"
 
         file_path0 = f'{self.path}/말일/원천/29_콘크리트.xls'
@@ -647,6 +655,7 @@ class Trans:
         df_fin.to_csv(f'{to_path}/29.rtp_sido_st_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
     def trans_34(self):
+        print(34)
         file_path1 = f"{self.path}/말일/원천/29.csv"
         file_path2 = f"{self.path}/말일/원천_처리후/"
 
@@ -657,6 +666,7 @@ class Trans:
         df.to_csv(file_path2 + 'sido.dat', sep='|', index=False, encoding='ANSI')
 
     def trans_38(self):
+        print(38)
         file_path = f"{self.path}/20일/원천/38.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
@@ -702,6 +712,7 @@ class Trans:
         unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.csv',sep='|', header=False, index=False, encoding='ANSI')
 
     def trans_39(self):
+        print(39)
         file_path1 = f"{self.path}/말일/원천/39.csv"
         file_path3 = f"{self.path}/말일/원천_처리후/"
 
@@ -742,6 +753,7 @@ class Trans:
                       index=False, sep='|', header=None, encoding='ANSI')
 
     def trans_41(self):
+        print(41)
         # 파일 경로 설정
         file_path1 = f"{self.path}/말일/원천/41.csv"
         file_path3 = f"{self.path}/말일/원천_처리후"
@@ -777,6 +789,7 @@ class Trans:
         unsold.to_csv(f'{file_path3}/41.rtp_sigungu_us_' + str(datetime.now().strftime('%Y%m')) + '.dat',  sep='|', index=False, encoding='ANSI')
 
     def trans_42(self):
+        print(42)
         file_path1 = f"{self.path}/20일/원천/42.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
@@ -844,7 +857,7 @@ class Trans:
         # print(lfile_list)
         # print(lfile_path)
 
-
+        print(45-49)
         # 파일 경로 설정
         last_month = (datetime.strptime(self.d,"%Y%m") - relativedelta(months=1)).strftime('%Y%m')
         last_month_path = f"{self.data_path}/{last_month}/말일/원천_처리후"
@@ -894,6 +907,7 @@ class Trans:
             sy.to_csv(f'{file_path3}/{fn_2}yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
     def trans_55(self):
+        print(55)
         ## 이번달 작업 외 수행 시 아래 코드 사용
         ## yyyymm = '2022.09월' # (현재 년월)
 
@@ -954,6 +968,7 @@ class Trans:
 
 
     def trans_56(self):
+        print(56)
         ## 이번달 작업 외 수행 시 아래 코드 사용
         ## yyyymm = '2022.09월' # (현재 년월)
 
@@ -990,6 +1005,7 @@ class Trans:
         df_fin.to_csv(f"{file_path2}/56.rtp_hyuksin_city_jg_index_inf_yyyymmdd.dat", sep='|', index=False,header=None, encoding='ANSI')
 
     def trans_57(self):
+        print(57)
         file_1 = f"{self.path}/20일/원천/57_1.xlsx"
         file_2 = f"{self.path}/20일/원천/57_2.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
@@ -1023,10 +1039,9 @@ class Trans:
                 code_nm.append('')
         df2['계정항목별'] = code_nm
         print(list(df1.columns))
-        yyyymm = input('사용할 컬럼명을 입력해주세요 ex)2022.03 (작업월-3) : ')
+        yyyymm = (datetime.now() - relativedelta(months=3)).strftime('%Y.%m')
         df1 = df1.loc[df1['계정항목별'].apply(lambda x: x in ['예금취급기관', '주택담보대출', '기타대출']), ['계정항목별', '지역코드별'] + [yyyymm]]
         print(list(df2.columns))
-        yyyymm = input('사용할 컬럼명을 입력해주세요 ex)2022.03 (작업월-3) : ')
         df2 = df2.loc[df2['계정항목별'].apply(lambda x: x in ['예금취급기관', '주택담보대출', '기타대출']), ['계정항목별', '지역코드별'] + [yyyymm]]
 
         df = pd.merge(df1, df2, how='inner', on=['계정항목별', '지역코드별'])

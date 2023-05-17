@@ -38,37 +38,34 @@ class FileDown:
 
         self.make_d_dir()
 
-        # 20일자
-        # self.try_twice(self.filedown_1, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_2_20, self.return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_21)
-        # self.try_twice(self.filedown_22)
-        # self.try_twice(self.filedown_23)
-        # self.try_twice(self.filedown_38)
-        # self.try_twice(self.filedown_42)
-        # self.try_twice(self.filedown_55, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_56)
-        # self.try_twice(self.filedown_57)
-        #
-        # 말일자
-        # self.try_twice(self.filedown_27)
-        # self.try_twice(self.filedown_28)
-        # self.try_twice(self.filedown_29)
-        # self.try_twice(self.filedown_34)
-        # self.try_twice(self.filedown_36)
-        # self.try_twice(self.filedown_39)
-        # self.try_twice(self.filedown_41)
-        # self.try_twice(self.filedown_43)
-        # self.try_twice(self.filedown_44)
-        self.try_twice(self.filedown_45_49)
-        # self.try_twice(self.filedown_45)
-        # self.try_twice(self.filedown_46)
-        # self.try_twice(self.filedown_47)
-        # self.try_twice(self.filedown_48)
-        # self.try_twice(self.filedown_49)
-        # self.try_twice(self.filedown_51)
-        # # 53, 54해야함
+        # # [20일자]
+        # # 외부통계
+        # self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_52)
+        # self.try_twice(self.filedown_53)
+        # self.try_twice(self.filedown_54)
+        # self.try_twice(self.filedown_69)
+        # self.try_twice(self.filedown_73)
+        # self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_87)
+        # self.try_twice(self.filedown_88)
+        # 그외
+        self.filedown_8()
 
+        # [말일자]
+        # self.try_twice(self.filedown_58)
+        # self.try_twice(self.filedown_59)
+        # self.try_twice(self.filedown_60)
+        # self.try_twice(self.filedown_65)
+        # self.try_twice(self.filedown_67)
+        # self.try_twice(self.filedown_70)
+        # self.try_twice(self.filedown_72)
+        # self.try_twice(self.filedown_74)
+        # self.try_twice(self.filedown_75)
+        # self.try_twice(self.filedown_76_80)
+        # self.try_twice(self.filedown_82)
+        # # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -118,8 +115,61 @@ class FileDown:
             if not os.path.isdir(f"{self.path}\\{folder}\\원천"):
                 os.mkdir(f"{self.path}\\{folder}\\원천")
 
-    def filedown_1(self,y,m):
-        print("1")
+    def filedown_8(self):
+        file_num=8
+        print(f"8.전국주택 매매가격지수")
+
+        file_dir_dict = {
+            "단독":
+                {"월간_매매가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+            "아파트":
+                {"월간_매매가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+            "연립":
+                {"월간_매매가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+            "종합":
+                {"월간_매매가격지수_종합.xlsx"   : "https://www.reb.or.kr/r-one/statistics/excelDownLoadAllType1.do?statCd=HOUSE_21111&houseSubGbn=HOUSE_INDEX&weekFlag=M&aptType=0&trGbn=S&priceGbn=&excelType=all",
+                 "월간_월세가격지수_종합.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21132&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R2&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_종합.xlsx": "https://www.reb.or.kr/r-one/statistics/excelDownLoadAllType1.do?statCd=HOUSE_21131&houseSubGbn=HOUSE_INDEX&weekFlag=M&aptType=0&trGbn=R1&priceGbn=&excelType=all",
+                 "월간_전세가격지수_종합.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21121&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=D&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_종합.xlsx"  : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_24111&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=T&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_종합.xlsx"  : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21133&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R3&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_종합.xlsx"  : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+        }
+
+        # 폴더 경로생성
+        if not os.path.isdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수"):
+            os.mkdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수")
+            for folder in file_dir_dict:
+                if not os.path.isdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}"):
+                    os.mkdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}")
+
+        for folder in file_dir_dict:
+            name_url_dict = file_dir_dict[folder]
+            for file_name, url in name_url_dict.items():
+                print(file_name)
+                request.urlretrieve(url, f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}/{file_name}")
+
+    def filedown_32(self,y,m):
+        file_num = 1
+        print(f"32.이용상황별 지가변동률 , 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
@@ -144,11 +194,11 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url,f"{folder_path}/1.{file_type}")
+                request.urlretrieve(down_url,f"{folder_path}/{file_num}.{file_type}")
 
-    def filedown_2_20(self,y,m):
+    def filedown_33_51(self,y,m):
         file_num = "2-20"
-        print(file_num)
+        print(f"33-51.공동주택 통합 매매 실거래가격지수~연립 다세대 매매 평균가격 , 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=TSPIA')
         soup = bs(page.text, "html.parser")
@@ -195,9 +245,9 @@ class FileDown:
         # pd.read_excel(row_down_path, sheet_name='매매 중위_연립 다세대').to_csv(f"{folder_path}/19.csv", index=False, encoding='cp949')
         # pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
 
-    def filedown_21(self):
+    def filedown_52(self):
         file_num = "21"
-        print(file_num)
+        print(f"52.경기종합지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
@@ -210,9 +260,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path,file_num)
 
-    def filedown_22(self):
+    def filedown_53(self):
         file_num = "22"
-        print(file_num)
+        print(f"53.품목별 소비자물가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1J20112&orgId=101&listId=P2_6&dbUser=NSI.&language=ko',))
@@ -250,9 +300,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_23(self):
+    def filedown_54(self):
         file_num = "23"
-        print(file_num)
+        print(f"54.생산자물가지수(품목별), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
@@ -279,9 +329,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_27(self):
+    def filedown_58(self):
         file_num = "27"
-        print(file_num)
+        print(f"58.동수별 연면적별 건축착공현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6905&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
@@ -303,9 +353,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_28(self):
+    def filedown_59(self):
         file_num = "28"
-        print(file_num)
+        print(f"59.동수별 연면적별 건축허가현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(30,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6906&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
@@ -327,9 +377,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_29(self):
+    def filedown_60(self):
         file_num = "29"
-        print(file_num)
+        print(f"60.시도별 건축물착공현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2200&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
@@ -375,9 +425,9 @@ class FileDown:
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
-    def filedown_34(self):
+    def filedown_65(self):
         file_num = "34"
-        print(file_num)
+        print(f"65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1946&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
@@ -405,9 +455,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_36(self):
+    def filedown_67(self):
         file_num = "36"
-        print(file_num)
+        print(f"67.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1952&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
@@ -450,9 +500,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_38(self):
+    def filedown_69(self):
         file_num = "38"
-        print(file_num)
+        print(f"69.공사완료후 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=5328&hDivEng=&month_yn=',))
@@ -466,9 +516,9 @@ class FileDown:
 
         self.change_last_file(folder_path, file_num)
 
-    def filedown_39(self):
+    def filedown_70(self):
         file_num = "39"
-        print(file_num)
+        print(f"70.규모별 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2080&hDivEng=&month_yn=',))
@@ -511,9 +561,9 @@ class FileDown:
         self.kosis_download(browser,"csv")
         self.change_last_file(folder_path, file_num)
 
-    def filedown_41(self):
+    def filedown_72(self):
         file_num = "41"
-        print(file_num)
+        print(f"72.시군구별 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2082&hDivEng=&month_yn=',))
@@ -551,9 +601,9 @@ class FileDown:
         self.kosis_download(browser, "csv")
         self.change_last_file(folder_path, file_num)
 
-    def filedown_42(self):
+    def filedown_73(self):
         file_num = "42"
-        print(file_num)
+        print(f"73.공동주택현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=419&hFormId=5882&hDivEng=&month_yn=',))
@@ -568,9 +618,9 @@ class FileDown:
 
         self.change_last_file(folder_path, file_num)
 
-    def filedown_43(self):
+    def filedown_74(self):
         file_num = "43"
-        print(file_num)
+        print(f"74.주택유형별 주택준공실적_ 다가구구분, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5373&orgId=116&listId=116_11626_003&dbUser=NSI.&language=ko',))
@@ -606,9 +656,9 @@ class FileDown:
         self.kosis_download(browser, "xlsx")
         self.change_last_file(folder_path, file_num)
 
-    def filedown_44(self):
+    def filedown_75(self):
         file_num = "44"
-        print(file_num)
+        print(f"75.주택유형별 착공실적다가구 구분, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5387&orgId=116&listId=116_11626_002&dbUser=NSI.&language=ko',))
@@ -637,8 +687,13 @@ class FileDown:
         self.kosis_download(browser, "xlsx")
         self.change_last_file(folder_path, file_num)
 
-    def filedown_45_49(self):
-        index_to_file_num={2:"45", 3:"46",4:"48",5:"49",6:"47"}
+    def filedown_76_80(self):
+        index_to_file_num={2:"45", 3:"46",6:"47",4:"48",5:"49"}
+        index_to_file_name={2:"76.부동산시장 소비심리지수",
+                            3:"77.주택시장 소비심리지수",
+                            4:"78.토지시장 소비심리지수",
+                            5:"79.주택매매시장 소비심리지수",
+                            6:"80.주택전세시장 소비심리지수"}
         def move_back_year():
             # 날짜설정
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_BusinessSdate"]').click)
@@ -654,7 +709,7 @@ class FileDown:
         # 45~49 하나씩 다운로드
         for i in range(2,7):
             file_num = index_to_file_num[i]
-            print(file_num)
+            print(f"{index_to_file_name[i]}, 외부통계 번호 : {file_num}")
 
             self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[{i}]').click)  # 조회클릭
 
@@ -744,9 +799,9 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-    def filedown_51(self):
+    def filedown_82(self):
         file_num = "51"
-        print(file_num)
+        print(f"82.K-REMAP지수, 외부통계 번호 : {file_num}")
 
         warnings.filterwarnings(action='ignore')
         ua = UserAgent()
@@ -772,9 +827,9 @@ class FileDown:
             time.sleep(2)
         df.to_csv(f"{self.path}\\말일\\원천\\KREMAP_CRW.csv", index=False, encoding='ANSI')
 
-    def filedown_55(self, y, m):
+    def filedown_86(self, y, m):
         file_num = "55"
-        print(file_num)
+        print(f"86.이용상황별 지가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
@@ -799,9 +854,9 @@ class FileDown:
 
                 request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_type}")
 
-    def filedown_56(self):
+    def filedown_87(self):
         file_num = "56"
-        print(file_num)
+        print(f"87.주요정책사업(혁신도시) 지가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ("https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=LFR_13200",))
@@ -809,12 +864,26 @@ class FileDown:
 
         self.change_last_file(folder_path, file_num)
 
-    def filedown_57(self):
+    def filedown_88(self):
         folder_path = f"{self.path}\\20일\\원천"
 
         # 첫번째
         file_num = "57_1"
-        print(file_num)
+        print(f"88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {file_num}")
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20, browser.get, (
+        'https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
+
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+
+        # 다운로드
+        self.kosis_download(browser)
+        self.change_last_file(folder_path, file_num)
+
+        # 두번째
+        file_num = "57_2"
+        print(f"88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {file_num}")
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
@@ -838,18 +907,7 @@ class FileDown:
         self.kosis_download(browser)
         self.change_last_file(folder_path, file_num)
 
-        # 두번째
-        file_num = "57_2"
-        print(file_num)
-        browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(20, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
-        browser.switch_to.frame('iframe_rightMenu')
-        browser.switch_to.frame('iframe_centerMenu1')
-
-        # 다운로드
-        self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
 
     def kosis_init_broswer(self,folder_path):
         chrome_options = webdriver.ChromeOptions()
