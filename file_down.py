@@ -38,8 +38,8 @@ class FileDown:
 
         self.make_d_dir()
 
-        # # [20일자]
-        # # 외부통계
+        # [20일자]
+        # 외부통계
         # self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
         # self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
         # self.try_twice(self.filedown_52)
@@ -50,8 +50,6 @@ class FileDown:
         # self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
         # self.try_twice(self.filedown_87)
         # self.try_twice(self.filedown_88)
-        # 그외
-        self.filedown_8()
 
         # [말일자]
         # self.try_twice(self.filedown_58)
@@ -66,6 +64,9 @@ class FileDown:
         # self.try_twice(self.filedown_76_80)
         # self.try_twice(self.filedown_82)
         # # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
+
+        # 그외
+        self.filedown_8()
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -117,33 +118,33 @@ class FileDown:
 
     def filedown_8(self):
         file_num=8
-        print(f"8.전국주택 매매가격지수")
+        print(f"{file_num}.전국주택 매매가격지수")
 
         file_dir_dict = {
             "단독":
-                {"월간_매매가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세통합가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전월세통합지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준월세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준전세가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+                {"월간_매매가격지수_단독.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21411&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=S&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_월세가격지수_단독.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21432&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=R2&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_단독.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21431&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=R1&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_단독.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21421&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=D&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_단독.xlsx"  :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_24411&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=T&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_단독.xlsx"  :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21433&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=R3&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_단독.xlsx"  :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21434&houseSubGbn=HOUSE_INDEX&aptType=7&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
             "아파트":
-                {"월간_매매가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세통합가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전월세통합지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준월세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준전세가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+                {"월간_매매가격지수_아파트.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21211&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=S&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_월세가격지수_아파트.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21232&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=R2&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_아파트.xlsx":"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21231&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=R1&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_아파트.xlsx"   :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21221&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=D&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_아파트.xlsx" :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_24211&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=T&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_아파트.xlsx" :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21233&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=R3&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_아파트.xlsx" :"https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21234&houseSubGbn=HOUSE_INDEX&aptType=1&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
             "연립":
-                {"월간_매매가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_월세통합가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_전월세통합지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준월세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
-                 "월간_준전세가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21134&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
+                {"월간_매매가격지수_연립다세대.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21311&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=S&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_월세가격지수_연립다세대.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21332&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=R2&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_월세통합가격지수_연립다세대.xlsx": "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21331&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=R1&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_전세가격지수_연립다세대.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21321&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=D&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_전월세통합지수_연립다세대.xlsx" : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_24311&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=T&regionCd=&regulation=true&researchDate_s=200311&priceGbn=&excelType=all",
+                 "월간_준월세가격지수_연립다세대.xlsx" : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21333&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=R3&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
+                 "월간_준전세가격지수_연립다세대.xlsx" : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21334&houseSubGbn=HOUSE_INDEX&aptType=3&weekFlag=M&trGbn=R4&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all"},
             "종합":
                 {"월간_매매가격지수_종합.xlsx"   : "https://www.reb.or.kr/r-one/statistics/excelDownLoadAllType1.do?statCd=HOUSE_21111&houseSubGbn=HOUSE_INDEX&weekFlag=M&aptType=0&trGbn=S&priceGbn=&excelType=all",
                  "월간_월세가격지수_종합.xlsx"   : "https://www.reb.or.kr/r-one/statistics/getPriceIndicesListAJAX.do?statCd=HOUSE_21132&houseSubGbn=HOUSE_INDEX&aptType=0&weekFlag=M&trGbn=R2&regionCd=&regulation=true&researchDate_s=201506&priceGbn=&excelType=all",
