@@ -27,28 +27,29 @@ class Trans:
         print("========== start data trasnformation ==========")
 
         # 20일자
-        self.trans_32()
-        self.trans_33_51()
-        self.trans_52()
-        self.trans_53()
-        self.trans_54()
-        self.trans_69()
-        self.trans_73()
-        self.trans_86()
-        self.trans_87()
-        self.trans_88()
-
-        # 말일자
-        self.trans_58()
-        self.trans_59()
-        self.trans_60()
-        self.trans_65()
-        self.trans_67()
-        self.trans_70()
-        self.trans_72()
-        self.trans_74()
-        self.trans_75()
-        self.trans_76_80()
+        # self.trans_32()
+        # self.trans_33_51()
+        # self.trans_52()
+        # self.trans_53()
+        # self.trans_54()
+        # self.trans_69()
+        # self.trans_73()
+        # self.trans_86()
+        # self.trans_87()
+        # self.trans_88()
+        #
+        # # 말일자
+        # self.trans_58()
+        # self.trans_59()
+        # self.trans_60()
+        # self.trans_65()
+        # self.trans_67()
+        # self.trans_70()
+        # self.trans_72()
+        # self.trans_74()
+        # self.trans_75()
+        # self.trans_76_80()
+        self.trans_82()
         # 82(51)은 kreamap 코드로 있음,
         # 84(53), 85(54)는 sas로
 
@@ -1163,6 +1164,33 @@ class Trans:
             sy = pd.concat([sy, ldf], axis=0, ignore_index=True)
 
             sy.to_csv(f'{file_path3}/{fn_2}yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
+
+    def trans_82(self):
+        pd.options.display.float_format = '{:.15f}'.format
+
+        file_path1 = f"{self.path}/말일/원천/51.KREMAP_CRW.xlsx"
+        file_path2 = f"{self.path}/말일/원천_처리후/"
+
+        kremap = pd.read_excel(file_path1)
+
+        # 필요한 컬럼 선택
+        print(list(kremap.columns))
+        kremap = kremap.loc[:, list(input('사용할 열을 입력해주세요 ex) 지역명 2022-02 : ').split())]
+        kremap.columns = ['지역명', 'value']
+        # 데이터의 공백 제거
+        kremap['지역명'] = kremap['지역명'].apply(lambda x: re.sub(' ', '', x))
+
+        # 시군구 코드 불러오기
+        sigungu_cd = pd.read_csv(f'{self.refer_path}/kremap_code.dat', sep='|', encoding='ANSI', header=None, names=['code', 'Lev', '지역명'])
+
+        fin = pd.merge(sigungu_cd, kremap, how='left', on='지역명')
+        fin.drop_duplicates(inplace=True)
+        fin.insert(0, '날짜', (datetime.now() - relativedelta(months=1)).strftime('%Y%m01'))
+        fin['기준년월'] = (datetime.now() - relativedelta(months=1)).strftime('%Y%m')
+        fin = fin[['날짜', 'code', 'Lev', 'value', '기준년월']]
+        fin.fillna('', inplace=True)
+        print(tb(fin, headers='keys', tablefmt='pretty'))
+        fin.to_csv(f'{file_path2}/kremap.csv',encoding='ANSI', header=False, index=False)
 
     def trans_86(self):
         print('86.이용상황별 지가지수, 외부통계 번호 : 55')

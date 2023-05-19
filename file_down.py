@@ -40,28 +40,28 @@ class FileDown:
 
         # [20일자]
         # 외부통계
-        self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
-        self.try_twice(self.filedown_52)
-        self.try_twice(self.filedown_53)
-        self.try_twice(self.filedown_54)
-        self.try_twice(self.filedown_69)
-        self.try_twice(self.filedown_73)
-        self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_87)
-        self.try_twice(self.filedown_88)
-
-        # [말일자]
-        self.try_twice(self.filedown_58)
-        self.try_twice(self.filedown_59)
-        self.try_twice(self.filedown_60)
-        self.try_twice(self.filedown_65)
-        self.try_twice(self.filedown_67)
-        self.try_twice(self.filedown_70)
-        self.try_twice(self.filedown_72)
-        self.try_twice(self.filedown_74)
-        self.try_twice(self.filedown_75)
-        self.try_twice(self.filedown_76_80)
+        # self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_52)
+        # self.try_twice(self.filedown_53)
+        # self.try_twice(self.filedown_54)
+        # self.try_twice(self.filedown_69)
+        # self.try_twice(self.filedown_73)
+        # self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_87)
+        # self.try_twice(self.filedown_88)
+        #
+        # # [말일자]
+        # self.try_twice(self.filedown_58)
+        # self.try_twice(self.filedown_59)
+        # self.try_twice(self.filedown_60)
+        # self.try_twice(self.filedown_65)
+        # self.try_twice(self.filedown_67)
+        # self.try_twice(self.filedown_70)
+        # self.try_twice(self.filedown_72)
+        # self.try_twice(self.filedown_74)
+        # self.try_twice(self.filedown_75)
+        # self.try_twice(self.filedown_76_80)
         self.try_twice(self.filedown_82)
         # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
 
@@ -826,7 +826,7 @@ class FileDown:
                 df_tp.insert(0, '기준년월', yyyymm)
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
             time.sleep(2)
-        df.to_csv(f"{self.path}\\말일\\원천\\KREMAP_CRW.csv", index=False, encoding='ANSI')
+        df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.xlsx", index=False, encoding='ANSI')
 
     def filedown_86(self, y, m):
         file_num = "55"
