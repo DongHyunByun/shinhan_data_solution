@@ -40,30 +40,30 @@ class FileDown:
 
         # [20일자]
         # 외부통계
-        # self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_52)
-        # self.try_twice(self.filedown_53)
-        # self.try_twice(self.filedown_54)
-        # self.try_twice(self.filedown_69)
-        # self.try_twice(self.filedown_73)
-        # self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_87)
-        # self.try_twice(self.filedown_88)
+        self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
+        self.try_twice(self.filedown_52)
+        self.try_twice(self.filedown_53)
+        self.try_twice(self.filedown_54)
+        self.try_twice(self.filedown_69)
+        self.try_twice(self.filedown_73)
+        self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_87)
+        self.try_twice(self.filedown_88)
 
         # [말일자]
-        # self.try_twice(self.filedown_58)
-        # self.try_twice(self.filedown_59)
-        # self.try_twice(self.filedown_60)
-        # self.try_twice(self.filedown_65)
-        # self.try_twice(self.filedown_67)
-        # self.try_twice(self.filedown_70)
-        # self.try_twice(self.filedown_72)
-        # self.try_twice(self.filedown_74)
-        # self.try_twice(self.filedown_75)
-        # self.try_twice(self.filedown_76_80)
-        # self.try_twice(self.filedown_82)
-        # # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
+        self.try_twice(self.filedown_58)
+        self.try_twice(self.filedown_59)
+        self.try_twice(self.filedown_60)
+        self.try_twice(self.filedown_65)
+        self.try_twice(self.filedown_67)
+        self.try_twice(self.filedown_70)
+        self.try_twice(self.filedown_72)
+        self.try_twice(self.filedown_74)
+        self.try_twice(self.filedown_75)
+        self.try_twice(self.filedown_76_80)
+        self.try_twice(self.filedown_82)
+        # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
 
         # 그외
         self.filedown_8()
@@ -461,7 +461,7 @@ class FileDown:
         print(f"67.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1952&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1952&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
 
         # 행렬교체(상자옮기기)
         browser.switch_to.frame('iframe_rightMenu')

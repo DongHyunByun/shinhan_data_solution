@@ -28,7 +28,7 @@ class Trans:
 
         # 20일자
         self.trans_32()
-        self.trans_33_51() # 15~20까지 추가예정
+        self.trans_33_51()
         self.trans_52()
         self.trans_53()
         self.trans_54()
@@ -40,18 +40,17 @@ class Trans:
 
         # 말일자
         self.trans_58()
+        self.trans_59()
+        self.trans_60()
         self.trans_65()
         self.trans_67()
-        self.trans_60()
         self.trans_70()
         self.trans_72()
         self.trans_74()
         self.trans_75()
         self.trans_76_80()
-
         # 82(51)은 kreamap 코드로 있음,
         # 84(53), 85(54)는 sas로
-        # 없음 : 59(28),
 
     def make_d_dir(self):
         '''
@@ -686,6 +685,40 @@ class Trans:
         print(tb(df, headers='keys', tablefmt='pretty'))
 
         df.to_csv(f'{file_path2}/27.rtp_d_alsqr_st_yyyymm.dat', sep='|', index=False, header=None, encoding='ANSI')
+
+    def trans_59(self):
+        print('59.동수별 연면적별 건축허가현황, 외부통계 번호 : 28')
+        today = datetime.now().strftime('%Y.%m')
+
+        file_path1 = f"{self.path}/말일/원천/28.xlsx"
+        file_path2 = f"{self.path}/말일/원천_처리후/"
+
+        df = pd.read_excel(file_path1, dtype='str',sheet_name='데이터', engine='openpyxl')
+        df.fillna(method='ffill', inplace=True)
+
+        dic = {'조적': '조적조','교육및사회용': '교육및사회'}
+        df.replace(dic, inplace=True)
+        df.columns = ['필요없음', '레벨01(1)', '레벨02(1)', '항목'] + list(df.columns)[4:]
+
+        df = df.loc[:,['필요없음', '레벨01(1)', '레벨02(1)', '항목'] + [(datetime.now() - relativedelta(months=2)).strftime('%Y.%m')]]
+        df.columns = ['필요없음', '레벨01(1)', '레벨02(1)', '항목', '값']
+        df.insert(1, '레벨', [item1 + '_' + item2 for item1, item2 in zip(df['레벨01(1)'], df['레벨02(1)'])])
+        df.insert(0, '날짜', (datetime.now() - relativedelta(months=1)).strftime('%Y%m01'))
+        df['기준년월'] = (datetime.now() - relativedelta(months=1)).strftime('%Y%m')
+
+        df = df[['날짜', '레벨', '항목', '값', '기준년월']]
+
+        cd1 = pd.read_csv(f'{self.refer_path}/27_level.dat', sep='|', dtype='str', header=None, encoding='ANSI')
+        cd1.columns = ['code1', '레벨']
+        cd2 = pd.read_csv(f'{self.refer_path}/27_level2.dat', sep='|', dtype='str', header=None, encoding='ANSI')
+        cd2.columns = ['code2', '항목']
+
+        df = pd.merge(df, cd1, how='left', on='레벨')
+        df = pd.merge(df, cd2, how='left', on='항목')
+        df = df[['날짜', 'code1', 'code2', '레벨', '항목', '값', '기준년월']]
+        print(tb(df, headers='keys', tablefmt='pretty'))
+
+        df.to_csv(f'{file_path2}/28.rtp_d_alsqr_pm_yyyymm.dat', sep='|',index=False, header=None, encoding='ANSI')
 
     def trans_60(self):
         print('60.시도별 건축물착공현황, 외부통계 번호 : 29')
