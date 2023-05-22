@@ -1,57 +1,68 @@
 import pandas as pd
 from tabulate import tabulate as tb
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import os
 from bs4 import BeautifulSoup as bs
 import warnings
+import time
+
+from datetime_func import *
 
 warnings.filterwarnings('ignore')
 
 class Trans:
     data_path = None
     path = None
+    str_d = None
     d = None
     today = datetime.now().strftime('%Y.%m월')
     refer = "refer"
+    y = None
+    m = None
 
-    def __init__(self,data_path,d):
+    def __init__(self,data_path,str_d):
         self.data_path = data_path
-        self.path = f"{data_path}\\{d}"
+        self.path = f"{data_path}\\{str_d}"
         self.refer_path = f"{data_path}\\refer"
-        self.d = d
+        self.str_d = str_d #yyyymm
+        self.d = datetime.strptime(str_d, '%Y%m')
+
+        self.y = str_d[:4]
+        self.m = str_d[5:].lstrip('0')
 
         self.make_d_dir()
         print("========== start data trasnformation ==========")
 
         # 20일자
-        # self.trans_32()
-        # self.trans_33_51()
-        # self.trans_52()
-        # self.trans_53()
-        # self.trans_54()
-        # self.trans_69()
-        # self.trans_73()
-        # self.trans_86()
-        # self.trans_87()
-        # self.trans_88()
-        #
-        # # 말일자
-        # self.trans_58()
-        # self.trans_59()
-        # self.trans_60()
-        # self.trans_65()
-        # self.trans_67()
-        # self.trans_70()
-        # self.trans_72()
-        # self.trans_74()
-        # self.trans_75()
-        # self.trans_76_80()
-        self.trans_82()
-        # 82(51)은 kreamap 코드로 있음,
-        # 84(53), 85(54)는 sas로
+        self.trans_32()
+        self.trans_33_51()
+        self.trans_52()
+        self.trans_53()
+        self.trans_54()
+        self.trans_69()
+        self.trans_73()
+        self.trans_86()
+        self.trans_87()
+        self.trans_88()
+
+        # 말일자
+        self.trans_10(*return_y_m_before_n_v2(self.d,1))
+        self.trans_58()
+        self.trans_59()
+        self.trans_60()
+        self.trans_65()
+        self.trans_67()
+        self.trans_70()
+        self.trans_72()
+        self.trans_74()
+        self.trans_75()
+        self.trans_76_80()
+        # self.trans_82() # engine이슈로 동작안됨
+        self.trans_84(*return_y_m_before_n_v2(self.d,2))
+        # 84(53)는 sas로
 
     def make_d_dir(self):
         '''
@@ -72,6 +83,92 @@ class Trans:
         for folder in ["20일","말일","kb단지"]:
             if not os.path.isdir(f"{self.path}\\{folder}\\원천_처리후"):
                 os.mkdir(f"{self.path}\\{folder}\\원천_처리후")
+
+    def trans_10(self,y,m):
+        print(f"10.용도지역별 지가지수")
+
+        file_path = f"{self.path}/말일/원천/10.{y}년 {m}월 지가변동률.xls"
+        file_path3 = f"{self.path}/말일/원천_처리후"
+
+        # 엑셀 불러오기 (멀티 컬럼이라 header를 그냥 3으로 설정)
+        df = pd.read_excel(file_path, dtype='str', header=3)
+
+        # 이용상황별 지가지수는 쳐내기
+        df = df.iloc[1:, 1:12]
+        df.columns = ['행정구역', '평균', '주거', '상업', '공업', '녹지', '보전관리', '생산관리', '계획관리', '농림', '자연환경보전']
+
+        # 행정구역(시도시군구)에 문자를 제외한 값 삭제
+        df['행정구역'] = df['행정구역'].apply(lambda x: re.sub('[\W\d]', '', str(x)))
+
+        df.dropna(subset=['주거', '상업', '공업', '녹지', '보전관리', '생산관리', '계획관리', '농림', '자연환경보전'], inplace=True)
+
+        # 데이터값 -은 0으로 변경
+        df.replace({'-': 0}, inplace=True)
+
+        df.dropna()
+
+        # 관리지역 추가
+        df.insert(6, '관리지역', '0')
+
+        big_si = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시',
+                  '울산광역시', '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도',
+                  '전라북도', '전라남도', '경상북도', '경상남도', '제주자치도']
+        si_in = [i if i in big_si else np.nan for i in df['행정구역']]
+        si_nin = [i if i not in big_si else np.nan for i in df['행정구역']]
+
+        df.drop(['평균', '행정구역'], axis=1, inplace=True)
+        df.insert(0, '시군구', si_nin)
+        df.insert(0, '시도', si_in)
+
+        df['시도'].fillna(method='ffill', inplace=True)
+        df['시도'].fillna('', inplace=True)
+        df['시도'] = df['시도'].apply(lambda x: re.sub('청|상|라|도|특별시|광역시|특별자치시|자치도', '', str(x)))
+        df['시군구'].fillna('', inplace=True)
+
+        df.insert(0, '시도시군구', df['시도'] + df['시군구'])
+        df.drop_duplicates(inplace=True)
+        df.drop(['시도', '시군구'], axis=1, inplace=True)
+
+        sido_code = pd.read_csv(f'{self.refer_path}/용지지역별_지가지수_시군구코드.dat',sep='|', header=None, encoding='ANSI')
+        sido_code.columns = ['시도코드', '시도시군구', '시도', '시군구']
+        sido_code.fillna('', inplace=True)
+
+        df_tp = pd.merge(sido_code, df, how='left', on='시도시군구')
+
+        # 이번달 날짜 데이터 만들기
+        now = datetime.now()
+        yyyymm = datetime.strftime(now, '%Y%m')
+        yyyymmdd = yyyymm + '01'
+
+        df_tp.insert(0, '자료기준일자', yyyymmdd)
+        # **지수기준일 변경시 변경 필수**
+        df_tp['지수기준일자'] = '20221001'
+
+        # 소수점 반올림
+        for col in ['주거', '상업', '공업', '녹지', '보전관리', '생산관리', '계획관리', '농림', '자연환경보전']:
+            df_tp.loc[:, col] = np.round(df_tp.loc[:, col].apply(lambda x: float(x) + 0.0001), 2)
+            df_tp.loc[df_tp[col] == 0, col] = '0'
+
+        print(tb(df_tp, headers='keys', tablefmt='pretty'))
+
+        print(sido_code.shape)
+        print(df_tp.shape)
+
+        df_nsido = [i for i in df['시도시군구'] if (i not in list(sido_code['시도시군구'])
+                                               and i not in ['전국', '대도시', '수도권', '지방권']
+                                               and '지역' not in i
+                                               and len(i) < 15)]
+        print('원천에 추가된 시군구코드 확인 :', end=' ')
+        if df_nsido == []:
+            df_nsido = ['없음']
+        print(df_nsido)
+
+        df_tp.drop(['시도시군구'], axis=1, inplace=True)
+
+        print('KEY값 중복 확인')
+        print(df_tp.iloc[:, [0, 1, -1]].drop_duplicates())
+
+        df_tp.to_csv(f"{file_path3}/10.rtp_landpi_inf_{yyyymm}.dat", sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_32(self):
         print("32.이용상황별 지가변동률 , 외부통계 번호 : 1")
@@ -847,7 +944,7 @@ class Trans:
         unsold = unsold.loc[:, ['자료발표일자', '시도시군구', '부문_규모', '호', '자료기준년월']]
 
         # 이번달 제공해야할 기준월 자료만 추출
-        today = self.d
+        today = self.str_d
         today = datetime.strptime(today, '%Y%m') - relativedelta(months=2)
         today = today.strftime('%Y%m')
         print(today)
@@ -1118,7 +1215,7 @@ class Trans:
 
         print('76~80, 외부통계 번호 : 45-49')
         # 파일 경로 설정
-        last_month = (datetime.strptime(self.d,"%Y%m") - relativedelta(months=1)).strftime('%Y%m')
+        last_month = (datetime.strptime(self.str_d,"%Y%m") - relativedelta(months=1)).strftime('%Y%m')
         last_month_path = f"{self.data_path}/{last_month}/말일/원천_처리후"
 
         file_path1 = f"{self.path}/말일/원천/"
@@ -1134,7 +1231,7 @@ class Trans:
             sy = pd.read_excel(f'{file_path1}/{fn_1}.xlsx', dtype='str')
 
             # 현재 년월을 기준으로 데이터 처리
-            yyyymm = datetime.strptime(self.d,"%Y%m") - relativedelta(months=1)
+            yyyymm = datetime.strptime(self.str_d,"%Y%m") - relativedelta(months=1)
             yyyymm_bf = yyyymm.strftime('%Y-%m')
 
             try:
@@ -1191,6 +1288,187 @@ class Trans:
         fin.fillna('', inplace=True)
         print(tb(fin, headers='keys', tablefmt='pretty'))
         fin.to_csv(f'{file_path2}/kremap.csv',encoding='ANSI', header=False, index=False)
+
+    def trans_84(self,y=None, m=None):
+        print("84.주요국가산엄단지 산업동향")
+        file_name = f'84.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용).xlsx'
+
+        file_path = f"{self.path}/말일/원천/{file_name}"
+        file_path2 = f"{self.path}/말일/원천_처리후"
+
+        if len(re.sub('[^0-9]', '', file_name[3:])) == 3:
+            mm = re.sub('[^0-9]', '', file_name[3:])[:2] + '0' + re.sub('[^0-9]', '', file_name)[-1]
+        elif len(re.sub('[^0-9]', '', file_name[3:])) == 4:
+            mm = re.sub('[^0-9]', '', file_name[3:])
+        else:
+            input('프로그램 종료 후 파일명에 년월이 이상한지 확인 : ')
+
+        yymm = '20' + mm
+        # 시트 이름
+        sheets = ['표2 업종별 입주', '표7 업종별 수출', '표5 업종별 생산', '표9 업종별 고용', '표12 업종별 가동률', '표3 업종별 가동']
+        # IND_CD
+        ind_cds = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '99']
+        sandan_v1 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_1': []
+        })
+        sandan_v2 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_2': []
+        })
+        sandan_v3 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_3': []
+        })
+        sandan_v4 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_4': []
+        })
+        sandan_v5 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_5': []
+        })
+        sandan_v6 = pd.DataFrame({
+            'IND_CD': [],
+            'sandan_nm': [],
+            'IND_NM': [],
+            'value_6': []
+        })
+        dfs = [sandan_v1, sandan_v2, sandan_v3, sandan_v4, sandan_v5, sandan_v6]
+        while True:
+            for i in range(6):
+                sandan = pd.read_excel(file_path,header=2, dtype='object', sheet_name=sheets[i])
+                # 마지막에 설명이 있을 경우, 즉 마지막행에 NA값이 컬럼수-1 개인 경우 마지막 행 삭제
+                if sandan.iloc[-1, :].value_counts(dropna=False).reset_index().iloc[0, 1] == (len(sandan.columns) - 1):
+                    sandan = sandan.iloc[:-1, :]
+                sandan.fillna('', inplace=True)
+
+                # <산업단지 이름이 다르거나 새로운 산업단지가 추가되었을때>를 확인! 작업필요 !!
+                if i == 0:
+                    danji_df = pd.DataFrame(sandan.loc[:, '산업단지'])
+                else:
+                    danji_tp = pd.DataFrame(sandan.loc[:, '산업단지'])
+                    danji_df = pd.concat([danji_df, danji_tp], ignore_index=False, axis=1)
+                    danji_df.replace('대불(외)', '대불(외국인)', inplace=True)
+
+                # 업종 이름(ind_nm)이 다른 경우
+                try:
+                    sandan.loc[:, '계']
+                    ind_nms = ['계']
+                except:
+                    ind_nms = ['총계']
+                ind_nms += ['기계', '목재종이', '비금속', '비제조', '석유화학', '섬유의복', '운송장비', '음식료', '전기전자', '철강', '기타']
+
+                for j in range(12):
+                    try:
+                        df_tp = sandan.loc[:, ['산업단지'] + [ind_nms[j]]]
+                        df_tp['IND_CD'] = ind_cds[j]
+                        df_tp['IND_NM'] = ind_nms[j]
+                        df_tp = df_tp.loc[:, ['IND_CD', '산업단지', 'IND_NM'] + [ind_nms[j]]]
+                    except:
+                        df_tp = sandan.loc[:, ['산업단지']]
+                        df_tp[ind_nms[j]] = ''
+                        df_tp['IND_CD'] = ind_cds[j]
+                        df_tp['IND_NM'] = ind_nms[j]
+                        df_tp = df_tp.loc[:, ['IND_CD', '산업단지', 'IND_NM'] + [ind_nms[j]]]
+                    df_tp.columns = ['IND_CD', 'sandan_nm', 'IND_NM', 'value_' + str(i + 1)]
+
+                    # 산업단지 이름(sandan_nm)이 다른 경우
+                    df_tp.replace('대불(외)', '대불(외국인)', inplace=True)
+
+                    # 업종 이름(ind_nm)이 다른 경우
+                    df_tp.replace('총계', '계', inplace=True)
+                    dfs[i] = pd.concat([dfs[i], df_tp], axis=0)
+                    try:
+                        sandan.drop([ind_nms[j]], axis=1, inplace=True)
+                    except:
+                        pass
+
+                if sandan.shape[1] > 2:
+                    print(tb(sandan.head(), headers='keys', tablefmt='psql'))
+                    print('추가된 컬럼 확인 必')
+                    break
+
+                print()
+                print('데이터가 잘 합쳐졌는지 확인')
+                time.sleep(1)
+                # 깔끔하게 보기 위해 일부 데이터들을 좌우로 붙이는 과정
+                p_df1 = pd.DataFrame(dfs[i].head(50)).reset_index().drop('index', axis=1)
+                p_df2 = pd.DataFrame(dfs[i].tail(50)).reset_index().drop('index', axis=1)
+                p_df3 = pd.DataFrame(dfs[i].loc[dfs[i]['IND_NM'] == '비제조', :]).reset_index().drop('index', axis=1)
+                p_df4 = pd.DataFrame({'': ['']})
+                p_df = pd.concat([p_df1, p_df4, p_df2, p_df4, p_df3], axis=1)
+                p_df.fillna('', inplace=True)
+
+                print(tb(p_df, headers='keys', tablefmt='psql'))
+                conf = input('데이터가 올바르게 들어갔으면 y, 그렇지 않으면 n : ')
+                if conf == 'n':
+                    break
+
+            if conf == 'n':
+                break
+
+            print()
+            print('산업단지 명이 달라지는지 확인')
+            time.sleep(2)
+            print(tb(danji_df, headers='keys', tablefmt='psql'))
+            conf1 = input('문제가 없으면 y, 수정이 필요하면 n : ')
+            if conf1 == 'n':
+                break
+            print()
+            yyyymm = y+m
+            danji_df['작업년월'] = yyyymm
+            danji_nm = danji_df.iloc[:, [0, -1]]
+            danji_nm_bf = pd.read_csv(f'{self.refer_path}/danji_nm.csv',dtype='str', encoding='ANSI')
+            yyyymm_bf = datetime.strptime(yyyymm, '%Y%m') - relativedelta(months=1)
+            danji_nm_bf_tp = danji_nm_bf.loc[danji_nm_bf['작업년월'] == yyyymm_bf.strftime('%Y%m'), :]
+
+            print(tb(pd.concat([danji_nm, danji_nm_bf_tp]).drop_duplicates(subset='산업단지', keep=False),
+                           headers='keys', tablefmt='pretty'))
+            if input('빈 데이터 프레임이 나오지 않으면 추가된 산업단지가 있다는 말임. 추가된 산업단지가 없다면 y, 있으면 n : ') == 'n':
+                break
+            danji_nm = pd.concat([danji_nm, danji_nm_bf])
+            danji_nm.to_csv(f'{self.refer_path}/danji_nm.csv',index=False, encoding='ANSI')
+
+            total = pd.merge(dfs[0], dfs[1], how='left', on=['sandan_nm', 'IND_CD', 'IND_NM'])
+            total = pd.merge(total, dfs[2], how='left', on=['sandan_nm', 'IND_CD', 'IND_NM'])
+            total = pd.merge(total, dfs[3], how='left', on=['sandan_nm', 'IND_CD', 'IND_NM'])
+            total = pd.merge(total, dfs[4], how='left', on=['sandan_nm', 'IND_CD', 'IND_NM'])
+            total = pd.merge(total, dfs[5], how='left', on=['sandan_nm', 'IND_CD', 'IND_NM'])
+            total['BAS_YYMM'] = yymm
+            total.replace('x', '', inplace=True)
+            print(tb(total.head(50), headers='keys', tablefmt='psql'))
+            print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
+            print(tb(total.tail(50), headers='keys', tablefmt='psql'))
+            # 파일 위치 확인
+            if input('저장하시겠습니까? (y/n) : ') != 'n':
+                total.to_csv(file_path2 + '/84.python_sandan_' + yyyymm + '25.dat', sep='|', index=False, encoding='ANSI')
+            break
+
+        '''
+        00 계
+        01 기계
+        02 목재종이
+        03 비금속
+        04 비제조
+        05 석유화학
+        06 섬유의복
+        07 운송장비
+        08 음식료
+        09 전기전자
+        10 철강
+        99 기타
+        '''
 
     def trans_86(self):
         print('86.이용상황별 지가지수, 외부통계 번호 : 55')

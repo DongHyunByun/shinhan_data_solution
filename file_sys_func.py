@@ -1,8 +1,8 @@
+# 파일 시스템 함수를 사용하는 모듈들
+
 import pandas as pd
 import os
-
-# 파일 시스템 함수를 호출하는 모듈 들
-# print(os.listdir("C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\원천_처리후"))
+import shutil
 
 file_num_name={1:"rtp_usecase_jg",2:"rtp_gdhse_t_inf",3:"rtp_gdhse_sea_inf",4:"rtp_sz_apt_t_in",5:"rtp_sz_apt_js_inf",
                7:"rtp_apt_t_inf",8:"rtp_apt_js_inf", 9:"rtp_apt_sz_mid", 10:"rtp_apt_sz_avg", 11:"rtp_apt_t_mid",
@@ -26,6 +26,12 @@ def add_num_20(path):
                     fin_num = num
 
         os.rename(f'{path}/{file_name}',f'{path}/{fin_num}.{file_name}')
+
+def change_last_file(folder_path, new_name, file_type=None):
+    filename = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
+    if not file_type:
+        file_type = filename.split(".")[-1]
+    shutil.move(filename, os.path.join(folder_path, f"{new_name}.{file_type}"))
 
 if __name__ == "__main__":
     path = "C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\db"

@@ -9,7 +9,7 @@ import sys
 import openpyxl
 import csv
 import xlrd
-import shutil
+
 from fake_useragent import UserAgent
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -25,6 +25,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
+from datetime_func import *
+from file_sys_func import *
+
 class FileDown:
     str_d = None
     d = None
@@ -36,34 +39,43 @@ class FileDown:
         self.str_d = str_d
         self.d = datetime.strptime(str_d, '%Y%m')
 
+        self.y = str_d[:4]
+        self.m = str_d[5:].lstrip('0')
+
         self.make_d_dir()
 
         # [20일자]
         # 외부통계
-        # self.try_twice(self.filedown_32, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_33_51, self.return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_52)
-        # self.try_twice(self.filedown_53)
-        # self.try_twice(self.filedown_54)
-        # self.try_twice(self.filedown_69)
-        # self.try_twice(self.filedown_73)
-        # self.try_twice(self.filedown_86, self.return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_87)
-        # self.try_twice(self.filedown_88)
-        #
-        # # [말일자]
-        # self.try_twice(self.filedown_58)
-        # self.try_twice(self.filedown_59)
-        # self.try_twice(self.filedown_60)
-        # self.try_twice(self.filedown_65)
-        # self.try_twice(self.filedown_67)
-        # self.try_twice(self.filedown_70)
-        # self.try_twice(self.filedown_72)
-        # self.try_twice(self.filedown_74)
-        # self.try_twice(self.filedown_75)
-        # self.try_twice(self.filedown_76_80)
+        self.try_twice(self.filedown_32, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_33_51, return_y_m_before_n(self.d, 3))
+        self.try_twice(self.filedown_52)
+        self.try_twice(self.filedown_53)
+        self.try_twice(self.filedown_54)
+        self.try_twice(self.filedown_69)
+        self.try_twice(self.filedown_73)
+        self.try_twice(self.filedown_86, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_87)
+        self.try_twice(self.filedown_88)
+
+        # [말일자]
+        # 말일자 우선제공
+        self.try_twice(self.filedown_10)
+        # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
+        self.try_twice(self.filedown_84, return_y_m_before_n_v2(self.d, 2))
+
+        # 말일자
+        self.try_twice(self.filedown_58)
+        self.try_twice(self.filedown_59)
+        self.try_twice(self.filedown_60)
+        self.try_twice(self.filedown_65)
+        self.try_twice(self.filedown_67)
+        self.try_twice(self.filedown_70)
+        self.try_twice(self.filedown_72)
+        self.try_twice(self.filedown_74)
+        self.try_twice(self.filedown_75)
+        self.try_twice(self.filedown_76_80)
         self.try_twice(self.filedown_82)
-        # 84.국가산업단지동향, 85. 팩토리온 등록공장현황
+        # 85. 팩토리온 등록공장현황
 
         # 그외
         self.filedown_8()
@@ -82,12 +94,6 @@ class FileDown:
 
             if i==n-1:
                 print("실패", end=" ")
-
-    def return_y_m_before_n(self,d,n):
-        '''
-        d일(date type)에서 n월 전 값의 년,월을 반환한다.
-        '''
-        return (str((d + timedelta(days=15) - timedelta(days=30 * n)).year), str((d + timedelta(days=15) - timedelta(days=30 * n)).month))
 
     def make_d_dir(self):
         '''
@@ -167,6 +173,47 @@ class FileDown:
             for file_name, url in name_url_dict.items():
                 print(file_name)
                 request.urlretrieve(url, f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}/{file_name}")
+
+    def filedown_10(self,y=None,m=None):
+        print(f"10.용도지역별 지가지수")
+        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR"
+
+        folder_path = f"{self.path}/말일/원천"
+        page = self.try_request(url)
+        soup = bs(page.text, "html.parser")
+
+        # 날짜
+        if y and m:
+            y = f"{y}년"
+            m = f"{m}월"
+
+            # 파일다운로드
+            for a in soup.select('tr>td>a.nttInfoBtn'):
+                if (y in a.text) and (m in a.text):
+                    post_id = a["data-id"]
+                    down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
+
+                    file = self.try_request(down_file_response).json()["nttFileList"][0]
+
+                    file_name = file["fileNm"]
+                    file_type = file_name.split('.')[-1]
+                    down_key = file["dwldUrl"]
+                    down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
+
+                    request.urlretrieve(down_url, f"{folder_path}/{file_name}")
+        else:
+            post_id = soup.select('tr>td>a.nttInfoBtn')[0]["data-id"]
+            down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
+
+            file = self.try_request(down_file_response).json()["nttFileList"][0]
+
+            file_name = file["fileNm"]
+            file_type = file_name.split('.')[-1]
+            down_key = file["dwldUrl"]
+            down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
+
+            request.urlretrieve(down_url, f"{folder_path}/10.{file_name}")
+
 
     def filedown_32(self,y,m):
         file_num = 1
@@ -259,7 +306,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path,file_num)
+        change_last_file(folder_path,file_num)
 
     def filedown_53(self):
         file_num = "22"
@@ -299,7 +346,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_54(self):
         file_num = "23"
@@ -328,7 +375,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_58(self):
         file_num = "27"
@@ -352,7 +399,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_59(self):
         file_num = "28"
@@ -376,7 +423,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_60(self):
         file_num = "29"
@@ -422,7 +469,7 @@ class FileDown:
 
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
             self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
-            self.change_last_file(folder_path, f"{file_num}_{L[i]}")
+            change_last_file(folder_path, f"{file_num}_{L[i]}")
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
             self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
@@ -454,7 +501,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_67(self):
         file_num = "36"
@@ -499,7 +546,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_69(self):
         file_num = "38"
@@ -515,7 +562,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_70(self):
         file_num = "39"
@@ -531,7 +578,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_39_kosis(self):
         file_num = "39"
@@ -560,7 +607,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser,"csv")
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_72(self):
         file_num = "41"
@@ -576,7 +623,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_41_kosis(self):
         file_num = "41"
@@ -600,7 +647,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser, "csv")
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_73(self):
         file_num = "42"
@@ -617,7 +664,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_74(self):
         file_num = "43"
@@ -655,7 +702,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser, "xlsx")
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_75(self):
         file_num = "44"
@@ -686,7 +733,7 @@ class FileDown:
 
         # 다운로드(시점후 바로 다운로드창으로)
         self.kosis_download(browser, "xlsx")
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_76_80(self):
         index_to_file_num={2:"45", 3:"46",6:"47",4:"48",5:"49"}
@@ -719,7 +766,7 @@ class FileDown:
             # 엑셀다운로드
             button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_excel_down"]')
             self.delay_after_func(3, ActionChains(browser).move_to_element(button).click(button).perform)
-            self.change_last_file(folder_path, file_num)
+            change_last_file(folder_path, file_num)
 
         # browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[4]').click()  # n번째
         # button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]')
@@ -742,7 +789,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_46_kosis(self):
         file_num = "46"
@@ -756,7 +803,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_47_kosis(self):
         file_num = "47"
@@ -770,7 +817,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_48_kosis(self):
         file_num = "48"
@@ -784,7 +831,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_49_kosis(self):
         file_num = "49"
@@ -798,7 +845,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_82(self):
         file_num = "51"
@@ -827,6 +874,27 @@ class FileDown:
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
             time.sleep(2)
         df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.xlsx", index=False, encoding='ANSI')
+
+    def filedown_84(self,y=None,m=None):
+        file_name = "84.국가산업단지산업동향"
+        print(file_name)
+
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://www.kicox.or.kr/user/bbs/BD_selectBbsList.do?q_bbsCode=1036&q_clCode=1',))
+
+        if y and m:
+            find_title = f"{y}.{m}월 주요 국가산업단지"
+            for i,row in enumerate(browser.find_elements(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr')):
+                if find_title in row.text:
+                    self.delay_after_func(1, browser.find_element(By.XPATH,f'//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[{i+1}]').click)
+                    break
+        else:
+            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[1]').click)
+
+        down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
+        self.delay_after_func(5, browser.get, (down_url,))
+        change_last_file(folder_path, f"84.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
 
     def filedown_86(self, y, m):
         file_num = "55"
@@ -863,7 +931,7 @@ class FileDown:
         self.delay_after_func(10, browser.get, ("https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=LFR_13200",))
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="S_FileBox"]').click)
 
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
     def filedown_88(self):
         folder_path = f"{self.path}\\20일\\원천"
@@ -872,15 +940,14 @@ class FileDown:
         file_num = "57_1"
         print(f"88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {file_num}")
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(20, browser.get, (
-        'https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
+        self.delay_after_func(20, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
         browser.switch_to.frame('iframe_rightMenu')
         browser.switch_to.frame('iframe_centerMenu1')
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
         # 두번째
         file_num = "57_2"
@@ -906,7 +973,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        self.change_last_file(folder_path, file_num)
+        change_last_file(folder_path, file_num)
 
 
 
@@ -971,8 +1038,3 @@ class FileDown:
         df = pd.DataFrame(total_dict)
         df.to_excel(down_path,index=False)
 
-    def change_last_file(self,folder_path, new_name, file_type=None):
-        filename = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
-        if not file_type:
-            file_type = filename.split(".")[-1]
-        shutil.move(filename, os.path.join(folder_path, f"{new_name}.{file_type}"))
