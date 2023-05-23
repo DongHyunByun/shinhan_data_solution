@@ -46,35 +46,35 @@ class FileDown:
 
         # [20일자]
         # 외부통계
-        self.try_twice(self.filedown_32, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_33_51, return_y_m_before_n(self.d, 3))
-        self.try_twice(self.filedown_52)
-        self.try_twice(self.filedown_53)
-        self.try_twice(self.filedown_54)
-        self.try_twice(self.filedown_69)
-        self.try_twice(self.filedown_73)
-        self.try_twice(self.filedown_86, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_87)
-        self.try_twice(self.filedown_88)
-
-        # [말일자]
-        # 말일자 우선제공
-        self.try_twice(self.filedown_10)
-        # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
-        self.try_twice(self.filedown_84, return_y_m_before_n_v2(self.d, 2))
-
-        # 말일자
-        self.try_twice(self.filedown_58)
-        self.try_twice(self.filedown_59)
-        self.try_twice(self.filedown_60)
-        self.try_twice(self.filedown_65)
-        self.try_twice(self.filedown_67)
-        self.try_twice(self.filedown_70)
-        self.try_twice(self.filedown_72)
-        self.try_twice(self.filedown_74)
-        self.try_twice(self.filedown_75)
-        self.try_twice(self.filedown_76_80)
-        self.try_twice(self.filedown_82)
+        # self.try_twice(self.filedown_32, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_33_51, return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_52)
+        # self.try_twice(self.filedown_53)
+        # self.try_twice(self.filedown_54)
+        # self.try_twice(self.filedown_69)
+        # self.try_twice(self.filedown_73)
+        # self.try_twice(self.filedown_86, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_87)
+        # self.try_twice(self.filedown_88)
+        #
+        # # [말일자]
+        # # 말일자 우선제공
+        # self.try_twice(self.filedown_10)
+        # # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
+        # self.try_twice(self.filedown_84, return_y_m_before_n_v2(self.d, 2))
+        #
+        # # 말일자
+        # self.try_twice(self.filedown_58)
+        # self.try_twice(self.filedown_59)
+        # self.try_twice(self.filedown_60)
+        # self.try_twice(self.filedown_65)
+        # self.try_twice(self.filedown_67)
+        # self.try_twice(self.filedown_70)
+        # self.try_twice(self.filedown_72)
+        # self.try_twice(self.filedown_74)
+        # self.try_twice(self.filedown_75)
+        # self.try_twice(self.filedown_76_80)
+        # self.try_twice(self.filedown_82)
         # 85. 팩토리온 등록공장현황
 
         # 그외
@@ -450,6 +450,9 @@ class FileDown:
         self.delay_after_func(1, browser.switch_to.alert.accept)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-4"]/li/span').click)
 
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_5"]').click)  # 레벨
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAll5"]').click) # 전체선택
+
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)  # 시점 탭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAllM"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-7"]/li/span').click)
@@ -463,15 +466,15 @@ class FileDown:
         for i in range(2,8):
             # print(L[i])
             if i != 2:
-                self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i-1}]/span').click)
-            self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
-            self.delay_after_func(1, browser.switch_to.alert.accept)
+                self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i-1}]/span').click)
+            self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
+            self.delay_after_func(2, browser.switch_to.alert.accept)
 
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
-            self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
+            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
+            self.delay_after_func(7, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
             change_last_file(folder_path, f"{file_num}_{L[i]}")
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
+            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
+            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
     def filedown_65(self):
         file_num = "34"
@@ -873,7 +876,7 @@ class FileDown:
                 df_tp.insert(0, '기준년월', yyyymm)
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
             time.sleep(2)
-        df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.xlsx", index=False, encoding='ANSI')
+        df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
 
     def filedown_84(self,y=None,m=None):
         file_name = "84.국가산업단지산업동향"

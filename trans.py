@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pandas as pd
 from tabulate import tabulate as tb
 import re
@@ -10,6 +12,7 @@ import warnings
 import time
 
 from datetime_func import *
+from tabulate import tabulate
 
 warnings.filterwarnings('ignore')
 
@@ -36,32 +39,33 @@ class Trans:
         self.make_d_dir()
         print("========== start data trasnformation ==========")
 
-        # 20일자
-        self.trans_32()
-        self.trans_33_51()
-        self.trans_52()
-        self.trans_53()
-        self.trans_54()
-        self.trans_69()
-        self.trans_73()
-        self.trans_86()
-        self.trans_87()
-        self.trans_88()
-
-        # 말일자
-        self.trans_10(*return_y_m_before_n_v2(self.d,1))
-        self.trans_58()
-        self.trans_59()
-        self.trans_60()
-        self.trans_65()
-        self.trans_67()
-        self.trans_70()
-        self.trans_72()
-        self.trans_74()
-        self.trans_75()
-        self.trans_76_80()
+        # # 20일자
+        self.trans_8()
+        # self.trans_32()
+        # self.trans_33_51()
+        # self.trans_52()
+        # self.trans_53()
+        # self.trans_54()
+        # self.trans_69()
+        # self.trans_73()
+        # self.trans_86()
+        # self.trans_87()
+        # self.trans_88()
+        #
+        # # 말일자
+        # self.trans_10(*return_y_m_before_n_v2(self.d,1))
+        # self.trans_58()
+        # self.trans_59()
+        # self.trans_60()
+        # self.trans_6_5()
+        # self.trans_67()
+        # self.trans_70()
+        # self.trans_72()
+        # self.trans_74()
+        # self.trans_75()
+        # self.trans_76_80()
         # self.trans_82() # engine이슈로 동작안됨
-        self.trans_84(*return_y_m_before_n_v2(self.d,2))
+        # self.trans_84(*return_y_m_before_n_v2(self.d,2))
         # 84(53)는 sas로
 
     def make_d_dir(self):
@@ -83,6 +87,50 @@ class Trans:
         for folder in ["20일","말일","kb단지"]:
             if not os.path.isdir(f"{self.path}\\{folder}\\원천_처리후"):
                 os.mkdir(f"{self.path}\\{folder}\\원천_처리후")
+
+    def trans_8(self):
+        pd.options.display.float_format = '{:.15f}'.format
+
+        file_path = f"{self.path}/20일/원천/8.전국주택 매매가격지수"
+        file_path3 = f"{self.path}/20일/원천_처리후/8.전국주택 매매가격지수"
+
+        if not os.path.isdir(file_path3):
+            os.mkdir(file_path3)
+            # 여기에 하위 폴더 있는지 확인하고 없으면 만드는 코드 추가
+
+
+        jutec_type = ['종합', '아파트', '연립', '단독']
+        jutec_type2 = ['종합', '아파트', '연립다세대', '단독']
+        jutec_num = ['0', '1', '3', '7']
+        jutec_class = ['매매가격지수', '전월세통합지수', '전세가격지수', '준전세가격지수', '월세가격지수', '월세통합가격지수', '준월세가격지수']
+        class_alpha = ['S', 'T', 'D', 'R4', 'R2', 'R1', 'R3']
+
+        for i in range(4):
+            for j in range(7):
+                print(jutec_type[i] + ' ' + jutec_class[j])
+                jutec = pd.read_excel(f'{file_path}/{jutec_type[i]}/월간_{jutec_class[j]}_{jutec_type2[i]}.xlsx',header=10, sheet_name='Sheet1', dtype='object')
+                jutec.fillna('', inplace=True)
+                n = jutec.iloc[1, 3]
+
+                if n == '':
+                    jutec.iloc[:, 0] = jutec.iloc[:, 0] + jutec.iloc[:, 1] + jutec.iloc[:, 2] + jutec.iloc[:, 3]
+                    jutec = jutec.iloc[:, [0, -1]]
+                if n != '':
+                    jutec.iloc[:, 0] = jutec.iloc[:, 0] + jutec.iloc[:, 1] + jutec.iloc[:, 2]
+                    jutec = jutec.iloc[:, [0, -1]]
+                jutec.columns = ['지역', '가격지수값']
+
+                jutec['지수발표일자'] = '20220101'
+                jutec['주택유형코드'] = jutec_num[i]
+                jutec['주택유형명'] = jutec_type[i]
+                jutec['매매전세월세구분'] = class_alpha[j]
+
+                jutec = jutec.loc[:, ['지역', '주택유형코드', '주택유형명', '매매전세월세구분', '가격지수값']]
+
+                print(tabulate(jutec.head(20), headers='keys', tablefmt='psql'))
+                jutec.to_csv('D:/1_루틴업무/20일/17_주택매매 지가지수/데이터 처리/' + jutec_type[i] + '_' + class_alpha[j] + '.csv',
+                             index=False, encoding='ANSI')
+                print('')
 
     def trans_10(self,y,m):
         print(f"10.용도지역별 지가지수")
@@ -875,12 +923,12 @@ class Trans:
         df = df.merge(gubun, how='left').merge(level, how='left').merge(sido, how='left').merge(yong_d,how='left').merge(yong,how='left').merge(hang, how='left')
 
         # 작업월에 필요한 컬럼 값만 사용, 자료기준년월이 다르면 에러
-        yyyymm = (datetime.now() - relativedelta(months=2)).strftime('%Y.%m 월')
+        yyyymm = (self.d - relativedelta(months=2)).strftime('%Y.%m 월')
 
         # 필요한 컬럼만 사용
         df_fin = df.loc[:,['시도코드', '시도명', '항목코드', '항목명', '용도코드', '용도상세코드', '용도명', '용도상세명', '구분코드', '구분', '레벨코드', '레벨01', yyyymm]]
-        df_fin.insert(0, '자료기준년월', (datetime.now() - relativedelta(months=1)).strftime('%Y%m01'))
-        df_fin['지수기준년월'] = (datetime.now() - relativedelta(months=1)).strftime('%Y%m')
+        df_fin.insert(0, '자료기준년월', (self.d - relativedelta(months=1)).strftime('%Y%m01'))
+        df_fin['지수기준년월'] = (self.d - relativedelta(months=1)).strftime('%Y%m')
 
         # 코드 값 매핑이 안된 자료 제거
         df_fin.dropna(inplace=True)
