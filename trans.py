@@ -14,6 +14,8 @@ import time
 from datetime_func import *
 from tabulate import tabulate
 
+from file_sys_func import *
+
 warnings.filterwarnings('ignore')
 
 class Trans:
@@ -40,7 +42,7 @@ class Trans:
         print("========== start data trasnformation ==========")
 
         # # 20일자
-        self.trans_8()
+        # self.trans_8()
         # self.trans_32()
         # self.trans_33_51()
         # self.trans_52()
@@ -94,10 +96,9 @@ class Trans:
         file_path = f"{self.path}/20일/원천/8.전국주택 매매가격지수"
         file_path3 = f"{self.path}/20일/원천_처리후/8.전국주택 매매가격지수"
 
-        if not os.path.isdir(file_path3):
-            os.mkdir(file_path3)
-            # 여기에 하위 폴더 있는지 확인하고 없으면 만드는 코드 추가
-
+        start_path = f"{self.path}/20일/원천_처리후/"
+        dir_dict = {"8.전국주택 매매가격지수" : None}
+        mkdir_dfs(start_path, dir_dict)
 
         jutec_type = ['종합', '아파트', '연립', '단독']
         jutec_type2 = ['종합', '아파트', '연립다세대', '단독']
@@ -112,12 +113,19 @@ class Trans:
                 jutec.fillna('', inplace=True)
                 n = jutec.iloc[1, 3]
 
+                print(jutec)
                 if n == '':
                     jutec.iloc[:, 0] = jutec.iloc[:, 0] + jutec.iloc[:, 1] + jutec.iloc[:, 2] + jutec.iloc[:, 3]
-                    jutec = jutec.iloc[:, [0, -1]]
                 if n != '':
                     jutec.iloc[:, 0] = jutec.iloc[:, 0] + jutec.iloc[:, 1] + jutec.iloc[:, 2]
+
+
+                # 변동률이 붙은것과 안붙은것
+                if '변동률' in set(jutec.loc[0]):
+                    jutec = jutec.iloc[1:, [0, -2]]
+                else:
                     jutec = jutec.iloc[:, [0, -1]]
+
                 jutec.columns = ['지역', '가격지수값']
 
                 jutec['지수발표일자'] = '20220101'
@@ -128,8 +136,7 @@ class Trans:
                 jutec = jutec.loc[:, ['지역', '주택유형코드', '주택유형명', '매매전세월세구분', '가격지수값']]
 
                 print(tabulate(jutec.head(20), headers='keys', tablefmt='psql'))
-                jutec.to_csv('D:/1_루틴업무/20일/17_주택매매 지가지수/데이터 처리/' + jutec_type[i] + '_' + class_alpha[j] + '.csv',
-                             index=False, encoding='ANSI')
+                jutec.to_csv(f'{file_path3}/{jutec_type[i]}_{class_alpha[j]}.csv', index=False, encoding='ANSI')
                 print('')
 
     def trans_10(self,y,m):

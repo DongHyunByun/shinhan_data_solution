@@ -13,6 +13,6 @@ if __name__ == "__main__":
     config = args.parse_args()
 
     str_d = config.d
-    path = f"{config.path}\\{str_d}"
+    path = config.path
 
     FileDown(str_d,path)

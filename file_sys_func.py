@@ -5,7 +5,7 @@ import shutil
 
 def add_num_20(path):
     '''
-    디렉토리에 있는 20일자 파일들을 넘버링 한다.
+    디렉토리에 있는 20일자 외부통계 파일들을 넘버링 한다.
     '''
     file_num_name = {1: "rtp_usecase_jg",
                      2: "rtp_gdhse_t_inf",
@@ -47,7 +47,29 @@ def add_num_20(path):
 
         os.rename(f'{path}/{file_name}',f'{path}/{fin_num}.{file_name}')
 
+def mkdir_dfs(path, dir_dict):
+    '''
+    빈디렉토리를 재귀적으로 만든다
+    root_path : 디렉토리를 만들기 시작할 경로
+    sub_list : root_path를 시작으로 하위폴더들을 만든다
+    ex:
+    sub_list = {"8.전국주택 매매가격지수" : {"단독":None, "아파트":None, "연립":None, "종합":None}}
+    '''
+
+    if not dir_dict:
+        return
+
+    for d in dir_dict:
+        new_path = f"{path}/{d}"
+        if not os.path.isdir(new_path):
+            os.mkdir(new_path)
+            mkdir_dfs(new_path, dir_dict[d])
+
 def change_last_file(folder_path, new_name, file_type=None):
+    '''
+    수정일자가 가장 최근인 파일의 이름을 변경하는 함수
+    가장 최근 다운로드된 파일이름을 변경하는데 사용한다.
+    '''
     filename = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
     if not file_type:
         file_type = filename.split(".")[-1]

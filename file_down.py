@@ -35,14 +35,20 @@ class FileDown:
     path = None
 
     def __init__(self,str_d,path):
-        self.path = path
+        self.root_path = path
+        self.path = f"{path}\\{str_d}"
         self.str_d = str_d
         self.d = datetime.strptime(str_d, '%Y%m')
 
         self.y = str_d[:4]
         self.m = str_d[5:].lstrip('0')
 
-        self.make_d_dir()
+        dir_dict = {str_d : {"20일": {"원천":None, "원천_처리후":None},
+                             "말일": {"원천":None, "원천_처리후":None},
+                             "kb단지":{"원천":None, "원천_처리후":None}}
+                    }
+        mkdir_dfs(self.root_path, dir_dict)
+        # self.make_d_dir()
 
         # [20일자]
         # 외부통계
@@ -95,32 +101,6 @@ class FileDown:
             if i==n-1:
                 print("실패", end=" ")
 
-    def make_d_dir(self):
-        '''
-        폴더가 없으면 폴더를 만든다
-        path/YYYYMM
-          I
-          I--20일
-             I
-             I--원천
-          I
-          I--말일
-             I
-             I--원천
-          I
-          I--kb단지
-             I
-             I--원천
-        '''
-        if not os.path.isdir(self.path):
-            os.mkdir(self.path)
-
-        for folder in ["20일","말일","kb단지"]:
-            if not os.path.isdir(f"{self.path}\\{folder}"):
-                os.mkdir(f"{self.path}\\{folder}")
-
-            if not os.path.isdir(f"{self.path}\\{folder}\\원천"):
-                os.mkdir(f"{self.path}\\{folder}\\원천")
 
     def filedown_8(self):
         file_num=8
@@ -162,11 +142,9 @@ class FileDown:
         }
 
         # 폴더 경로생성
-        if not os.path.isdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수"):
-            os.mkdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수")
-            for folder in file_dir_dict:
-                if not os.path.isdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}"):
-                    os.mkdir(f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}")
+        start_path = f"{self.path}/20일/원천/"
+        dir_dict = {"8.전국주택 매매가격지수": {"단독": None, "아파트": None, "연립": None, "종합": None}}
+        mkdir_dfs(start_path, dir_dict)
 
         for folder in file_dir_dict:
             name_url_dict = file_dir_dict[folder]
