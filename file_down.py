@@ -51,6 +51,7 @@ class FileDown:
         # self.make_d_dir()
 
         # [20일자]
+        # self.filedown_8()
         # 외부통계
         # self.try_twice(self.filedown_32, return_y_m_before_n(self.d, 2))
         # self.try_twice(self.filedown_33_51, return_y_m_before_n(self.d, 3))
@@ -63,10 +64,10 @@ class FileDown:
         # self.try_twice(self.filedown_87)
         # self.try_twice(self.filedown_88)
         #
-        # # [말일자]
-        # # 말일자 우선제공
-        # self.try_twice(self.filedown_10)
-        # # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
+        # [말일자]
+        # 말일자 우선제공
+        self.try_twice(self.filedown_10)
+        # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
         # self.try_twice(self.filedown_84, return_y_m_before_n_v2(self.d, 2))
         #
         # # 말일자
@@ -83,8 +84,6 @@ class FileDown:
         # self.try_twice(self.filedown_82)
         # 85. 팩토리온 등록공장현황
 
-        # 그외
-        self.filedown_8()
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -183,7 +182,7 @@ class FileDown:
             post_id = soup.select('tr>td>a.nttInfoBtn')[0]["data-id"]
             down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
 
-            file = self.try_request(down_file_response).json()["nttFileList"][0]
+            file = self.try_request(down_file_response).json()["nttFileList"][1]
 
             file_name = file["fileNm"]
             file_type = file_name.split('.')[-1]
@@ -857,7 +856,7 @@ class FileDown:
         df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
 
     def filedown_84(self,y=None,m=None):
-        file_name = "84.국가산업단지산업동향"
+        file_name = "84.국가산업단지산업동향, 외부통계번호 : 53"
         print(file_name)
 
         folder_path = f"{self.path}\\말일\\원천"
@@ -875,7 +874,7 @@ class FileDown:
 
         down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
         self.delay_after_func(5, browser.get, (down_url,))
-        change_last_file(folder_path, f"84.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
+        change_last_file(folder_path, f"53.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
 
     def filedown_86(self, y, m):
         file_num = "55"

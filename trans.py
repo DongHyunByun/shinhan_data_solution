@@ -38,7 +38,6 @@ class Trans:
         self.y = str_d[:4]
         self.m = str_d[5:].lstrip('0')
 
-        self.make_d_dir()
         print("========== start data trasnformation ==========")
 
         # # 20일자
@@ -55,7 +54,7 @@ class Trans:
         # self.trans_88()
         #
         # # 말일자
-        # self.trans_10(*return_y_m_before_n_v2(self.d,1))
+        self.trans_10(*return_y_m_before_n_v2(self.d,1))
         # self.trans_58()
         # self.trans_59()
         # self.trans_60()
@@ -69,26 +68,6 @@ class Trans:
         # self.trans_82() # engine이슈로 동작안됨
         # self.trans_84(*return_y_m_before_n_v2(self.d,2))
         # 84(53)는 sas로
-
-    def make_d_dir(self):
-        '''
-        폴더가 없으면 폴더를 만든다 path/YYYYMM/n일/원천_처리후
-          I
-          I--20일
-             I
-             I--원천_처리후
-          I
-          I--말일
-             I
-             I--원천_처리후
-          I
-          I--kb단지
-             I
-             I--원천
-        '''
-        for folder in ["20일","말일","kb단지"]:
-            if not os.path.isdir(f"{self.path}\\{folder}\\원천_처리후"):
-                os.mkdir(f"{self.path}\\{folder}\\원천_처리후")
 
     def trans_8(self):
         pd.options.display.float_format = '{:.15f}'.format
@@ -142,7 +121,7 @@ class Trans:
     def trans_10(self,y,m):
         print(f"10.용도지역별 지가지수")
 
-        file_path = f"{self.path}/말일/원천/10.{y}년 {m}월 지가변동률.xls"
+        file_path = f"{self.path}/말일/원천/10.{y}년 {m}월 지가지수.xls"
         file_path3 = f"{self.path}/말일/원천_처리후"
 
         # 엑셀 불러오기 (멀티 컬럼이라 header를 그냥 3으로 설정)
@@ -1345,8 +1324,8 @@ class Trans:
         fin.to_csv(f'{file_path2}/kremap.csv',encoding='ANSI', header=False, index=False)
 
     def trans_84(self,y=None, m=None):
-        print("84.주요국가산엄단지 산업동향")
-        file_name = f'84.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용).xlsx'
+        print("84.주요국가산업단지 산업동향, 외부통계번호 : 53")
+        file_name = f'53.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용).xlsx'
 
         file_path = f"{self.path}/말일/원천/{file_name}"
         file_path2 = f"{self.path}/말일/원천_처리후"
@@ -1506,9 +1485,7 @@ class Trans:
             print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
-            if input('저장하시겠습니까? (y/n) : ') != 'n':
-                total.to_csv(file_path2 + '/84.python_sandan_' + yyyymm + '25.dat', sep='|', index=False, encoding='ANSI')
-            break
+            total.to_csv(file_path2 + '53.python_sandan_' + yyyymm + '25.dat', sep='|', index=False, encoding='ANSI')
 
         '''
         00 계
