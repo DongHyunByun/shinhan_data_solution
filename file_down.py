@@ -48,42 +48,59 @@ class FileDown:
                              "kb단지":{"원천":None, "원천_처리후":None}}
                     }
         mkdir_dfs(self.root_path, dir_dict)
-        # self.make_d_dir()
 
         # [20일자]
-        # self.filedown_8()
-        # 외부통계
-        # self.try_twice(self.filedown_32, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_33_51, return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_52)
-        # self.try_twice(self.filedown_53)
-        # self.try_twice(self.filedown_54)
-        # self.try_twice(self.filedown_69)
-        # self.try_twice(self.filedown_73)
-        # self.try_twice(self.filedown_86, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_87)
-        # self.try_twice(self.filedown_88)
-        #
-        # [말일자]
-        # 말일자 우선제공
-        self.try_twice(self.filedown_10)
-        # self.try_twice(self.filedown_10, return_y_m_before_n_v2(self.d, 1))
-        # self.try_twice(self.filedown_84, return_y_m_before_n_v2(self.d, 2))
-        #
-        # # 말일자
-        # self.try_twice(self.filedown_58)
-        # self.try_twice(self.filedown_59)
-        # self.try_twice(self.filedown_60)
-        # self.try_twice(self.filedown_65)
-        # self.try_twice(self.filedown_67)
-        # self.try_twice(self.filedown_70)
-        # self.try_twice(self.filedown_72)
-        # self.try_twice(self.filedown_74)
-        # self.try_twice(self.filedown_75)
-        # self.try_twice(self.filedown_76_80)
-        # self.try_twice(self.filedown_82)
-        # 85. 팩토리온 등록공장현황
+        self.try_twice(self.filedown_8)
+        self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
+        self.try_twice(self.filedown_52_ex21)
+        self.try_twice(self.filedown_53_ex22)
+        self.try_twice(self.filedown_54_ex23)
+        self.try_twice(self.filedown_69_ex38)
+        self.try_twice(self.filedown_73_ex42)
+        self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_87_ex56)
+        self.try_twice(self.filedown_88_ex57)
 
+        # [말일자 우선제공]
+        self.try_twice(self.filedown_10)
+        self.try_twice(self.filedown_76_80_ex45_49)
+        self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
+
+        # [말일자]
+        self.try_twice(self.filedown_58_ex27)
+        self.try_twice(self.filedown_59_ex28)
+        self.try_twice(self.filedown_60_ex29)
+        self.try_twice(self.filedown_65_ex34)
+        self.try_twice(self.filedown_67_ex36)
+        self.try_twice(self.filedown_70_ex39)
+        self.try_twice(self.filedown_72_ex41)
+        self.try_twice(self.filedown_74_ex43)
+        self.try_twice(self.filedown_75_ex44)
+        self.try_twice(self.filedown_76_80_ex45_49)
+        self.try_twice(self.filedown_82_ex51)
+
+        # [나머지(to_do)]
+        # 1.리얼탑 kb아파트단지매핑(sas)
+        # 2.리얼탑 kb아파트평형시세매핑(sas)
+        # 4.건축물신축단가관리(excel)
+        # 5.산단격차율(sas)
+        # 6.토지격차율(sas)
+        # 9.오피스탤 매매가격지수(python,sas)
+        # 11. 리얼탑 토지특성정보(sas)
+        # 55. 면적별 건축물현황
+        # 56. 용도별 건축물현황
+        # 57. 층수별 건축물현황
+        # 61. 연도별 건축허가현황
+        # 62. 시도별 건축허가현황
+        # 63. (신)주택보급률
+        # 64. 주택 멸실현황
+        # 66. 주택건설실적총괄
+        # 68. 지역별 주택건설 인허가 실정
+        # 71. 미분양현황종합
+        # 81. 국토부 상가 수일률
+        # 83. 전국산업단지현황통계
+        # 85. 팩토리온 등록공장현황
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -192,7 +209,7 @@ class FileDown:
             request.urlretrieve(down_url, f"{folder_path}/10.{file_name}")
 
 
-    def filedown_32(self,y,m):
+    def filedown_32_ex1(self,y,m):
         file_num = 1
         print(f"32.이용상황별 지가변동률 , 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
@@ -221,7 +238,7 @@ class FileDown:
 
                 request.urlretrieve(down_url,f"{folder_path}/{file_num}.{file_type}")
 
-    def filedown_33_51(self,y,m):
+    def filedown_33_51_ex2_20(self,y,m):
         file_num = "2-20"
         print(f"33-51.공동주택 통합 매매 실거래가격지수~연립 다세대 매매 평균가격 , 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
@@ -270,7 +287,7 @@ class FileDown:
         # pd.read_excel(row_down_path, sheet_name='매매 중위_연립 다세대').to_csv(f"{folder_path}/19.csv", index=False, encoding='cp949')
         # pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
 
-    def filedown_52(self):
+    def filedown_52_ex21(self):
         file_num = "21"
         print(f"52.경기종합지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -285,7 +302,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path,file_num)
 
-    def filedown_53(self):
+    def filedown_53_ex22(self):
         file_num = "22"
         print(f"53.품목별 소비자물가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -325,7 +342,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_54(self):
+    def filedown_54_ex23(self):
         file_num = "23"
         print(f"54.생산자물가지수(품목별), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -354,7 +371,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_58(self):
+    def filedown_58_ex27(self):
         file_num = "27"
         print(f"58.동수별 연면적별 건축착공현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -378,7 +395,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_59(self):
+    def filedown_59_ex28(self):
         file_num = "28"
         print(f"59.동수별 연면적별 건축허가현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -402,7 +419,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_60(self):
+    def filedown_60_ex29(self):
         file_num = "29"
         print(f"60.시도별 건축물착공현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -453,7 +470,7 @@ class FileDown:
             self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
             self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
-    def filedown_65(self):
+    def filedown_65_ex34(self):
         file_num = "34"
         print(f"65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -483,7 +500,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_67(self):
+    def filedown_67_ex36(self):
         file_num = "36"
         print(f"67.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -528,7 +545,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_69(self):
+    def filedown_69_ex38(self):
         file_num = "38"
         print(f"69.공사완료후 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -544,7 +561,7 @@ class FileDown:
 
         change_last_file(folder_path, file_num)
 
-    def filedown_70(self):
+    def filedown_70_ex39(self):
         file_num = "39"
         print(f"70.규모별 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -589,7 +606,7 @@ class FileDown:
         self.kosis_download(browser,"csv")
         change_last_file(folder_path, file_num)
 
-    def filedown_72(self):
+    def filedown_72_ex41(self):
         file_num = "41"
         print(f"72.시군구별 미분양현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -629,7 +646,7 @@ class FileDown:
         self.kosis_download(browser, "csv")
         change_last_file(folder_path, file_num)
 
-    def filedown_73(self):
+    def filedown_73_ex42(self):
         file_num = "42"
         print(f"73.공동주택현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -646,7 +663,7 @@ class FileDown:
 
         change_last_file(folder_path, file_num)
 
-    def filedown_74(self):
+    def filedown_74_ex43(self):
         file_num = "43"
         print(f"74.주택유형별 주택준공실적_ 다가구구분, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -684,7 +701,7 @@ class FileDown:
         self.kosis_download(browser, "xlsx")
         change_last_file(folder_path, file_num)
 
-    def filedown_75(self):
+    def filedown_75_ex44(self):
         file_num = "44"
         print(f"75.주택유형별 착공실적다가구 구분, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
@@ -715,7 +732,7 @@ class FileDown:
         self.kosis_download(browser, "xlsx")
         change_last_file(folder_path, file_num)
 
-    def filedown_76_80(self):
+    def filedown_76_80_ex45_49(self):
         index_to_file_num={2:"45", 3:"46",6:"47",4:"48",5:"49"}
         index_to_file_name={2:"76.부동산시장 소비심리지수",
                             3:"77.주택시장 소비심리지수",
@@ -827,7 +844,7 @@ class FileDown:
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
 
-    def filedown_82(self):
+    def filedown_82_ex51(self):
         file_num = "51"
         print(f"82.K-REMAP지수, 외부통계 번호 : {file_num}")
 
@@ -855,7 +872,7 @@ class FileDown:
             time.sleep(2)
         df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
 
-    def filedown_84(self,y=None,m=None):
+    def filedown_84_ex53(self,y=None,m=None):
         file_name = "84.국가산업단지산업동향, 외부통계번호 : 53"
         print(file_name)
 
@@ -876,7 +893,7 @@ class FileDown:
         self.delay_after_func(5, browser.get, (down_url,))
         change_last_file(folder_path, f"53.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
 
-    def filedown_86(self, y, m):
+    def filedown_86_ex55(self, y, m):
         file_num = "55"
         print(f"86.이용상황별 지가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}/20일/원천"
@@ -903,7 +920,7 @@ class FileDown:
 
                 request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_type}")
 
-    def filedown_87(self):
+    def filedown_87_ex56(self):
         file_num = "56"
         print(f"87.주요정책사업(혁신도시) 지가지수, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\20일\\원천"
@@ -913,7 +930,7 @@ class FileDown:
 
         change_last_file(folder_path, file_num)
 
-    def filedown_88(self):
+    def filedown_88_ex57(self):
         folder_path = f"{self.path}\\20일\\원천"
 
         # 첫번째

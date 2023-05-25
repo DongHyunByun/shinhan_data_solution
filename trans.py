@@ -40,34 +40,36 @@ class Trans:
 
         print("========== start data trasnformation ==========")
 
-        # # 20일자
-        # self.trans_8()
-        # self.trans_32()
-        # self.trans_33_51()
-        # self.trans_52()
-        # self.trans_53()
-        # self.trans_54()
-        # self.trans_69()
-        # self.trans_73()
-        # self.trans_86()
-        # self.trans_87()
-        # self.trans_88()
-        #
-        # # 말일자
+        # [20일자]
+        self.trans_8()
+        self.trans_32_ex1()
+        self.trans_33_51_ex2_20()
+        self.trans_52_ex21()
+        self.trans_53_ex22()
+        self.trans_54_ex23()
+        self.trans_69_ex38()
+        self.trans_73_ex42()
+        self.trans_86_ex55()
+        self.trans_87_ex56()
+        self.trans_88_ex57()
+
+        # [말일자 우선제공]
         self.trans_10(*return_y_m_before_n_v2(self.d,1))
-        # self.trans_58()
-        # self.trans_59()
-        # self.trans_60()
-        # self.trans_6_5()
-        # self.trans_67()
-        # self.trans_70()
-        # self.trans_72()
-        # self.trans_74()
-        # self.trans_75()
-        # self.trans_76_80()
-        # self.trans_82() # engine이슈로 동작안됨
-        # self.trans_84(*return_y_m_before_n_v2(self.d,2))
-        # 84(53)는 sas로
+        self.trans_76_80_ex45_49()
+        self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2))
+
+        # [말일자]
+        self.trans_58_ex27()
+        self.trans_59_ex28()
+        self.trans_60_ex29()
+        self.trans_65_ex34()
+        self.trans_67_ex36()
+        self.trans_70_ex39()
+        self.trans_72_ex41()
+        self.trans_74_ex43()
+        self.trans_75_ex44()
+        self.trans_76_80_ex45_49()
+        # self.trans_82_ex51() # engine이슈로 동작안됨
 
     def trans_8(self):
         pd.options.display.float_format = '{:.15f}'.format
@@ -204,7 +206,7 @@ class Trans:
 
         df_tp.to_csv(f"{file_path3}/10.rtp_landpi_inf_{yyyymm}.dat", sep='|', header=None, index=False, encoding='ANSI')
 
-    def trans_32(self):
+    def trans_32_ex1(self):
         print("32.이용상황별 지가변동률 , 외부통계 번호 : 1")
         file_path1 = f"{self.path}/20일/원천/1.xls"
         file_path3 = f"{self.path}/20일/원천_처리후"
@@ -261,7 +263,7 @@ class Trans:
 
         jiga.to_csv(f'{file_path3}/1.rtp_usecase_jg_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_33_51(self):
+    def trans_33_51_ex2_20(self):
         print(f"33-51 , 외부통계 번호 : 2-20")
         # 파일 경로 설정
         file_path1 = f"{self.path}/20일/원천/2-20.xlsm"
@@ -671,7 +673,7 @@ class Trans:
 
         df.to_csv(f'{file_path3}/20.rtp_yd_t_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
 
-    def trans_52(self):
+    def trans_52_ex21(self):
         print('52.경기종합지수(2015=100) (10차), 외부통계 번호 : 21')
         file_name1 = f"{self.path}/20일/원천/21.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
@@ -701,7 +703,7 @@ class Trans:
 
         df.to_csv(f"{file_path2}/21.rtp_cei_inf_yyyymmdd.dat",sep='|', index=False, encoding='ANSI')
 
-    def trans_53(self):
+    def trans_53_ex22(self):
         print('53.품목별 소비자물가지수(품목성질별: 2020=100), 외부통계 번호 : 22')
         pd.set_option('display.float_format', '{:, %g}'.format)
 
@@ -741,7 +743,7 @@ class Trans:
 
         out.to_csv(f"{file_path2}/22.rtp_item_cpi1_inf_yyyymm.dat", index=False, sep='|', header=None, encoding='ANSI')
 
-    def trans_54(self):
+    def trans_54_ex23(self):
         '''
         파일 형태 참고 ( 전체 월 데이터 불러오는걸 추천 )
         계정코드별                   2021.11	2021.12
@@ -786,7 +788,7 @@ class Trans:
 
         df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
 
-    def trans_58(self):
+    def trans_58_ex27(self):
         print('58.동수별 연면적별 건축착공현황, 외부통계 번호 : 27')
         file_path1 = f"{self.path}/말일/원천/27.xlsx"
         file_path2 = f"{self.path}/말일/원천_처리후/"
@@ -818,7 +820,7 @@ class Trans:
 
         df.to_csv(f'{file_path2}/27.rtp_d_alsqr_st_yyyymm.dat', sep='|', index=False, header=None, encoding='ANSI')
 
-    def trans_59(self):
+    def trans_59_ex28(self):
         print('59.동수별 연면적별 건축허가현황, 외부통계 번호 : 28')
         today = datetime.now().strftime('%Y.%m')
 
@@ -852,7 +854,7 @@ class Trans:
 
         df.to_csv(f'{file_path2}/28.rtp_d_alsqr_pm_yyyymm.dat', sep='|',index=False, header=None, encoding='ANSI')
 
-    def trans_60(self):
+    def trans_60_ex29(self):
         print('60.시도별 건축물착공현황, 외부통계 번호 : 29')
         to_path = f"{self.path}/말일/원천_처리후/"
 
@@ -922,7 +924,7 @@ class Trans:
         # 자료 저장
         df_fin.to_csv(f'{to_path}/29.rtp_sido_st_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_65(self):
+    def trans_65_ex34(self):
         print('65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : 34')
         file_path1 = f"{self.path}/말일/원천/34.xlsx"
         file_path2 = f"{self.path}/말일/원천_처리후/"
@@ -953,7 +955,7 @@ class Trans:
 
         df.to_csv(f'{file_path2}/34.rtp_field_hse_pm_m_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_69(self):
+    def trans_69_ex38(self):
         print('69.공사완료후 미분양현황, 외부통계 번호 : 38')
         file_path = f"{self.path}/20일/원천/38.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
@@ -999,7 +1001,7 @@ class Trans:
 
         unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.csv',sep='|', header=False, index=False, encoding='ANSI')
 
-    def trans_70(self):
+    def trans_70_ex39(self):
         print('70.규모별 미분양현황, 외부통계 번호 : 39')
         file_path1 = f"{self.path}/말일/원천/39.csv"
         file_path3 = f"{self.path}/말일/원천_처리후/"
@@ -1040,7 +1042,7 @@ class Trans:
         unsold.to_csv(file_path3 + '39.rtp_sz_us_yyyymmdd.dat',
                       index=False, sep='|', header=None, encoding='ANSI')
 
-    def trans_72(self):
+    def trans_72_ex41(self):
         print('72.시군구별 미분양현황, 외부통계 번호 : 41')
         # 파일 경로 설정
         file_path1 = f"{self.path}/말일/원천/41.csv"
@@ -1076,7 +1078,7 @@ class Trans:
 
         unsold.to_csv(f'{file_path3}/41.rtp_sigungu_us_' + str(datetime.now().strftime('%Y%m')) + '.dat',  sep='|', index=False, encoding='ANSI')
 
-    def trans_73(self):
+    def trans_73_ex42(self):
         print('73.공동주택현황, 외부통계 번호 : 42')
         file_path1 = f"{self.path}/20일/원천/42.csv"
         file_path2 = f"{self.path}/20일/원천_처리후/"
@@ -1112,7 +1114,7 @@ class Trans:
         # 파일 저장
         df.to_csv(f"{file_path2}/42.rtp_gdhse_now_yyyymmdd.dat", sep='|', header=None, index=False, encoding='ANSI')
 
-    def trans_67(self):
+    def trans_67_ex36(self):
         print('67.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : 36')
 
         file_path1 = f"{self.path}/말일/원천/36.xlsx"
@@ -1137,7 +1139,7 @@ class Trans:
 
         df.to_csv(f'{file_path2}/36.rtp_hse_sz_pm_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_74(self):
+    def trans_74_ex43(self):
         print('74.주택유형별 주택준공실적_ 다가구구분, 외부통계 번호 : 43')
         file_path1 = f"{self.path}/말일/원천/43.xlsx"
         file_path2 = f"{self.path}/말일/원천_처리후/"
@@ -1176,7 +1178,7 @@ class Trans:
 
         df.to_csv(file_path2 + '43.rtp_hse_ut_m_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_75(self):
+    def trans_75_ex44(self):
         print('75.주택유형별 착공실적다가구 구분, 외부통계 번호 : 44')
         file_path1 = f"{self.path}/말일/원천/44.xlsx"
         file_path2 = f"{self.path}/말일/원천_처리후/"
@@ -1214,7 +1216,7 @@ class Trans:
 
         df.to_csv(f'{file_path2}/44.rtp_hse_st_m_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_76_80(self):
+    def trans_76_80_ex45_49(self):
         '''
         ************************************
         파일명 수정 필수 ex)부동산시장소비심리지수, 주택매매시장소비심리지수
@@ -1296,7 +1298,7 @@ class Trans:
 
             sy.to_csv(f'{file_path3}/{fn_2}yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
-    def trans_82(self):
+    def trans_82_ex51(self):
         pd.options.display.float_format = '{:.15f}'.format
 
         file_path1 = f"{self.path}/말일/원천/51.KREMAP_CRW.xlsx"
@@ -1323,7 +1325,7 @@ class Trans:
         print(tb(fin, headers='keys', tablefmt='pretty'))
         fin.to_csv(f'{file_path2}/kremap.csv',encoding='ANSI', header=False, index=False)
 
-    def trans_84(self,y=None, m=None):
+    def trans_84_ex53(self,y=None, m=None):
         print("84.주요국가산업단지 산업동향, 외부통계번호 : 53")
         file_name = f'53.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용).xlsx'
 
@@ -1445,20 +1447,20 @@ class Trans:
                 p_df.fillna('', inplace=True)
 
                 print(tb(p_df, headers='keys', tablefmt='psql'))
-                conf = input('데이터가 올바르게 들어갔으면 y, 그렇지 않으면 n : ')
-                if conf == 'n':
-                    break
-
-            if conf == 'n':
-                break
+            #     conf = input('데이터가 올바르게 들어갔으면 y, 그렇지 않으면 n : ')
+            #     if conf == 'n':
+            #         break
+            #
+            # if conf == 'n':
+            #     break
 
             print()
             print('산업단지 명이 달라지는지 확인')
             time.sleep(2)
             print(tb(danji_df, headers='keys', tablefmt='psql'))
-            conf1 = input('문제가 없으면 y, 수정이 필요하면 n : ')
-            if conf1 == 'n':
-                break
+            # conf1 = input('문제가 없으면 y, 수정이 필요하면 n : ')
+            # if conf1 == 'n':
+            #     break
             print()
             yyyymm = y+m
             danji_df['작업년월'] = yyyymm
@@ -1469,8 +1471,8 @@ class Trans:
 
             print(tb(pd.concat([danji_nm, danji_nm_bf_tp]).drop_duplicates(subset='산업단지', keep=False),
                            headers='keys', tablefmt='pretty'))
-            if input('빈 데이터 프레임이 나오지 않으면 추가된 산업단지가 있다는 말임. 추가된 산업단지가 없다면 y, 있으면 n : ') == 'n':
-                break
+            # if input('빈 데이터 프레임이 나오지 않으면 추가된 산업단지가 있다는 말임. 추가된 산업단지가 없다면 y, 있으면 n : ') == 'n':
+            #     break
             danji_nm = pd.concat([danji_nm, danji_nm_bf])
             danji_nm.to_csv(f'{self.refer_path}/danji_nm.csv',index=False, encoding='ANSI')
 
@@ -1485,7 +1487,7 @@ class Trans:
             print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
-            total.to_csv(file_path2 + '53.python_sandan_' + yyyymm + '25.dat', sep='|', index=False, encoding='ANSI')
+            total.to_csv(f'{file_path2}/53.python_sandan_{yyyymm}25.dat', sep='|', index=False, encoding='ANSI')
 
         '''
         00 계
@@ -1502,7 +1504,7 @@ class Trans:
         99 기타
         '''
 
-    def trans_86(self):
+    def trans_86_ex55(self):
         print('86.이용상황별 지가지수, 외부통계 번호 : 55')
         ## 이번달 작업 외 수행 시 아래 코드 사용
         ## yyyymm = '2022.09월' # (현재 년월)
@@ -1563,7 +1565,7 @@ class Trans:
         jiga.to_csv(f"{file_path3}/55.rtp_usecase_jg_index_inf_yyyymmdd.dat", sep='|', index=False, encoding='ANSI')
 
 
-    def trans_87(self):
+    def trans_87_ex56(self):
         print('87.주요정책사업(혁신도시) 지가지수, 외부통계 번호 : 56')
         ## 이번달 작업 외 수행 시 아래 코드 사용
         ## yyyymm = '2022.09월' # (현재 년월)
@@ -1600,7 +1602,7 @@ class Trans:
 
         df_fin.to_csv(f"{file_path2}/56.rtp_hyuksin_city_jg_index_inf_yyyymmdd.dat", sep='|', index=False,header=None, encoding='ANSI')
 
-    def trans_88(self):
+    def trans_88_ex57(self):
         print('88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : 57')
         file_1 = f"{self.path}/20일/원천/57_1.xlsx"
         file_2 = f"{self.path}/20일/원천/57_2.xlsx"
