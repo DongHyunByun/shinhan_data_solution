@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# 원천데이터를 가공하는 class
 
 import pandas as pd
 from tabulate import tabulate as tb
@@ -41,34 +42,34 @@ class Trans:
         print("========== start data trasnformation ==========")
 
         # [20일자]
-        self.trans_8()
-        self.trans_32_ex1()
-        self.trans_33_51_ex2_20()
-        self.trans_52_ex21()
-        self.trans_53_ex22()
-        self.trans_54_ex23()
-        self.trans_69_ex38()
-        self.trans_73_ex42()
-        self.trans_86_ex55()
-        self.trans_87_ex56()
-        self.trans_88_ex57()
-
-        # [말일자 우선제공]
-        self.trans_10(*return_y_m_before_n_v2(self.d,1))
-        self.trans_76_80_ex45_49()
+        # self.trans_8()
+        # self.trans_32_ex1()
+        # self.trans_33_51_ex2_20()
+        # self.trans_52_ex21()
+        # self.trans_53_ex22()
+        # self.trans_54_ex23()
+        # self.trans_69_ex38()
+        # self.trans_73_ex42()
+        # self.trans_86_ex55()
+        # self.trans_87_ex56()
+        # self.trans_88_ex57()
+        #
+        # # [말일자 우선제공]
+        # self.trans_10(*return_y_m_before_n_v2(self.d,1))
+        # self.trans_76_80_ex45_49()
         self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2))
 
         # [말일자]
-        self.trans_58_ex27()
-        self.trans_59_ex28()
-        self.trans_60_ex29()
-        self.trans_65_ex34()
-        self.trans_67_ex36()
-        self.trans_70_ex39()
-        self.trans_72_ex41()
-        self.trans_74_ex43()
-        self.trans_75_ex44()
-        self.trans_76_80_ex45_49()
+        # self.trans_58_ex27()
+        # self.trans_59_ex28()
+        # self.trans_60_ex29()
+        # self.trans_65_ex34()
+        # self.trans_67_ex36()
+        # self.trans_70_ex39()
+        # self.trans_72_ex41()
+        # self.trans_74_ex43()
+        # self.trans_75_ex44()
+        # self.trans_76_80_ex45_49()
         # self.trans_82_ex51() # engine이슈로 동작안됨
 
     def trans_8(self):
@@ -1484,7 +1485,10 @@ class Trans:
             total['BAS_YYMM'] = yymm
             total.replace('x', '', inplace=True)
             print(tb(total.head(50), headers='keys', tablefmt='psql'))
-            print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
+            try:
+                print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
+            except:
+                print("except!!")
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
             total.to_csv(f'{file_path2}/53.python_sandan_{yyyymm}25.dat', sep='|', index=False, encoding='ANSI')

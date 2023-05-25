@@ -1,3 +1,5 @@
+# 원천데이터를 크롤링하는 class
+
 import requests
 from bs4 import BeautifulSoup as bs
 from datetime import datetime,timedelta
