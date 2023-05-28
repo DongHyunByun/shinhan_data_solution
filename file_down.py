@@ -1,35 +1,32 @@
 # 원천데이터를 크롤링하는 class
 
-import requests
-from bs4 import BeautifulSoup as bs
-from datetime import datetime,timedelta
+# 기본 lib
 import time
-import pandas as pd
-from urllib import request,parse
-import os
-import sys
-import openpyxl
-import csv
-import xlrd
-
-from fake_useragent import UserAgent
-from dateutil.relativedelta import relativedelta
-import pandas as pd
 import tqdm
 import warnings
+import sys
+
+# 크롤링
+import requests
+
+from bs4 import BeautifulSoup as bs
 
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
-
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
+from fake_useragent import UserAgent
+from urllib import request,parse
+
+# 링커
 from datetime_func import *
 from file_sys_func import *
 
+warnings.filterwarnings(action='ignore')
 class FileDown:
     str_d = None
     d = None
@@ -51,36 +48,38 @@ class FileDown:
                     }
         mkdir_dfs(self.root_path, dir_dict)
 
-        # [20일자]
-        self.try_twice(self.filedown_8)
-        self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
-        self.try_twice(self.filedown_52_ex21)
-        self.try_twice(self.filedown_53_ex22)
-        self.try_twice(self.filedown_54_ex23)
-        self.try_twice(self.filedown_69_ex38)
-        self.try_twice(self.filedown_73_ex42)
-        self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_87_ex56)
-        self.try_twice(self.filedown_88_ex57)
+        # [5일자]
+        self.filedown_5(*return_y_m_before_n(self.d, 2))
 
-        # [말일자 우선제공]
-        self.try_twice(self.filedown_10)
-        self.try_twice(self.filedown_76_80_ex45_49)
-        self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
+        # [20일자]
+        # self.try_twice(self.filedown_8)
+        # self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_52_ex21)
+        # self.try_twice(self.filedown_53_ex22)
+        # self.try_twice(self.filedown_54_ex23)
+        # self.try_twice(self.filedown_69_ex38)
+        # self.try_twice(self.filedown_73_ex42)
+        # self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_87_ex56)
+        # self.try_twice(self.filedown_88_ex57)
 
         # [말일자]
-        self.try_twice(self.filedown_58_ex27)
-        self.try_twice(self.filedown_59_ex28)
-        self.try_twice(self.filedown_60_ex29)
-        self.try_twice(self.filedown_65_ex34)
-        self.try_twice(self.filedown_67_ex36)
-        self.try_twice(self.filedown_70_ex39)
-        self.try_twice(self.filedown_72_ex41)
-        self.try_twice(self.filedown_74_ex43)
-        self.try_twice(self.filedown_75_ex44)
-        self.try_twice(self.filedown_76_80_ex45_49)
-        self.try_twice(self.filedown_82_ex51)
+        # self.try_twice(self.filedown_10)
+
+        # self.try_twice(self.filedown_58_ex27)
+        # self.try_twice(self.filedown_59_ex28)
+        # self.try_twice(self.filedown_60_ex29)
+        # self.try_twice(self.filedown_65_ex34)
+        # self.try_twice(self.filedown_67_ex36)
+        # self.try_twice(self.filedown_70_ex39)
+        # self.try_twice(self.filedown_72_ex41)
+        # self.try_twice(self.filedown_74_ex43)
+        # self.try_twice(self.filedown_75_ex44)
+        # self.try_twice(self.filedown_76_80_ex45_49)
+        # self.try_twice(self.filedown_82_ex51)
+        # self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
+        # 85_ex54. 팩토리온 등록공장현황
 
         # [나머지(to_do)]
         # 1.리얼탑 kb아파트단지매핑(sas)
@@ -102,7 +101,6 @@ class FileDown:
         # 71. 미분양현황종합
         # 81. 국토부 상가 수일률
         # 83. 전국산업단지현황통계
-        # 85. 팩토리온 등록공장현황
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -119,6 +117,13 @@ class FileDown:
             if i==n-1:
                 print("실패", end=" ")
 
+    def filedown_5(self,y,m):
+        file_num = 5
+        print(f"{file_num}.산단격차율")
+
+        url = "https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do" # 크롤링할 싸이트
+        # 제목에 y,m이 있는 파일을 다운로드 받아야 한다.
+        file_loc = f"{self.path}/말일/원천/5.산단격차율(지식산업센터현황).xlsx" #저장할 폴더
 
     def filedown_8(self):
         file_num=8
@@ -446,6 +451,9 @@ class FileDown:
         self.delay_after_func(1, browser.switch_to.alert.accept)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-4"]/li/span').click)
 
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_4"]').click)  # 구분
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAll4"]').click)  # 전체선택
+
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_5"]').click)  # 레벨
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAll5"]').click) # 전체선택
 
@@ -458,19 +466,25 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="treeCheckAll0"]').click)
 
         # 항목 하나씩 선택
-        L=[0,0,"콘크리트","철골","철골철근콘크리트","조적","목조","기타"]
-        for i in range(2,8):
-            # print(L[i])
-            if i != 2:
-                self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i-1}]/span').click)
-            self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
-            self.delay_after_func(2, browser.switch_to.alert.accept)
+        L = ["콘크리트","철골","철골철근콘크리트","조적","목조","기타"]
+        for i in range(1,7):
+            print(L[i-1])
+            if i!=1:
+                self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
+            self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i+1}]/span').click)
+            self.delay_after_func(3, browser.switch_to.alert.accept)
 
-            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
-            self.delay_after_func(7, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
-            change_last_file(folder_path, f"{file_num}_{L[i]}")
-            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
-            self.delay_after_func(2, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
+            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
+            mk_time = time.time()
+            self.delay_after_func(15, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
+
+            if file_check_func(folder_path,mk_time):
+                change_last_file(folder_path, f"{file_num}_{L[i-1]}")
+            else:
+                print("실패!")
+
+            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
+            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
     def filedown_65_ex34(self):
         file_num = "34"
@@ -532,8 +546,7 @@ class FileDown:
         # 조회설정
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="tabClassText_4"]/span[@class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-e"]').click) # 시도별 리스트 내리기
-
-        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-5"]/li[2]/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]').click)  # 시도별 리스트 내리기
+        self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-5"]/li[3]/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]').click)  # 시도별 리스트 내리기
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-5"]/li[6]/span[@class="fancytree-node fancytree-selected fancytree-exp-n fancytree-ico-c"]').click)  # 시도별 리스트 내리기
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
 
@@ -741,13 +754,6 @@ class FileDown:
                             4:"78.토지시장 소비심리지수",
                             5:"79.주택매매시장 소비심리지수",
                             6:"80.주택전세시장 소비심리지수"}
-        def move_back_year():
-            # 날짜설정
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_BusinessSdate"]').click)
-            for i in range(11):  # 11년 전
-                self.delay_after_func(0.5, browser.find_element(By.XPATH, '//*[@id="changeLeft"]').click)
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="content"]/table/tbody/tr[2]/td[3]').click)  # 7월
-            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_complete"]').click)  # 조회클릭
 
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
@@ -760,7 +766,7 @@ class FileDown:
 
             self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[{i}]').click)  # 조회클릭
 
-            move_back_year()
+            self.kremap_move_back_year(browser)
 
             # 엑셀다운로드
             button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_excel_down"]')
@@ -850,29 +856,72 @@ class FileDown:
         file_num = "51"
         print(f"82.K-REMAP지수, 외부통계 번호 : {file_num}")
 
-        warnings.filterwarnings(action='ignore')
         ua = UserAgent()
         headers = {
             'User-Agent': ua.random,
         }
-        yyyymm = (datetime.now() - relativedelta(months=2)).strftime('%Y%m')
+
+        # [전국, 수도권, 비수도권 값]
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://kremap.krihs.re.kr/grid/grid?jisu=166',))
+
+        self.kremap_move_back_year(browser)
+
+        # 엑셀다운로드
+        button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_excel_down"]')
+        self.delay_after_func(3, ActionChains(browser).move_to_element(button).click(button).perform)
+        file_name = "51.KREMAP_refer"
+        change_last_file(folder_path, file_name)
+
+        kremap_refer = pd.read_excel(f"{folder_path}/{file_name}.xlsx")
+
+        # [시도구]
         sido_cd = ['11', '26', '27', '28', '29', '30', '31', '36', '41', '42', '43', '44', '45', '46', '47', '48', '50']
 
         df = pd.DataFrame({'기준년월': [], '지역명': [], '기상도': [], '진단지수': [], '전월대비': []})
 
-        for i in tqdm.tqdm(range(2, 144)):
-            yyyymm = (datetime.now() - relativedelta(months=i)).strftime('%Y%m')
+        i=2
+        while(1):
+            yyyymm = (self.d - relativedelta(months=i)).strftime('%Y%m')
+            print(yyyymm)
+            yyyy = yyyymm[:4]
+            mm = yyyymm[4:]
+
+            # 시도군
             for sido in sido_cd:
-                URL = 'https://kremap.krihs.re.kr/menu4/SystemIntro?area_cd=' + sido + '&item_cd=0&Gbn=MONTH&year=' + yyyymm[:4] + '&month=' + yyyymm[4:]
+                URL = f'https://kremap.krihs.re.kr/menu4/SystemIntro?area_cd={sido}&item_cd=0&Gbn=MONTH&year={yyyy}&month={mm}'
                 rq = requests.get(URL, headers=headers, verify=False)
                 try:
-                    df_tp = pd.read_html(rq.text, encoding='UTF-8')[5] #에러?
+                    df_tp = pd.read_html(rq.text, encoding='UTF-8')[5] # 마지막에 에러
                 except:
                     break
+
+                head = df_tp["지역명"][0]
+                if head:
+                    df_tp["지역명"][1:] = str(head) + df_tp["지역명"][1:].astype(str)
+
+                df_tp["지역명"] = df_tp["지역명"].str.replace(" ","")
                 df_tp.insert(0, '기준년월', yyyymm)
+
                 df = pd.concat([df, df_tp], axis=0, ignore_index=True)
-            time.sleep(2)
-        df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
+
+                time.sleep(0.5)
+
+            # 전국, 수도권, 비수도권
+            df_add = pd.DataFrame({"기준년월":[yyyymm,yyyymm,yyyymm],
+                                    "지역명":["전국","수도권","비수도권"],
+                                   "진단지수":[float(kremap_refer[kremap_refer["지역명"]=="전국"][f"{yyyy}-{mm}"]),
+                                           float(kremap_refer[kremap_refer["지역명"]  == "수도권"][f"{yyyy}-{mm}"]),
+                                           float(kremap_refer[kremap_refer["지역명"]  == "비수도권"][f"{yyyy}-{mm}"])]
+                                   })
+            df = pd.concat([df, df_add], axis=0, ignore_index=True)
+            df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
+
+            if yyyymm=="201108":
+                break
+            else:
+                i+=1
 
     def filedown_84_ex53(self,y=None,m=None):
         file_name = "84.국가산업단지산업동향, 외부통계번호 : 53"
@@ -1037,3 +1086,11 @@ class FileDown:
         df = pd.DataFrame(total_dict)
         df.to_excel(down_path,index=False)
 
+
+    def kremap_move_back_year(self,browser):
+        # 날짜설정
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_BusinessSdate"]').click)
+        for i in range(11):  # 11년 전
+            self.delay_after_func(0.5, browser.find_element(By.XPATH, '//*[@id="changeLeft"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="content"]/table/tbody/tr[2]/td[3]').click)  # 7월
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_complete"]').click)  # 조회클릭

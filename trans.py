@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 # 원천데이터를 가공하는 class
 
-import pandas as pd
-from tabulate import tabulate as tb
-import re
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-import numpy as np
-import os
-from bs4 import BeautifulSoup as bs
 import warnings
 import time
 
-from datetime_func import *
+from tabulate import tabulate as tb
+import re
+import numpy as np
+from bs4 import BeautifulSoup as bs
 from tabulate import tabulate
 
+from datetime_func import *
 from file_sys_func import *
 
 warnings.filterwarnings('ignore')
@@ -41,6 +37,9 @@ class Trans:
 
         print("========== start data trasnformation ==========")
 
+        # [5일]
+        self.trans_5(*return_y_m_before_n_v2(self.d, 2))
+
         # [20일자]
         # self.trans_8()
         # self.trans_32_ex1()
@@ -53,16 +52,11 @@ class Trans:
         # self.trans_86_ex55()
         # self.trans_87_ex56()
         # self.trans_88_ex57()
-        #
-        # # [말일자 우선제공]
-        # self.trans_10(*return_y_m_before_n_v2(self.d,1))
-        # self.trans_76_80_ex45_49()
-        self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2))
 
-        # [말일자]
+        # # [말일자]
         # self.trans_58_ex27()
         # self.trans_59_ex28()
-        # self.trans_60_ex29()
+        # self.trans_60_ex29() # todo 속도issue
         # self.trans_65_ex34()
         # self.trans_67_ex36()
         # self.trans_70_ex39()
@@ -70,7 +64,52 @@ class Trans:
         # self.trans_74_ex43()
         # self.trans_75_ex44()
         # self.trans_76_80_ex45_49()
-        # self.trans_82_ex51() # engine이슈로 동작안됨
+        # self.trans_82_ex51()
+        self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2))
+
+        # self.trans_10(*return_y_m_before_n_v2(self.d, 1))
+
+    def trans_5(self, yyyy, m):
+        while True:
+            file_loc = f"{self.path}/말일/원천/5.산단격차율(지식산업센터현황).xlsx"
+            file_path3 = f"{self.path}/말일/원천_처리후"
+
+            # 엑셀 파일 읽기
+            jisic = pd.read_excel(file_loc)
+            print(tabulate(jisic.iloc[:, :10].head(), headers='keys', tablefmt='psql'))
+            print(tabulate(jisic.iloc[:, 10:20].head(), headers='keys', tablefmt='psql'))
+            print(tabulate(jisic.iloc[:, 20:].head(), headers='keys', tablefmt='psql'))
+            print(jisic.shape)
+            id1 = input('데이터 호출에 문제가 없는지 확인하고 문제가 없다면 y 있다면 n 입력 : ')
+            if id1 == 'n':
+                break
+
+            # 필요한 컬럼만 지정
+            jisic = jisic.loc[:, ['지식산업센터명', '회사명']]
+            # 회사명 앞뒤에 빈공백 제거
+            jisic['회사명'] = jisic['회사명'].apply(lambda x: x.strip())
+            print('')
+            time.sleep(2)
+            print(tabulate(jisic.head(), headers='keys', tablefmt='psql'))
+            id2 = input('지식산업센터명과 회사명 컬럼이 제대로 들어갔는지 확인, 문제가 없다면 y 있다면 n 입력 : ')
+            if id2 == 'n':
+                break
+
+            time.sleep(2)
+            print('')
+            print('전체 데이터 수 :', len(jisic))
+            print('중복 데이터 수 :', len(jisic[jisic.duplicated(['지식산업센터명', '회사명'])]))
+            # 지식산업센터명 및 회사명 기준, 중복된 행 제거
+            jisic.drop_duplicates(['지식산업센터명', '회사명'], inplace=True)
+            print('중복 제거 후 데이터 수 :', len(jisic))
+
+            time.sleep(1.5)
+            print()
+
+            file_name_final = f'{file_path3}/jisic_{yyyy}{m.zfill(2)}.dat'
+            jisic.to_csv(file_name_final, sep='|', index=False, encoding='ANSI')
+            print("실행완료")
+            break
 
     def trans_8(self):
         pd.options.display.float_format = '{:.15f}'.format
@@ -1302,16 +1341,22 @@ class Trans:
     def trans_82_ex51(self):
         pd.options.display.float_format = '{:.15f}'.format
 
-        file_path1 = f"{self.path}/말일/원천/51.KREMAP_CRW.xlsx"
+        file_path1 = f"{self.path}/말일/원천/51.KREMAP_CRW.csv"
         file_path2 = f"{self.path}/말일/원천_처리후/"
 
-        kremap = pd.read_excel(file_path1)
+        kremap = pd.read_csv(file_path1,encoding="CP949")
+
+        # 기준년월 확인
+        y_2, m_2 = return_y_m_before_n_v2(self.d, 2)
+        d_2 = y_2 + m_2.zfill(2)
+        kremap = kremap[kremap["기준년월"]==int(d_2)]
 
         # 필요한 컬럼 선택
-        print(list(kremap.columns))
-        kremap = kremap.loc[:, list(input('사용할 열을 입력해주세요 ex) 지역명 2022-02 : ').split())]
+        kremap = kremap.loc[:, ["지역명","진단지수"]]
         kremap.columns = ['지역명', 'value']
+
         # 데이터의 공백 제거
+        kremap = kremap.dropna()
         kremap['지역명'] = kremap['지역명'].apply(lambda x: re.sub(' ', '', x))
 
         # 시군구 코드 불러오기
@@ -1319,12 +1364,12 @@ class Trans:
 
         fin = pd.merge(sigungu_cd, kremap, how='left', on='지역명')
         fin.drop_duplicates(inplace=True)
-        fin.insert(0, '날짜', (datetime.now() - relativedelta(months=1)).strftime('%Y%m01'))
-        fin['기준년월'] = (datetime.now() - relativedelta(months=1)).strftime('%Y%m')
+        fin.insert(0, '날짜', (self.d - relativedelta(months=1)).strftime('%Y%m01'))
+        fin['기준년월'] = (self.d - relativedelta(months=1)).strftime('%Y%m')
         fin = fin[['날짜', 'code', 'Lev', 'value', '기준년월']]
         fin.fillna('', inplace=True)
         print(tb(fin, headers='keys', tablefmt='pretty'))
-        fin.to_csv(f'{file_path2}/kremap.csv',encoding='ANSI', header=False, index=False)
+        fin.to_csv(f'{file_path2}/51.rtp_k_remap_yyyymmdd.dat',encoding='ANSI', header=False, index=False)
 
     def trans_84_ex53(self,y=None, m=None):
         print("84.주요국가산업단지 산업동향, 외부통계번호 : 53")
@@ -1489,6 +1534,7 @@ class Trans:
                 print(tb(total.loc[total['IND_NM'] == '비제조', :], headers='keys', tablefmt='psql'))
             except:
                 print("except!!")
+                pass
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
             total.to_csv(f'{file_path2}/53.python_sandan_{yyyymm}25.dat', sep='|', index=False, encoding='ANSI')

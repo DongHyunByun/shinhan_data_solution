@@ -2,10 +2,11 @@
 import pandas as pd
 import os
 import shutil
+import time
 
-def add_num_20(path):
+def nubmering(path):
     '''
-    디렉토리에 있는 20일자 외부통계 파일들을 넘버링 한다.
+    PATH에 있는 외부통계 파일들을 넘버링한다.
     '''
     file_num_name = {1: "rtp_usecase_jg",
                      2: "rtp_gdhse_t_inf",
@@ -36,11 +37,19 @@ def add_num_20(path):
                      36: "rtp_hse_sz_pm",
                      38: "rtp_gsat_us",
                      39: "rtp_sz_us",
+                     41: "rtp_sigungu_us",
                      42: "rtp_gdhse_now",
                      43: "rtp_hse_ut_m",
                      44: "rtp_hse_st_m",
+                     45: "rtp_re_csi_inf",
+                     46: "rtp_hse_csi_inf",
+                     47: "rtp_ld_csi_inf",
+                     48: "rtp_hse_t_csi_inf",
+                     49: "rtp_hse_js_csi_inf",
+                     50: "rtp_sg_rtrate",
                      51: "rtp_k_remap",
                      55: "rtp_usecase_jg_index_inf",
+                     53: "ked_sandan_in",
                      56: "rtp_hyuksin_city_jg_index_inf",
                      57: "rtp_householdloan"}
 
@@ -84,9 +93,22 @@ def change_last_file(folder_path, new_name, file_type=None):
         file_type = filename.split(".")[-1]
     shutil.move(filename, os.path.join(folder_path, f"{new_name}.{file_type}"))
 
+def file_check_func(folder_path, mk_time):
+    '''
+    folder_path 경로에 가장 최근 파일 생성시간이 mk_time이후인지 체크
+    없으면 10시간 기다린 후 다시 확인한다.
+    최대 3번 반복한다.
+    '''
+    for i in range(3):
+        path = max([folder_path + "\\" + f for f in os.listdir(folder_path)], key=os.path.getctime)
+        if mk_time < os.path.getctime(path):
+            return True
+        time.sleep(10)
+    return False
+
 if __name__ == "__main__":
-    path = "C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\db"
-    add_num_20(path)
+    path = "C:\\Users\\KODATA\\Desktop\\20230430_다운로드"
+    nubmering(path)
 
 
 
