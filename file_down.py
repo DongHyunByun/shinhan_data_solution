@@ -5,6 +5,7 @@ import time
 import tqdm
 import warnings
 import sys
+import re
 
 # 크롤링
 import requests
@@ -122,8 +123,26 @@ class FileDown:
         print(f"{file_num}.산단격차율")
 
         url = "https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do" # 크롤링할 싸이트
-        # 제목에 y,m이 있는 파일을 다운로드 받아야 한다.
-        file_loc = f"{self.path}/말일/원천/5.산단격차율(지식산업센터현황).xlsx" #저장할 폴더
+        page = self.try_request(url)
+        soup = bs(page.text, "html.parser")
+
+        for row in soup.select('div.subCont>table.cellType_b.inpCell.mt10>tbody>tr')[0].select('td>p.inTxt.al'):
+            title = row.text
+
+            if  f"({y}.{m.zfill(2)}월말기준)_공장등록통계" == title:
+                p = re.compile('\(([^)]+)')
+                num = p.findall(row.a["href"])[0]
+                break
+
+        row_url = f"https://www.factoryon.go.kr/bbs/frtblRecsroomBbsDetail.do?selectBbsSn={num}"
+        row_page = self.try_request(row_url)
+        soup = bs(row_page.text, "html.parser")
+
+        down_url_last = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a["href"]
+        file_name = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a.text
+        down_url = f"https://www.factoryon.go.kr{down_url_last}"
+
+        request.urlretrieve(down_url, f"{self.path}/말일/원천/5.산단격차율_{file_name}")
 
     def filedown_8(self):
         file_num=8

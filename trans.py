@@ -65,7 +65,7 @@ class Trans:
         # self.trans_75_ex44()
         # self.trans_76_80_ex45_49()
         # self.trans_82_ex51()
-        self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2))
+        # self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2)) # todo 속도이슈, 메모리이슈
 
         # self.trans_10(*return_y_m_before_n_v2(self.d, 1))
 
