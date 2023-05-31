@@ -50,43 +50,42 @@ class FileDown:
         mkdir_dfs(self.root_path, dir_dict)
 
         # [5일자]
-        self.filedown_5(*return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_5,return_y_m_before_n(self.d, 2))
 
         # [20일자]
-        # self.try_twice(self.filedown_8)
-        # self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_52_ex21)
-        # self.try_twice(self.filedown_53_ex22)
-        # self.try_twice(self.filedown_54_ex23)
-        # self.try_twice(self.filedown_69_ex38)
-        # self.try_twice(self.filedown_73_ex42)
-        # self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_87_ex56)
-        # self.try_twice(self.filedown_88_ex57)
+        self.try_twice(self.filedown_8)
+        self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
+        self.try_twice(self.filedown_52_ex21)
+        self.try_twice(self.filedown_53_ex22)
+        self.try_twice(self.filedown_54_ex23)
+        self.try_twice(self.filedown_69_ex38)
+        self.try_twice(self.filedown_73_ex42)
+        self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
+        self.try_twice(self.filedown_87_ex56)
+        self.try_twice(self.filedown_88_ex57)
 
         # [말일자]
-        # self.try_twice(self.filedown_10)
+        self.try_twice(self.filedown_10)
 
-        # self.try_twice(self.filedown_58_ex27)
-        # self.try_twice(self.filedown_59_ex28)
-        # self.try_twice(self.filedown_60_ex29)
-        # self.try_twice(self.filedown_65_ex34)
-        # self.try_twice(self.filedown_67_ex36)
-        # self.try_twice(self.filedown_70_ex39)
-        # self.try_twice(self.filedown_72_ex41)
-        # self.try_twice(self.filedown_74_ex43)
-        # self.try_twice(self.filedown_75_ex44)
-        # self.try_twice(self.filedown_76_80_ex45_49)
-        # self.try_twice(self.filedown_82_ex51)
-        # self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
+        self.try_twice(self.filedown_58_ex27)
+        self.try_twice(self.filedown_59_ex28)
+        self.try_twice(self.filedown_60_ex29)
+        self.try_twice(self.filedown_65_ex34)
+        self.try_twice(self.filedown_67_ex36)
+        self.try_twice(self.filedown_70_ex39)
+        self.try_twice(self.filedown_72_ex41)
+        self.try_twice(self.filedown_74_ex43)
+        self.try_twice(self.filedown_75_ex44)
+        self.try_twice(self.filedown_76_80_ex45_49)
+        self.try_twice(self.filedown_82_ex51)
+        self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
         # 85_ex54. 팩토리온 등록공장현황
 
         # [나머지(to_do)]
         # 1.리얼탑 kb아파트단지매핑(sas)
         # 2.리얼탑 kb아파트평형시세매핑(sas)
         # 4.건축물신축단가관리(excel)
-        # 5.산단격차율(sas)
         # 6.토지격차율(sas)
         # 9.오피스탤 매매가격지수(python,sas)
         # 11. 리얼탑 토지특성정보(sas)
@@ -129,7 +128,7 @@ class FileDown:
         for row in soup.select('div.subCont>table.cellType_b.inpCell.mt10>tbody>tr')[0].select('td>p.inTxt.al'):
             title = row.text
 
-            if  f"({y}.{m.zfill(2)}월말기준)_공장등록통계" == title:
+            if  f"({y}.{m.zfill(2)}월말기준)_전국_지식산업센터현황" == title:
                 p = re.compile('\(([^)]+)')
                 num = p.findall(row.a["href"])[0]
                 break
@@ -1052,7 +1051,7 @@ class FileDown:
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True
         })
-        browser = webdriver.Chrome(chrome_options=chrome_options, executable_path="chromedriver.exe")
+        browser = webdriver.Chrome(chrome_options=chrome_options, executable_path="../chromedriver.exe")
         return browser
 
     def kosis_download(self,browser,type="excel"):

@@ -71,7 +71,7 @@ class Trans:
 
     def trans_5(self, yyyy, m):
         while True:
-            file_loc = f"{self.path}/말일/원천/5.산단격차율(지식산업센터현황).xlsx"
+            file_loc = f"{self.path}/말일/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
             file_path3 = f"{self.path}/말일/원천_처리후"
 
             # 엑셀 파일 읽기
@@ -1712,5 +1712,5 @@ class Trans:
         df.to_csv(f"{file_path2}/57.rtp_householdloan_yyyymmdd.dat", sep='|', index=False, header=False, encoding='ANSI')
 
 if __name__ == "__main__":
-    str_d = "202305"
+    str_d = "202306"
     trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d)
