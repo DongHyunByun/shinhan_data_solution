@@ -3,6 +3,7 @@
 
 import warnings
 import time
+import decimal
 
 from tabulate import tabulate as tb
 import re
@@ -38,7 +39,7 @@ class Trans:
         print("========== start data trasnformation ==========")
 
         # [5일]
-        self.trans_5(*return_y_m_before_n_v2(self.d, 2))
+        # self.trans_5(*return_y_m_before_n_v2(self.d, 2))
 
         # [20일자]
         # self.trans_8()
@@ -64,6 +65,7 @@ class Trans:
         # self.trans_74_ex43()
         # self.trans_75_ex44()
         # self.trans_76_80_ex45_49()
+        self.trans_81_ex50()
         # self.trans_82_ex51()
         # self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2)) # todo 속도이슈, 메모리이슈
 
@@ -1338,6 +1340,386 @@ class Trans:
 
             sy.to_csv(f'{file_path3}/{fn_2}yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
+    def trans_81_ex50(self):
+        file_num = 50
+        month_to_quater = {"2": 4, "5": 1, "8": 2, "11": 3}
+        if self.m not in month_to_quater:
+            print("수행달 아님")
+            return
+
+        print(f"81. 국토부 상가수익률, 외부통계번호 : {file_num}")
+        file_path1 = f"{self.path}/말일/원천/{file_num}.23년 {month_to_quater[self.m]}분기 상업용부동산 임대동향조사 통계표(공표용).xlsx"
+        file_path2 = f"{self.path}/말일/원천_처리후/"
+
+        pre_file = "50.rtp_sg_rtrate_20230228.txt"
+
+        context = decimal.getcontext()
+        context.rounding = decimal.ROUND_HALF_UP
+
+        def rd(num, n):
+            if num == '':
+                return ''
+            if float(num) > 0:
+                rt = str(round(float(num) + (1 / (10 ** (n + 5))), n))
+                if rt[-2:] == '.0':
+                    rt = rt[:-2]
+                elif rt[-1] == '0':
+                    rt = rt[:-1]
+                return rt
+            elif float(num) == 0:
+                return '0'
+            else:
+                rt = str(round(float(num) - (1 / (10 ** (n + 5))), n))
+                if rt[-2:] == '.0':
+                    rt = rt[:-2]
+                elif rt[-1] == '0':
+                    rt = rt[:-1]
+                return rt
+
+        # 상권구분코드 매핑키 데이터 불러오기
+        key = pd.read_csv(f'{self.refer_path}/매핑키.dat', sep='|', dtype='str', encoding='ANSI').fillna('')
+
+        # 지역상권명 데이터 만들기
+        jiyok_key = pd.DataFrame({'지역상권명': []})
+
+        # 평균임대금액
+        sheets = ['105', '204', '304', '404']
+        df_loan = pd.DataFrame({'분기': [], '상가건물유형구분CODE': [], '지역구분(1)': [], '지역구분(2)': [], '지역CODE': [], '항목': [], '값': []})
+        for i in range(4):
+            df = pd.read_excel(file_path1, sheet_name=sheets[i], header=3, dtype='str')
+
+            # 결측값은 공백으로 삽입
+            df.fillna('', inplace=True)
+
+            # 컬럼명 yyyymm 꼴로 변경
+            df.columns = [item.replace('.', '0') for item in list(df.columns)]
+            df.columns = [item.replace('Q', '') for item in list(df.columns)]
+
+            # 분기로 이루어진 컬럼을 분기 컬럼으로 변환
+            # |202202|202203|   |분기  |값  |
+            # |값1   |값2   | > |202202|값1 |
+            #                   |202203|값2 |
+            df.set_index(['지역구분(1)', '지역구분(2)', '지역CODE', '항목'], inplace=True)
+            df = df.stack().reset_index().sort_values(by=['level_4', '지역CODE'], ascending=[False, True])
+            df.columns = ['지역구분(1)', '지역구분(2)', '지역CODE', '항목', '분기', '값']
+
+            # 상가건물유형구분코드 삽입
+            df.insert(1, '상가건물유형구분CODE', str(i + 1))
+            df = df.reset_index().iloc[:, 1:]
+
+            # 데이터 결합
+            df_loan = pd.concat([df_loan, df])
+
+        # df_loan2로 백업 후 작업
+        df_loan2 = df_loan.copy()
+
+        # 지역구분(1, 2) 활용 지역상권명 만들기
+        # 지역구분(2)에서 합계와 소계만 빈칸인 값을 지역구분2로 할당
+        df_loan2.insert(3, '지역구분2', df_loan2['지역구분(2)'].apply(lambda x: re.sub('합계|소계', '', x)))
+
+        # 괄호가 들어가있는 값만 남기기 (도심지역)과 같이 광역상권명을 남기기 위함
+        tf = (df_loan2['지역구분2'].str.contains('\('))
+        ft = tf.apply(lambda x: not x)
+        df_loan2.loc[ft, '지역구분2'] = ''
+
+        # 괄호 및 지역 제거   ex) (강남지역) > 강남
+        df_loan2.loc[tf, '지역구분2'] = df_loan2.loc[tf, '지역구분2'].apply(lambda x: re.sub('지역|[()]', '', x))
+
+        # 순서에 맞게 정렬 후 인덱스 초기화
+        df_loan2.sort_values(by=['상가건물유형구분CODE', '분기', '지역CODE'], ascending=[True, False, True], inplace=True)
+        df_loan2 = df_loan2.reset_index().iloc[:, 1:]
+
+        # 서울지역만 상위 광역상권명으로 채워넣기
+        jiyok = df_loan2.loc[(df_loan2['지역구분(1)'] == '서울') & (df_loan2['지역구분(2)'] != '계'), '지역구분2'].reset_index()
+        jiyok.loc[jiyok['지역구분2'] == '', '지역구분2'] = np.nan
+        jiyok['지역구분2'].fillna(method='ffill', inplace=True)
+        jiyok.set_index('index', inplace=True)
+        df_loan2.loc[(df_loan2['지역구분(1)'] == '서울') & (df_loan2['지역구분(2)'] != '계'), '지역구분2'] = jiyok['지역구분2']
+
+        # 지역구분(2)에 계, 합계, (~지역)을 전체로 변경
+        df_loan2['지역구분(2)'].replace({'계': '전체', '합계': '전체'}, inplace=True)
+        df_loan2.loc[df_loan2['지역구분(2)'].str.contains('\('), '지역구분(2)'] = '전체'
+
+        # 지역상권명 만들어주기
+        df_loan2['지역상권명'] = df_loan2['지역구분(1)'] + ' ' + df_loan2['지역구분2'] + ' ' + df_loan2['지역구분(2)']
+
+        jiyok_key = pd.concat([jiyok_key, df_loan2['지역상권명'].drop_duplicates().reset_index()[['지역상권명']]],ignore_index=True)
+
+        # 키값으로 결합
+        df_loan = pd.merge(key, df_loan2, how='outer', on='지역상권명')
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['값']
+        df_loan = df_loan[col]
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['평균임대금액']
+        df_loan.columns = col
+        df_loan['평균임대금액'] = df_loan['평균임대금액'].apply(lambda x: rd(x, 2))
+        df_loan.sort_values(by=['분기', '상가건물유형구분CODE', '지역상권구분CODE'], ascending=[False, True, True], inplace=True)
+
+        # 임대가격지수
+        sheets = ['102', '202', '302', '402']
+        df_price = pd.DataFrame(
+            {'분기': [], '상가건물유형구분CODE': [], '지역구분(1)': [], '지역구분(2)': [], '지역CODE': [], '항목': [], '값': []})
+        for i in range(4):
+            df = pd.read_excel(file_path1, sheet_name=sheets[i], header=3, dtype='str')
+
+            # 결측값은 공백으로 삽입
+            df.fillna('', inplace=True)
+
+            # 컬럼명 yyyymm 꼴로 변경
+            df.columns = [item.replace('.', '0') for item in list(df.columns)]
+            df.columns = [item.replace('Q', '') for item in list(df.columns)]
+
+            # 분기로 이루어진 컬럼을 분기 컬럼으로 변환
+            # |202202|202203|   |분기  |값  |
+            # |값1   |값2   | > |202202|값1 |
+            #                   |202203|값2 |
+            df.set_index(['지역구분(1)', '지역구분(2)', '지역CODE', '항목'], inplace=True)
+            df = df.stack().reset_index().sort_values(by=['level_4', '지역CODE'], ascending=[False, True])
+            df.columns = ['지역구분(1)', '지역구분(2)', '지역CODE', '항목', '분기', '값']
+
+            # 상가건물유형구분코드 삽입
+            df.insert(0, '상가건물유형구분CODE', str(i + 1))
+
+            # 데이터 결합
+            df_price = pd.concat([df_price, df])
+
+        # df_price2로 백업 후 작업
+        df_price2 = df_price.copy()
+
+        # 지역구분(1, 2) 활용 지역상권명 만들기
+        # 지역구분(2)에서 합계와 소계만 빈칸인 값을 지역구분2로 할당
+        df_price2.insert(3, '지역구분2', df_price2['지역구분(2)'].apply(lambda x: re.sub('합계|소계', '', x)))
+
+        # 괄호가 들어가있는 값만 남기기 (도심지역)과 같이 광역상권명을 남기기 위함
+        tf = (df_price2['지역구분2'].str.contains('\('))
+        ft = tf.apply(lambda x: not x)
+        df_price2.loc[ft, '지역구분2'] = ''
+
+        # 괄호 및 지역 제거   ex) (강남지역) > 강남
+        df_price2.loc[tf, '지역구분2'] = df_price2.loc[tf, '지역구분2'].apply(lambda x: re.sub('지역|[()]', '', x))
+
+        # 순서에 맞게 정렬 후 인덱스 초기화
+        df_price2.sort_values(by=['상가건물유형구분CODE', '분기', '지역CODE'], ascending=[True, False, True], inplace=True)
+        df_price2 = df_price2.reset_index().iloc[:, 1:]
+
+        # 서울지역만 상위 광역상권명으로 채워넣기
+        jiyok = df_price2.loc[(df_price2['지역구분(1)'] == '서울') & (df_price2['지역구분(2)'] != '계'), '지역구분2'].reset_index()
+        jiyok.loc[jiyok['지역구분2'] == '', '지역구분2'] = np.nan
+        jiyok['지역구분2'].fillna(method='ffill', inplace=True)
+        jiyok.set_index('index', inplace=True)
+        df_price2.loc[(df_price2['지역구분(1)'] == '서울') & (df_price2['지역구분(2)'] != '계'), '지역구분2'] = jiyok['지역구분2']
+
+        # 지역구분(2)에 계, 합계, (~지역)을 전체로 변경
+        df_price2['지역구분(2)'].replace({'계': '전체', '합계': '전체'}, inplace=True)
+        df_price2.loc[df_price2['지역구분(2)'].str.contains('\('), '지역구분(2)'] = '전체'
+
+        # 지역상권명 만들어주기
+        df_price2['지역상권명'] = df_price2['지역구분(1)'] + ' ' + df_price2['지역구분2'] + ' ' + df_price2['지역구분(2)']
+
+        jiyok_key = pd.concat([jiyok_key, df_price2['지역상권명'].drop_duplicates().reset_index()[['지역상권명']]], ignore_index=True)
+
+        # 키값으로 결합
+        df_price = pd.merge(key, df_price2, how='outer', on='지역상권명')
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['값']
+        df_price = df_price[col]
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['임대가격지수']
+        df_price.columns = col
+        df_price.sort_values(by=['분기', '상가건물유형구분CODE', '지역상권구분CODE'], ascending=[False, True, True], inplace=True)
+
+        # 공실률
+        sheets = ['103', '203', '303', '403']
+        df_empty = pd.DataFrame({'분기': [], '상가건물유형구분CODE': [], '지역구분(1)': [], '지역구분(2)': [], '지역CODE': [], '항목': [], '값': []})
+        for i in range(4):
+            df = pd.read_excel(file_path1,sheet_name=sheets[i], header=3, dtype='str')
+
+            # 결측값은 공백으로 삽입
+            df.fillna('', inplace=True)
+
+            # 컬럼명 yyyymm 꼴로 변경
+            df.columns = [item.replace('.', '0') for item in list(df.columns)]
+            df.columns = [item.replace('Q', '') for item in list(df.columns)]
+
+            # 컬럼명 yyyymm 꼴로 변경
+            df.columns = [item.replace('.', '0') for item in list(df.columns)]
+            df.columns = [item.replace('Q', '') for item in list(df.columns)]
+
+            # 분기로 이루어진 컬럼을 분기 컬럼으로 변환
+            # |202202|202203|   |분기  |값  |
+            # |값1   |값2   | > |202202|값1 |
+            #                   |202203|값2 |
+            df.set_index(['지역구분(1)', '지역구분(2)', '지역CODE', '항목'], inplace=True)
+            df = df.stack().reset_index().sort_values(by=['level_4', '지역CODE'], ascending=[False, True])
+            df.columns = ['지역구분(1)', '지역구분(2)', '지역CODE', '항목', '분기', '값']
+
+            # 상가건물유형구분코드 삽입
+            df.insert(0, '상가건물유형구분CODE', str(i + 1))
+
+            # 데이터 결합
+            df_empty = pd.concat([df_empty, df])
+
+        # df_empty2로 백업 후 작업
+        df_empty2 = df_empty.copy()
+
+        # 지역구분(1, 2) 활용 지역상권명 만들기
+        # 지역구분(2)에서 합계와 소계만 빈칸인 값을 지역구분2로 할당
+        df_empty2.insert(3, '지역구분2', df_empty2['지역구분(2)'].apply(lambda x: re.sub('합계|소계', '', x)))
+
+        # 괄호가 들어가있는 값만 남기기 (도심지역)과 같이 광역상권명을 남기기 위함
+        tf = (df_empty2['지역구분2'].str.contains('\('))
+        ft = tf.apply(lambda x: not x)
+        df_empty2.loc[ft, '지역구분2'] = ''
+
+        # 괄호 및 지역 제거   ex) (강남지역) > 강남
+        df_empty2.loc[tf, '지역구분2'] = df_empty2.loc[tf, '지역구분2'].apply(lambda x: re.sub('지역|[()]', '', x))
+
+        # 순서에 맞게 정렬 후 인덱스 초기화
+        df_empty2.sort_values(by=['상가건물유형구분CODE', '분기', '지역CODE'], ascending=[True, False, True], inplace=True)
+        df_empty2 = df_empty2.reset_index().iloc[:, 1:]
+
+        # 서울지역만 상위 광역상권명으로 채워넣기
+        jiyok = df_empty2.loc[(df_empty2['지역구분(1)'] == '서울') & (df_empty2['지역구분(2)'] != '계'), '지역구분2'].reset_index()
+        jiyok.loc[jiyok['지역구분2'] == '', '지역구분2'] = np.nan
+        jiyok['지역구분2'].fillna(method='ffill', inplace=True)
+        jiyok.set_index('index', inplace=True)
+        df_empty2.loc[(df_empty2['지역구분(1)'] == '서울') & (df_empty2['지역구분(2)'] != '계'), '지역구분2'] = jiyok['지역구분2']
+
+        # 지역구분(2)에 계, 합계, (~지역)을 전체로 변경
+        df_empty2['지역구분(2)'].replace({'계': '전체', '합계': '전체'}, inplace=True)
+        df_empty2.loc[df_empty2['지역구분(2)'].str.contains('\('), '지역구분(2)'] = '전체'
+
+        # 지역상권명 만들어주기
+        df_empty2['지역상권명'] = df_empty2['지역구분(1)'] + ' ' + df_empty2['지역구분2'] + ' ' + df_empty2['지역구분(2)']
+
+        jiyok_key = pd.concat([jiyok_key, df_price2['지역상권명'].drop_duplicates().reset_index()[['지역상권명']]], ignore_index=True)
+
+        # 키값으로 결합
+        df_empty = pd.merge(key, df_empty2, how='outer', on='지역상권명')
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['값']
+        df_empty = df_empty[col]
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['공실률']
+        df_empty.columns = col
+        df_empty.sort_values(by=['분기', '상가건물유형구분CODE', '지역상권구분CODE'], ascending=[False, True, True], inplace=True)
+
+        # 수익률
+        sheets = ['114', '208', '308', '408']
+        df_rev = pd.DataFrame(
+            {'분기': [], '상가건물유형구분CODE': [], '지역구분(1)': [], '지역구분(2)': [], '지역CODE': [], '소득수익률(%)': [], '자본수익률(%)': [],
+             '투자수익률(%)': []})
+        for i in range(4):
+            df = pd.read_excel(file_path1, sheet_name=sheets[i], header=3, dtype='str')
+
+            # 결측값은 공백으로 삽입
+            df.fillna('', inplace=True)
+
+            # 컬럼명 yyyymm 꼴로 변경
+            df.columns = [item.replace('.', '0') for item in list(df.columns)]
+            df.columns = [item.replace('Q', '') for item in list(df.columns)]
+            colnm = []
+            j = 0
+            for item in list(df.columns):
+                if item[:8] == 'Unnamed:':
+                    if j == 0:
+                        colnm.append('항목CODE')
+                        j += 1
+                    else:
+                        colnm.append('상세코드')
+                else:
+                    colnm.append(item)
+            df.columns = colnm
+
+            df.set_index(['지역구분(1)', '지역구분(2)', '지역CODE', '상세코드', '항목', '항목CODE'], inplace=True)
+            df = df.stack().reset_index().sort_values(by=['level_6', '지역CODE', '항목'], ascending=[False, True, True])
+            df.columns = ['지역구분(1)', '지역구분(2)', '지역CODE', '상세코드', '항목', '항목CODE', '분기', '값']
+
+            # 상가건물유형구분코드 삽입
+            df.insert(0, '상가건물유형구분CODE', str(i + 1))
+            df = df[['상가건물유형구분CODE', '지역구분(1)', '지역구분(2)', '지역CODE', '항목', '분기', '값']]
+            df = df.pivot(index=['상가건물유형구분CODE', '지역구분(1)', '지역구분(2)', '지역CODE', '분기'], columns='항목',
+                          values='값').reset_index()
+
+            # 데이터 결합
+            df_rev = pd.concat([df_rev, df])
+
+        # df_rev2로 백업 후 작업
+        df_rev2 = df_rev.copy()
+
+        # 지역구분(1, 2) 활용 지역상권명 만들기
+        # 지역구분(2)에서 합계와 소계만 빈칸인 값을 지역구분2로 할당
+        df_rev2.insert(3, '지역구분2', df_rev2['지역구분(2)'].apply(lambda x: re.sub('합계|소계', '', x)))
+
+        # 괄호가 들어가있는 값만 남기기 (도심지역)과 같이 광역상권명을 남기기 위함
+        tf = (df_rev2['지역구분2'].str.contains('\('))
+        ft = tf.apply(lambda x: not x)
+        df_rev2.loc[ft, '지역구분2'] = ''
+
+        # 괄호 및 지역 제거   ex) (강남지역) > 강남
+        df_rev2.loc[tf, '지역구분2'] = df_rev2.loc[tf, '지역구분2'].apply(lambda x: re.sub('지역|[()]', '', x))
+
+        # 순서에 맞게 정렬 후 인덱스 초기화
+        df_rev2.sort_values(by=['상가건물유형구분CODE', '분기', '지역CODE'], ascending=[True, False, True], inplace=True)
+        df_rev2 = df_rev2.reset_index().iloc[:, 1:]
+
+        # 서울지역만 상위 광역상권명으로 채워넣기
+        jiyok = df_rev2.loc[(df_rev2['지역구분(1)'] == '서울') & (df_rev2['지역구분(2)'] != '계'), '지역구분2'].reset_index()
+        jiyok.loc[jiyok['지역구분2'] == '', '지역구분2'] = np.nan
+        jiyok['지역구분2'].fillna(method='ffill', inplace=True)
+        jiyok.set_index('index', inplace=True)
+        df_rev2.loc[(df_rev2['지역구분(1)'] == '서울') & (df_rev2['지역구분(2)'] != '계'), '지역구분2'] = jiyok['지역구분2']
+
+        # 지역구분(2)에 계, 합계, (~지역)을 전체로 변경
+        df_rev2['지역구분(2)'].replace({'계': '전체', '합계': '전체'}, inplace=True)
+        df_rev2.loc[df_rev2['지역구분(2)'].str.contains('\('), '지역구분(2)'] = '전체'
+
+        # 지역상권명 만들어주기
+        df_rev2['지역상권명'] = df_rev2['지역구분(1)'] + ' ' + df_rev2['지역구분2'] + ' ' + df_rev2['지역구분(2)']
+
+        jiyok_key = pd.concat([jiyok_key, df_price2['지역상권명'].drop_duplicates().reset_index()[['지역상권명']]],
+                              ignore_index=True)
+
+        # 키값으로 결합
+        df_rev = pd.merge(key, df_rev2, how='outer', on='지역상권명')
+        col = ['분기', '상가건물유형구분CODE'] + list(key.columns)[:-2] + ['투자수익률(%)', '자본수익률(%)', '소득수익률(%)']
+        df_rev = df_rev[col]
+        df_rev.sort_values(by=['분기', '상가건물유형구분CODE', '지역상권구분CODE'], ascending=[False, True, True], inplace=True)
+
+        df_fin = pd.merge(df_loan, df_price, how='outer', on=['분기', '상가건물유형구분CODE', '지역상권구분CODE', '상권시도구분CODE',
+                                                              '광역상권구분CODE', '하위상권구분CODE', '지역상권명', '상권시도명',
+                                                              '광역상권명', '하위상권명', '시군구CODE', '합계행여부'])
+        df_fin = pd.merge(df_fin, df_empty, how='outer', on=['분기', '상가건물유형구분CODE', '지역상권구분CODE', '상권시도구분CODE',
+                                                             '광역상권구분CODE', '하위상권구분CODE', '지역상권명', '상권시도명',
+                                                             '광역상권명', '하위상권명', '시군구CODE', '합계행여부'])
+        df_fin = pd.merge(df_fin, df_rev, how='outer', on=['분기', '상가건물유형구분CODE', '지역상권구분CODE', '상권시도구분CODE',
+                                                           '광역상권구분CODE', '하위상권구분CODE', '지역상권명', '상권시도명',
+                                                           '광역상권명', '하위상권명', '시군구CODE', '합계행여부'])
+        df_fin.fillna('', inplace=True)
+
+        # 정수의 경우 끝자리가 .0인 부분 해결
+        for nm in df_fin.columns[-6:]:
+            df_fin[nm] = df_fin[nm].apply(lambda x: rd(x, 10))
+
+        # 지수기준년월 생성
+        df_fin['지수기준일'] = df_fin['분기']
+
+        df_fin.loc[(df_fin['지역상권명'] == '경남  통영 강구안') & (df_fin['분기'].apply(lambda x: x in ('202203', '202202'))), :]
+
+        # 이전 파일 호출
+        bf_df = pd.read_csv(f'{self.refer_path}\\{pre_file}', sep='|', header=None,dtype='str', names=list(df_fin.columns), encoding='ANSI')
+        bf_df.fillna('', inplace=True)
+
+        # 지역상권코드 중복 제거
+        jiyok_key.drop_duplicates(inplace=True)
+
+        # 지역상권명 추가된 값이 있는지 확인 및 데이터 저장
+        if (set(jiyok_key['지역상권명']) - set(bf_df['지역상권명'])) == set():
+            clnm = ['분기', '상가건물유형구분CODE', '지역상권구분CODE', '상권시도구분CODE', '광역상권구분CODE', '하위상권구분CODE',
+                    '지역상권명', '상권시도명', '광역상권명', '하위상권명', '시군구CODE', '합계행여부']
+            df_fin2 = pd.merge(bf_df[clnm], df_fin, how='left', on=clnm)
+        else:
+            print('키값 추가 필요')
+
+        df_fin3 = pd.concat([df_fin.loc[df_fin['분기'] == max(df_fin['분기']), :], df_fin2], axis=0, ignore_index=False)
+
+        df_fin3.to_csv(f'{file_path2}/50.rtp_sg_rtrate_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
+
     def trans_82_ex51(self):
         pd.options.display.float_format = '{:.15f}'.format
 
@@ -1712,5 +2094,5 @@ class Trans:
         df.to_csv(f"{file_path2}/57.rtp_householdloan_yyyymmdd.dat", sep='|', index=False, header=False, encoding='ANSI')
 
 if __name__ == "__main__":
-    str_d = "202306"
+    str_d = "202305"
     trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d)

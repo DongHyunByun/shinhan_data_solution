@@ -50,37 +50,40 @@ class FileDown:
         mkdir_dfs(self.root_path, dir_dict)
 
         # [5일자]
-        self.try_twice(self.filedown_5,return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_5,return_y_m_before_n(self.d, 2))
 
         # [20일자]
-        self.try_twice(self.filedown_8)
-        self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
-        self.try_twice(self.filedown_52_ex21)
-        self.try_twice(self.filedown_53_ex22)
-        self.try_twice(self.filedown_54_ex23)
-        self.try_twice(self.filedown_69_ex38)
-        self.try_twice(self.filedown_73_ex42)
-        self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
-        self.try_twice(self.filedown_87_ex56)
-        self.try_twice(self.filedown_88_ex57)
-
-        # [말일자]
-        self.try_twice(self.filedown_10)
-
-        self.try_twice(self.filedown_58_ex27)
-        self.try_twice(self.filedown_59_ex28)
-        self.try_twice(self.filedown_60_ex29)
-        self.try_twice(self.filedown_65_ex34)
-        self.try_twice(self.filedown_67_ex36)
-        self.try_twice(self.filedown_70_ex39)
-        self.try_twice(self.filedown_72_ex41)
-        self.try_twice(self.filedown_74_ex43)
-        self.try_twice(self.filedown_75_ex44)
-        self.try_twice(self.filedown_76_80_ex45_49)
-        self.try_twice(self.filedown_82_ex51)
-        self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
+        # self.try_twice(self.filedown_8)
+        # self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
+        # self.try_twice(self.filedown_52_ex21)
+        # self.try_twice(self.filedown_53_ex22)
+        # self.try_twice(self.filedown_54_ex23)
+        # self.try_twice(self.filedown_69_ex38)
+        # self.try_twice(self.filedown_73_ex42)
+        # self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
+        # self.try_twice(self.filedown_87_ex56)
+        # self.try_twice(self.filedown_88_ex57)
+        #
+        # # [말일자]
+        # self.try_twice(self.filedown_10)
+        #
+        # self.try_twice(self.filedown_58_ex27)
+        # self.try_twice(self.filedown_59_ex28)
+        # self.try_twice(self.filedown_60_ex29)
+        # self.try_twice(self.filedown_65_ex34)
+        # self.try_twice(self.filedown_67_ex36)
+        # self.try_twice(self.filedown_70_ex39)
+        # self.try_twice(self.filedown_72_ex41)
+        # self.try_twice(self.filedown_74_ex43)
+        # self.try_twice(self.filedown_75_ex44)
+        # self.try_twice(self.filedown_76_80_ex45_49)
+        # self.try_twice(self.filedown_82_ex51)
+        # self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
         # 85_ex54. 팩토리온 등록공장현황
+
+        # 분기별
+        self.filedown_81_ex50() # 분기(2월말, 5월말, 8월말, 11월말)
 
         # [나머지(to_do)]
         # 1.리얼탑 kb아파트단지매핑(sas)
@@ -99,7 +102,6 @@ class FileDown:
         # 66. 주택건설실적총괄
         # 68. 지역별 주택건설 인허가 실정
         # 71. 미분양현황종합
-        # 81. 국토부 상가 수일률
         # 83. 전국산업단지현황통계
 
     def try_twice(self,func,param=(),n=3):
@@ -869,6 +871,39 @@ class FileDown:
         # 다운로드
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
+
+    def filedown_81_ex50(self):
+        '''
+         2월 : (작년)4분기
+         5월 : 1분기
+         8월 : 2분기
+        11월 : 3분기
+        '''
+        file_num = "50"
+        print(f"81.국토부 상가수익률, 외부통계 번호 : {file_num}")
+        month_to_quater = {"2":4,"5":1,"8":2,"11":3}
+
+        folder_path = f"{self.path}/말일/원천"
+        page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=RCS')
+        soup = bs(page.text, "html.parser")
+
+        # 파일다운로드
+        for a in soup.select('tr>td>a.nttInfoBtn'):
+            if "상업용부동산 임대동향조사" in a.text and f"{month_to_quater[self.m]}분기" in a.text:
+                post_id = a["data-id"]
+                down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보시스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&searchCate=LFR&listCo=10&searchType=sj"
+                files = self.try_request(down_file_response).json()["nttFileList"]
+                for file in files:
+                    if "상업용부동산 임대동향조사 통계표(공표용)" in file["fileNm"]:
+                        file_name = file["fileNm"]
+                        file_type = file_name.split('.')[-1]
+                        down_key = file["dwldUrl"]
+                        down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
+                        break
+
+                request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_name}")
+                break
+
 
     def filedown_82_ex51(self):
         file_num = "51"
