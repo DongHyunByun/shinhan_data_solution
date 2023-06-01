@@ -54,6 +54,7 @@ class FileDown:
 
         # [20일자]
         # self.try_twice(self.filedown_8)
+        self.try_twice(self.filedown_9,return_y_m_before_n(self.d, 2))
         # self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
         # self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
         # self.try_twice(self.filedown_52_ex21)
@@ -83,14 +84,14 @@ class FileDown:
         # 85_ex54. 팩토리온 등록공장현황
 
         # 분기별
-        self.filedown_81_ex50() # 분기(2월말, 5월말, 8월말, 11월말)
+        # self.filedown_81_ex50() # 분기(2월말, 5월말, 8월말, 11월말)
 
         # [나머지(to_do)]
-        # 1.리얼탑 kb아파트단지매핑(sas)
-        # 2.리얼탑 kb아파트평형시세매핑(sas)
-        # 4.건축물신축단가관리(excel)
-        # 6.토지격차율(sas)
-        # 9.오피스탤 매매가격지수(python,sas)
+        #  1. 리얼탑 kb아파트단지매핑(sas)
+        #  2. 리얼탑 kb아파트평형시세매핑(sas)
+        #  4. 건축물신축단가관리(excel)
+        #  6. 토지격차율(sas)
+        #  9. 오피스탤 매매가격지수(python,sas)
         # 11. 리얼탑 토지특성정보(sas)
         # 55. 면적별 건축물현황
         # 56. 용도별 건축물현황
@@ -194,6 +195,47 @@ class FileDown:
             for file_name, url in name_url_dict.items():
                 print(file_name)
                 request.urlretrieve(url, f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}/{file_name}")
+
+    def filedown_9(self, y, m):
+        print(f"9.오피스탤 매매가격지수")
+        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=OFST"
+
+        folder_path = f"{self.path}/20일/원천"
+        page = self.try_request(url)
+        soup = bs(page.text, "html.parser")
+
+        # 날짜
+        if y and m:
+            y = f"{y}년"
+            m = f"{m}월"
+
+            # 파일다운로드
+            for a in soup.select('tr>td>a.nttInfoBtn'):
+                if (y in a.text) and (m in a.text):
+                    post_id = a["data-id"]
+                    down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
+
+                    file_list = self.try_request(down_file_response).json()["nttFileList"]
+                    for file in file_list:
+                        if "xlsx" in file["fileNm"]:
+                            file_name = file["fileNm"]
+                            file_type = file_name.split('.')[-1]
+                            down_key = file["dwldUrl"]
+                            down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
+                            break
+                    request.urlretrieve(down_url, f"{folder_path}/9.{file_name}")
+        # else:
+        #     post_id = soup.select('tr>td>a.nttInfoBtn')[0]["data-id"]
+        #     down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
+        #
+        #     file = self.try_request(down_file_response).json()["nttFileList"][1]
+        #
+        #     file_name = file["fileNm"]
+        #     file_type = file_name.split('.')[-1]
+        #     down_key = file["dwldUrl"]
+        #     down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
+        #
+        #     request.urlretrieve(down_url, f"{folder_path}/9.{file_name}")
 
     def filedown_10(self,y=None,m=None):
         print(f"10.용도지역별 지가지수")
@@ -1075,8 +1117,6 @@ class FileDown:
         # 다운로드
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
-
-
 
     def kosis_init_broswer(self,folder_path):
         chrome_options = webdriver.ChromeOptions()

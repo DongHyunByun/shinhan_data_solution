@@ -5,6 +5,8 @@ import warnings
 import time
 import decimal
 
+import pandas as pd
+
 from tabulate import tabulate as tb
 import re
 import numpy as np
@@ -43,6 +45,7 @@ class Trans:
 
         # [20일자]
         # self.trans_8()
+        self.trans_9(*return_y_m_before_n_v2(self.d, 2))
         # self.trans_32_ex1()
         # self.trans_33_51_ex2_20()
         # self.trans_52_ex21()
@@ -65,7 +68,7 @@ class Trans:
         # self.trans_74_ex43()
         # self.trans_75_ex44()
         # self.trans_76_80_ex45_49()
-        self.trans_81_ex50()
+        # self.trans_81_ex50()
         # self.trans_82_ex51()
         # self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2)) # todo 속도이슈, 메모리이슈
 
@@ -161,6 +164,122 @@ class Trans:
                 print(tabulate(jutec.head(20), headers='keys', tablefmt='psql'))
                 jutec.to_csv(f'{file_path3}/{jutec_type[i]}_{class_alpha[j]}.csv', index=False, encoding='ANSI')
                 print('')
+
+    def trans_9(self,y,m):
+        print(f"9.오피스탤 매매가격지수")
+        pd.options.display.float_format = '{:.20f}'.format
+
+        while True:
+            file_loc = f"{self.path}/20일/원천/9.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
+            file_path3 = f"{self.path}/말일/원천_처리후/9.op_jisu_20211116.csv"
+
+            cnt1_11 = int(input('1_11 시트의 데이터 개수를 입력해주세요 ex) 17 : '))
+            cnt2_11 = int(input('2_11 시트의 데이터 개수를 입력해주세요 ex) 66 : '))
+
+            date = self.str_d
+
+            date += '01'
+            # 파일 불러오기 1_11 Sheet
+            opi_1 = pd.read_excel(file_loc, header=5, dtype='object', sheet_name='1_11', engine="openpyxl")
+
+            # 파일 불러오기 2_11 Sheet
+            opi_2 = pd.read_excel(file_loc, header=5, dtype='object', sheet_name='2_11', engine="openpyxl")
+
+            opi_1 = opi_1.iloc[:, [0, 1, 2, -1]]
+            opi_2 = opi_2.iloc[:, [0, 1, 2, 3, -1]]
+
+            # 데이터 적재 성공 확인
+            if cnt1_11 == len(opi_1):
+                print()
+                print('1_11 sheet 데이터 ' + str(cnt1_11) + '개 모두 적재 완료')
+            else:
+                print('!!!!!!!! 1_11 sheet 데이터 적재 실패. 코드 확인 요망 !!!!!!!!')
+                break
+
+            if cnt2_11 == len(opi_2):
+                print()
+                print('2_11 sheet 데이터 ' + str(cnt2_11) + '개 모두 적재 완료')
+            else:
+                print('!!!!!!!! 2_11 sheet 데이터 적재 실패. 코드 확인 요망 !!!!!!!!')
+                break
+
+            opi_1.columns = ['a1', 'a2', 'a3', 'value']
+            opi_1['class2'] = '전체'
+            opi_2.columns = ['a1', 'a2', 'a3', 'class2', 'value']
+
+            print()
+            print('↓↓↓↓ 데이터가 잘 들어갔는지 확인 ↓↓↓↓')
+            print()
+            print('class2에 전체가 들어가 있어야 함')
+            print(tabulate(opi_1[['a1', 'a2', 'a3', 'class2', 'value']].head(), headers='keys', tablefmt='psql'))
+            print()
+            print('class2에 규모가 들어가 있어야 함')
+            print(tabulate(opi_2[['a1', 'a2', 'a3', 'class2', 'value']].head(), headers='keys', tablefmt='psql'))
+
+            # 1_11, 2_11 sheet 결합 및 결합 확인
+            opi = pd.concat([opi_1[['a1', 'a2', 'a3', 'class2', 'value']], opi_2[['a1', 'a2', 'a3', 'class2', 'value']]], ignore_index=True)
+            opi['date'] = date
+
+            # class2에서 sas와 코드 일치시키기
+            opi.loc[:, 'class2'] = opi.loc[:, 'class2'].apply(lambda x: re.sub(' ', '', x))
+            opi.loc[:, 'class2'] = opi.loc[:, 'class2'].apply(lambda x: re.sub('㎡', '', x))
+            opi.loc[:, 'class2'] = opi.loc[:, 'class2'].apply(lambda x: re.sub('초과', '㎡초과 ', x))
+            opi.loc[:, 'class2'] = opi.loc[:, 'class2'].apply(lambda x: re.sub('이하', '㎡이하', x))
+            print()
+            print('합친 데이터 확인 class2 규모가 띄워쓰기 문제 없이 들어가 있는지 확인')
+            print(tabulate(opi.tail(), headers='keys', tablefmt='psql'))
+
+            print()
+            if len(opi_1) + len(opi_2) == len(opi):
+                print('1_11, 2_11 sheet 데이터 총 ' + str(len(opi)) + '개 결합 완료')
+            else:
+                print('!!!!!!!! 1_11, 2_11 sheet 결합 실패. 코드 확인 요망 !!!!!!!!')
+                break
+
+            # class1 데이터 생성
+
+            class1 = []
+            for i in range(len(opi)):
+                if opi['a3'].iloc[i] != '계':
+                    class1.append(opi['a3'].iloc[i])
+                else:
+                    if opi['a2'].iloc[i] != '계':
+                        class1.append(opi['a2'].iloc[i])
+                    else:
+                        class1.append(opi['a1'].iloc[i])
+
+            opi = pd.concat([opi, pd.DataFrame({'class1': class1})], axis=1)
+            opi = opi[['a1', 'a2', 'a3', 'class1', 'class2', 'date', 'value']]
+
+            # class1 확인
+            print()
+            print('class1이 적절히 들어갔는지 확인! 3 > 2 > 1 순으로 계가 아닌 값이 들어가 있어야함')
+            print(tabulate(opi[['a1', 'a2', 'a3', 'class1']].drop_duplicates(), headers='keys', tablefmt='psql'))
+
+            ch = input('문제가 없다면 y, 문제가 있다면 n을 입력 후 코드 확인 요망! : ').lower()
+            if ch == 'n':
+                break
+
+            print()
+            # 전월 개수와 현재 개수가 일치하는지 확인
+            m_cnt = pd.read_csv(f'{self.refer_path}/오피스텔_매매지수_데이터수.csv', encoding='ANSI')
+            if m_cnt['개수'].iloc[-1] != len(opi):
+                print('전월 ' + str(m_cnt['작업월'].iloc[-1]) + ' ' + str(m_cnt['개수'].iloc[-1]) + '개와 이번월 ' + str(date) + ' ' + str(len(opi)) + '개가 일치하지 않습니다.')
+                print('값이 다른 원인 확인이 필요합니다.')
+            else:
+                print('전월 ' + str(m_cnt['작업월'].iloc[-1]) + ' 과 이번월 ' + str(date) + '는 데이터 수가 일치합니다.')
+            print()
+
+            if int(date) not in list(m_cnt["작업월"]):
+                new_cnt = pd.DataFrame({'작업월': [date], '개수': [len(opi)]})
+                pd.concat([m_cnt, new_cnt], ignore_index=True).to_csv(f'{self.refer_path}/오피스텔_매매지수_데이터수.csv',encoding='ANSI', index=False)
+
+
+            print()
+            opi.to_csv(file_path3, sep='|', index=False, encoding='ANSI')
+
+            print('작업 완료')
+            break
 
     def trans_10(self,y,m):
         print(f"10.용도지역별 지가지수")
