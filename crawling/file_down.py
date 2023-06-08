@@ -26,6 +26,7 @@ from urllib import request,parse
 # 링커
 from datetime_func import *
 from file_sys_func import *
+from run_month import *
 
 warnings.filterwarnings(action='ignore')
 class FileDown:
@@ -43,67 +44,75 @@ class FileDown:
         self.y = str_d[:4]
         self.m = str_d[5:].lstrip('0')
 
-        dir_dict = {str_d : {"20일": {"원천":None, "원천_처리후":None},
-                             "말일": {"원천":None, "원천_처리후":None},
-                             "kb단지":{"원천":None, "원천_처리후":None}}
+        self.func_dict={"1"    : [],#리얼탑KB아파트단지매핑
+                        "2"    : [],#리얼탑 kb아파트평형시세매핑(sas)
+                        "4"    : [],#건축물신축단가관리(excel)
+                        "5"    : [self.filedown_5,return_y_m_before_n(self.d, 2)],
+                        "6"    : [],#토지격차율(sas)
+                        "8"    : [self.filedown_8],
+                        "9"    : [self.filedown_9,return_y_m_before_n(self.d, 2)],
+                        "10"   : [self.filedown_10],
+                        "11"   : [],#리얼탑토지특성정보
+                        "32"   : [self.filedown_32_ex1,return_y_m_before_n(self.d, 2)],
+                        "33_51": [self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3)],
+                        "37"   : [],#아파트 매매 실거래가격지수_시군구분기별
+                        "52"   : [self.filedown_52_ex21],
+                        "53"   : [self.filedown_53_ex22],
+                        '54'   : [self.filedown_54_ex23],
+                        "55"   : [],#면적별 건축물 현황
+                        "56"   : [],#용도별 건축물 현황
+                        "57"   : [],#층수별 건축물 현황
+                        "58"   : [self.filedown_58_ex27],
+                        "59"   : [self.filedown_59_ex28],
+                        "60"   : [self.filedown_60_ex29],
+                        "61"   : [],#연도별 건축허가현황
+                        "62"   : [],#시도별 재건축사업 현황 누계
+                        "63"   : [],#(新)주택보급률
+                        "64"   : [],#주택 멸실현황
+                        "65"   : [self.filedown_65_ex34],
+                        "66"   : [],#주택건설실적총괄
+                        "67"   : [self.filedown_67_ex36],
+                        "68"   : [],#지역별 주택건설 인허가실적
+                        "69"   : [self.filedown_69_ex38],
+                        "70"   : [self.filedown_70_ex39],
+                        "71"   : [],#미분양현황종합
+                        "72"   : [self.filedown_72_ex41],
+                        "73"   : [self.filedown_73_ex42],
+                        "74"   : [self.filedown_74_ex43],
+                        "75"   : [self.filedown_75_ex44],
+                        "76_80": [self.filedown_76_80_ex45_49],
+                        "81"   : [self.filedown_81_ex50],
+                        "82"   : [self.filedown_82_ex51],
+                        "83"   : [],#전국산업단지현황통계
+                        "84"   : [self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2)],
+                        "85"   : [], #팩토리온 등록공장현황
+                        "86"   : [self.filedown_86_ex55, return_y_m_before_n(self.d, 2)],
+                        "87"   : [self.filedown_87_ex56],
+                        "88"   : [self.filedown_88_ex57],
+        }
+
+        dir_dict = {str_d : {"5일" : {"원천":None, "원천_처리후":None},
+                             "20일": {"원천":None, "원천_처리후":None},
+                             "말일": {"원천":None, "원천_처리후":None},}
                     }
         mkdir_dfs(self.root_path, dir_dict)
 
-        # [5일자]
-        # self.try_twice(self.filedown_5,return_y_m_before_n(self.d, 2))
-
-        # [20일자]
-        # self.try_twice(self.filedown_8)
-        self.try_twice(self.filedown_9,return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_32_ex1, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3))
-        # self.try_twice(self.filedown_52_ex21)
-        # self.try_twice(self.filedown_53_ex22)
-        # self.try_twice(self.filedown_54_ex23)
-        # self.try_twice(self.filedown_69_ex38)
-        # self.try_twice(self.filedown_73_ex42)
-        # self.try_twice(self.filedown_86_ex55, return_y_m_before_n(self.d, 2))
-        # self.try_twice(self.filedown_87_ex56)
-        # self.try_twice(self.filedown_88_ex57)
-        #
-        # # [말일자]
-        # self.try_twice(self.filedown_10)
-        #
-        # self.try_twice(self.filedown_58_ex27)
-        # self.try_twice(self.filedown_59_ex28)
-        # self.try_twice(self.filedown_60_ex29)
-        # self.try_twice(self.filedown_65_ex34)
-        # self.try_twice(self.filedown_67_ex36)
-        # self.try_twice(self.filedown_70_ex39)
-        # self.try_twice(self.filedown_72_ex41)
-        # self.try_twice(self.filedown_74_ex43)
-        # self.try_twice(self.filedown_75_ex44)
-        # self.try_twice(self.filedown_76_80_ex45_49)
-        # self.try_twice(self.filedown_82_ex51)
-        # self.try_twice(self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2))
-        # 85_ex54. 팩토리온 등록공장현황
-
-        # 분기별
-        # self.filedown_81_ex50() # 분기(2월말, 5월말, 8월말, 11월말)
-
-        # [나머지(to_do)]
-        #  1. 리얼탑 kb아파트단지매핑(sas)
-        #  2. 리얼탑 kb아파트평형시세매핑(sas)
-        #  4. 건축물신축단가관리(excel)
-        #  6. 토지격차율(sas)
-        #  9. 오피스탤 매매가격지수(python,sas)
-        # 11. 리얼탑 토지특성정보(sas)
-        # 55. 면적별 건축물현황
-        # 56. 용도별 건축물현황
-        # 57. 층수별 건축물현황
-        # 61. 연도별 건축허가현황
-        # 62. 시도별 건축허가현황
-        # 63. (신)주택보급률
-        # 64. 주택 멸실현황
-        # 66. 주택건설실적총괄
-        # 68. 지역별 주택건설 인허가 실정
-        # 71. 미분양현황종합
-        # 83. 전국산업단지현황통계
+        for num,vals in RUN_SCHEDULE.items():
+            file_name = vals[0]
+            months = vals[1]
+            day = vals[2]
+            if int(self.m) in months:
+                print(f"{file_name.center(60,'-')}")
+                if self.func_dict[num]:
+                    if len(self.func_dict[num])==2:
+                        func = self.func_dict[num][0]
+                        param = self.func_dict[num][1]
+                        self.try_twice(func,param)
+                    else:
+                        func = self.func_dict[num][0]
+                        self.try_twice(func)
+                else:
+                    print("함수없음")
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -124,27 +133,37 @@ class FileDown:
         file_num = 5
         print(f"{file_num}.산단격차율")
 
-        url = "https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do" # 크롤링할 싸이트
-        page = self.try_request(url)
-        soup = bs(page.text, "html.parser")
+        urls = ["https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do",
+                "https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do?pageIndex=2"] # 크롤링할 싸이트
 
-        for row in soup.select('div.subCont>table.cellType_b.inpCell.mt10>tbody>tr')[0].select('td>p.inTxt.al'):
-            title = row.text
+        for url in urls :
+            page = self.try_request(url)
+            soup = bs(page.text, "html.parser")
 
-            if  f"({y}.{m.zfill(2)}월말기준)_전국_지식산업센터현황" == title:
-                p = re.compile('\(([^)]+)')
-                num = p.findall(row.a["href"])[0]
+            fin_flag=False
+            for row in soup.select('div.subCont>table.cellType_b.inpCell.mt10>tbody>tr')[0].select('td>p.inTxt.al'):
+                title = row.text
+
+                if  f"({y}.{m.zfill(2)}월말기준)_전국_지식산업센터현황" == title:
+                    p = re.compile('\(([^)]+)')
+                    num = p.findall(row.a["href"])[0]
+                    fin_flag = True
+                    break
+
+            if fin_flag:
+                row_url = f"https://www.factoryon.go.kr/bbs/frtblRecsroomBbsDetail.do?selectBbsSn={num}"
+                row_page = self.try_request(row_url)
+                soup = bs(row_page.text, "html.parser")
+
+                down_url_last = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a["href"]
+                file_name = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a.text
+                down_url = f"https://www.factoryon.go.kr{down_url_last}"
+
+                request.urlretrieve(down_url, f"{self.path}/5일/원천/5.산단격차율_{file_name}")
                 break
+            else:
+                continue
 
-        row_url = f"https://www.factoryon.go.kr/bbs/frtblRecsroomBbsDetail.do?selectBbsSn={num}"
-        row_page = self.try_request(row_url)
-        soup = bs(row_page.text, "html.parser")
-
-        down_url_last = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a["href"]
-        file_name = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a.text
-        down_url = f"https://www.factoryon.go.kr{down_url_last}"
-
-        request.urlretrieve(down_url, f"{self.path}/말일/원천/5.산단격차율_{file_name}")
 
     def filedown_8(self):
         file_num=8
@@ -439,6 +458,35 @@ class FileDown:
         # 다운로드
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
+    #
+    # def filedown_55_ex24(self):
+    #     file_num = "24"
+    #     print(f"55.면적별 건축물 현황, 외부통계 번호 : {file_num}")
+    #     folder_path = f"{self.path}\\말일\\원천"
+    #     browser = self.kosis_init_broswer(folder_path)
+    #     self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
+    #
+    #     # 설정창 열기
+    #     browser.switch_to.frame('iframe_rightMenu')
+    #     browser.switch_to.frame('iframe_centerMenu1')
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+    #
+    #     # 계정코드별
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_1"]').click)
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fancytree_1Btn"]').click) #전체해제
+    #
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #창내리기
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/ul/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #창내리기
+    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/ul/li[@class="fancytree-lastsib"]/ul/li[5]/span/span[@class="fancytree-expander"]').click) #창내리기
+    #
+    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/span/span[@class="fancytree-checkbox"]').click)  #총지수 체크
+    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[2]/span/span[@class="fancytree-checkbox"]').click) #비주거건물인대
+    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[4]/span/span[@class="fancytree-checkbox"]').click) #비주거용부동산관리
+    #     self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+    #
+    #     # 다운로드
+    #     self.kosis_download(browser)
+    #     change_last_file(folder_path, file_num)
 
     def filedown_58_ex27(self):
         file_num = "27"

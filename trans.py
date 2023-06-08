@@ -15,6 +15,7 @@ from tabulate import tabulate
 
 from datetime_func import *
 from file_sys_func import *
+from run_month import *
 
 warnings.filterwarnings('ignore')
 
@@ -38,46 +39,75 @@ class Trans:
         self.y = str_d[:4]
         self.m = str_d[5:].lstrip('0')
 
-        print("========== start data trasnformation ==========")
+        self.func_dict = {"1"    : [],  # 리얼탑KB아파트단지매핑
+                          "2"    : [],  # 리얼탑 kb아파트평형시세매핑(sas)
+                          "4"    : [],  # 건축물신축단가관리(excel)
+                          "5"    : [self.trans_5, return_y_m_before_n_v2(self.d, 2)],
+                          "6"    : [],  # 토지격차율(sas)
+                          "8"    : [self.trans_8],
+                          "9"    : [self.trans_9, return_y_m_before_n_v2(self.d, 2)],
+                          "10"   : [self.trans_10,return_y_m_before_n_v2(self.d, 1)],
+                          "11"   : [],  # 리얼탑토지특성정보
+                          "32"   : [self.trans_32_ex1()],
+                          "33_51": [self.trans_33_51_ex2_20()],
+                          "37"   : [],  # 아파트 매매 실거래가격지수_시군구분기별
+                          "52"   : [self.trans_52_ex21],
+                          "53"   : [self.trans_53_ex22],
+                          '54'   : [self.trans_54_ex23],
+                          "55"   : [],  # 면적별 건축물 현황
+                          "56"   : [],  # 용도별 건축물 현황
+                          "57"   : [],  # 층수별 건축물 현황
+                          "58"   : [self.trans_58_ex27],
+                          "59"   : [self.trans_59_ex28],
+                          "60"   : [self.trans_60_ex29], # todo 속도issue
+                          "61"   : [],  # 연도별 건축허가현황
+                          "62"   : [],  # 시도별 재건축사업 현황 누계
+                          "63"   : [],  # (新)주택보급률
+                          "64"   : [],  # 주택 멸실현황
+                          "65"   : [self.trans_65_ex34],
+                          "66"   : [],  # 주택건설실적총괄
+                          "67"   : [self.trans_67_ex36],
+                          "68"   : [],  # 지역별 주택건설 인허가실적
+                          "69"   : [self.trans_69_ex38],
+                          "70"   : [self.trans_70_ex39],
+                          "71"   : [],  # 미분양현황종합
+                          "72"   : [self.trans_72_ex41],
+                          "73"   : [self.trans_73_ex42],
+                          "74"   : [self.trans_74_ex43],
+                          "75"   : [self.trans_75_ex44],
+                          "76_80": [self.trans_76_80_ex45_49],
+                          "81"   : [self.trans_81_ex50],
+                          "82"   : [self.trans_82_ex51],
+                          "83"   : [],  # 전국산업단지현황통계
+                          "84"   : [self.trans_84_ex53,return_y_m_before_n_v2(self.d, 2)], # todo 속도이슈, 메모리이슈
+                          "85"   : [],  # 팩토리온 등록공장현황
+                          "86"   : [self.trans_86_ex55],
+                          "87"   : [self.trans_87_ex56],
+                          "88"   : [self.trans_88_ex57],
+                          }
 
-        # [5일]
-        # self.trans_5(*return_y_m_before_n_v2(self.d, 2))
-
-        # [20일자]
-        # self.trans_8()
-        self.trans_9(*return_y_m_before_n_v2(self.d, 2))
-        # self.trans_32_ex1()
-        # self.trans_33_51_ex2_20()
-        # self.trans_52_ex21()
-        # self.trans_53_ex22()
-        # self.trans_54_ex23()
-        # self.trans_69_ex38()
-        # self.trans_73_ex42()
-        # self.trans_86_ex55()
-        # self.trans_87_ex56()
-        # self.trans_88_ex57()
-
-        # # [말일자]
-        # self.trans_58_ex27()
-        # self.trans_59_ex28()
-        # self.trans_60_ex29() # todo 속도issue
-        # self.trans_65_ex34()
-        # self.trans_67_ex36()
-        # self.trans_70_ex39()
-        # self.trans_72_ex41()
-        # self.trans_74_ex43()
-        # self.trans_75_ex44()
-        # self.trans_76_80_ex45_49()
-        # self.trans_81_ex50()
-        # self.trans_82_ex51()
-        # self.trans_84_ex53(*return_y_m_before_n_v2(self.d, 2)) # todo 속도이슈, 메모리이슈
-
-        # self.trans_10(*return_y_m_before_n_v2(self.d, 1))
+        for num, vals in RUN_SCHEDULE.items():
+            file_name = vals[0]
+            months = vals[1]
+            day = vals[2]
+            if int(self.m) in months:
+                print(f"--------------------{file_name}--------------------")
+                if self.func_dict[num]:
+                    if len(self.func_dict[num]) == 2:
+                        func = self.func_dict[num][0]
+                        param = self.func_dict[num][1]
+                        func(*param)
+                    else:
+                        func = self.func_dict[num][0]
+                        func()
+                else:
+                    print("함수없음")
 
     def trans_5(self, yyyy, m):
+        print("5.산단격차율")
         while True:
-            file_loc = f"{self.path}/말일/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
-            file_path3 = f"{self.path}/말일/원천_처리후"
+            file_loc = f"{self.path}/5일/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
+            file_path3 = f"{self.path}/5일/원천_처리후"
 
             # 엑셀 파일 읽기
             jisic = pd.read_excel(file_loc)
@@ -117,6 +147,7 @@ class Trans:
             break
 
     def trans_8(self):
+        print(f"8.전국주택 매매가격지수")
         pd.options.display.float_format = '{:.15f}'.format
 
         file_path = f"{self.path}/20일/원천/8.전국주택 매매가격지수"
@@ -2213,5 +2244,5 @@ class Trans:
         df.to_csv(f"{file_path2}/57.rtp_householdloan_yyyymmdd.dat", sep='|', index=False, header=False, encoding='ANSI')
 
 if __name__ == "__main__":
-    str_d = "202305"
+    str_d = "202306"
     trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d)

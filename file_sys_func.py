@@ -81,7 +81,7 @@ def mkdir_dfs(path, dir_dict):
         new_path = f"{path}/{d}"
         if not os.path.isdir(new_path):
             os.mkdir(new_path)
-            mkdir_dfs(new_path, dir_dict[d])
+        mkdir_dfs(new_path, dir_dict[d])
 
 def change_last_file(folder_path, new_name, file_type=None):
     '''
