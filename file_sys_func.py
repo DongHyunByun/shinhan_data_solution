@@ -96,7 +96,7 @@ def change_last_file(folder_path, new_name, file_type=None):
 def file_check_func(folder_path, mk_time):
     '''
     folder_path 경로에 가장 최근 파일 생성시간이 mk_time이후인지 체크
-    없으면 10시간 기다린 후 다시 확인한다.
+    없으면 10초간 기다린 후 다시 확인한다.
     최대 3번 반복한다.
     '''
     for i in range(3):

@@ -59,9 +59,9 @@ class FileDown:
                         "52"   : [self.filedown_52_ex21],
                         "53"   : [self.filedown_53_ex22],
                         '54'   : [self.filedown_54_ex23],
-                        "55"   : [],#면적별 건축물 현황
-                        "56"   : [],#용도별 건축물 현황
-                        "57"   : [],#층수별 건축물 현황
+                        "55"   : [self.filedown_55_ex24],
+                        "56"   : [self.filedown_56_ex25],
+                        "57"   : [self.filedown_57_ex26],
                         "58"   : [self.filedown_58_ex27],
                         "59"   : [self.filedown_59_ex28],
                         "60"   : [self.filedown_60_ex29],
@@ -102,7 +102,7 @@ class FileDown:
             months = vals[1]
             day = vals[2]
             if int(self.m) in months:
-                print(f"{file_name.center(60,'-')}")
+                print(f"{(num+'.'+file_name).center(60,'-')}")
                 if self.func_dict[num]:
                     if len(self.func_dict[num])==2:
                         func = self.func_dict[num][0]
@@ -458,35 +458,69 @@ class FileDown:
         # 다운로드
         self.kosis_download(browser)
         change_last_file(folder_path, file_num)
-    #
-    # def filedown_55_ex24(self):
-    #     file_num = "24"
-    #     print(f"55.면적별 건축물 현황, 외부통계 번호 : {file_num}")
-    #     folder_path = f"{self.path}\\말일\\원천"
-    #     browser = self.kosis_init_broswer(folder_path)
-    #     self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
-    #
-    #     # 설정창 열기
-    #     browser.switch_to.frame('iframe_rightMenu')
-    #     browser.switch_to.frame('iframe_centerMenu1')
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
-    #
-    #     # 계정코드별
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_1"]').click)
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fancytree_1Btn"]').click) #전체해제
-    #
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #창내리기
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/ul/li[@class="fancytree-lastsib"]/span/span[@class="fancytree-expander"]').click) #창내리기
-    #     self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[@class="fancytree-lastsib"]/ul/li[@class="fancytree-lastsib"]/ul/li[5]/span/span[@class="fancytree-expander"]').click) #창내리기
-    #
-    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/span/span[@class="fancytree-checkbox"]').click)  #총지수 체크
-    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[2]/span/span[@class="fancytree-checkbox"]').click) #비주거건물인대
-    #     self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="ft-id-2"]/li/ul/li[@class="fancytree-lastsib"]/ul/li[5]/ul/li[4]/span/span[@class="fancytree-checkbox"]').click) #비주거용부동산관리
-    #     self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
-    #
-    #     # 다운로드
-    #     self.kosis_download(browser)
-    #     change_last_file(folder_path, file_num)
+
+    def filedown_55_ex24(self):
+        file_num = "24"
+        print(f"55.면적별 건축물 현황, 외부통계 번호 : {file_num}")
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_540&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
+
+        # 설정창 열기
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)  # 시점 탭 선택
+        year_size = len(browser.find_elements(By.XPATH, '//*[@id="selectStrtTimeY"]/option'))
+        self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="selectStrtTimeY"]/option[{year_size}]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        change_last_file(folder_path, file_num)
+
+    def filedown_56_ex25(self):
+        file_num = "25"
+        print(f"56.용도별 건축물 현황, 외부통계 번호 : {file_num}")
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_522&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
+
+        # 설정창 열기
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+
+        # 시점탭 내리기
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="selectStrtTimeY"]/option[2]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        change_last_file(folder_path, file_num)
+
+    def filedown_57_ex26(self):
+        file_num = "26"
+        print(f"57.층수별 건축물 현황, 외부통계 번호 : {file_num}")
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(15, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_524&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
+
+        # 설정창 열기
+        browser.switch_to.frame('iframe_rightMenu')
+        browser.switch_to.frame('iframe_centerMenu1')
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click)
+
+        # 시점탭 내리기
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabTimeText"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, f'//*[@id="selectStrtTimeY"]/option[2]').click)
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 다운로드
+        self.kosis_download(browser)
+        change_last_file(folder_path, file_num)
 
     def filedown_58_ex27(self):
         file_num = "27"
@@ -541,7 +575,7 @@ class FileDown:
         print(f"60.시도별 건축물착공현황, 외부통계 번호 : {file_num}")
         folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
-        self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2200&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
+        self.delay_after_func(25,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2200&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
 
         # 설정창 열기
         browser.switch_to.frame('iframe_rightMenu')

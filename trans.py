@@ -48,8 +48,8 @@ class Trans:
                           "9"    : [self.trans_9, return_y_m_before_n_v2(self.d, 2)],
                           "10"   : [self.trans_10,return_y_m_before_n_v2(self.d, 1)],
                           "11"   : [],  # 리얼탑토지특성정보
-                          "32"   : [self.trans_32_ex1()],
-                          "33_51": [self.trans_33_51_ex2_20()],
+                          "32"   : [self.trans_32_ex1],
+                          "33_51": [self.trans_33_51_ex2_20],
                           "37"   : [],  # 아파트 매매 실거래가격지수_시군구분기별
                           "52"   : [self.trans_52_ex21],
                           "53"   : [self.trans_53_ex22],
@@ -86,12 +86,13 @@ class Trans:
                           "88"   : [self.trans_88_ex57],
                           }
 
+        self.trans_55_ex24()
         for num, vals in RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
             if int(self.m) in months:
-                print(f"--------------------{file_name}--------------------")
+                print(f"{(num+'.'+file_name).center(60,'-')}")
                 if self.func_dict[num]:
                     if len(self.func_dict[num]) == 2:
                         func = self.func_dict[num][0]
@@ -945,6 +946,44 @@ class Trans:
         '''
         print('54.생산자물가지수(품목별)(2020=100), 외부통계 번호 : 23')
         file_path1 = f"{self.path}/20일/원천/23.xlsx"
+        file_path2 = f"{self.path}/20일/원천_처리후/"
+
+        df = pd.read_excel(file_path1, sheet_name='데이터')
+        df.set_index('계정코드별', inplace=True)
+        df = df.T
+
+        df.columns = [re.sub('[^가-힣]', '', i) for i in df.columns]
+
+        yyyymm_list = list(df.index)
+        yyyymm_list = [(datetime.strptime(x, '%Y.%m') + relativedelta(months=1)) for x in yyyymm_list]
+        yyyymm_list = [x.strftime('%Y%m%d') for x in yyyymm_list]
+        df.insert(0, '자료발표일자', yyyymm_list)
+        df.sort_values(by='자료발표일자', ascending=False, inplace=True)
+
+        df_tp = df.loc[:, ['비주거용건물임대', '비주거용부동산관리']].stack()
+        df_tp = df_tp.reset_index()
+        df_tp = df_tp.set_index('level_0')
+
+        yyyymm_list = list(df_tp.index)
+        yyyymm_list = [(datetime.strptime(x, '%Y.%m') + relativedelta(months=1)) for x in yyyymm_list]
+        yyyymm_list = [x.strftime('%Y%m%d') for x in yyyymm_list]
+        df_tp.insert(0, '자료발표일자', yyyymm_list)
+
+        df = pd.merge(df.loc[:, ['자료발표일자', '총지수']], df_tp, how='left', on='자료발표일자')
+        df = df.loc[:, ['자료발표일자', 'level_1', '총지수', 0]]
+
+        code = [0 if '건물임대' in x else 1 for x in df['level_1']]
+        df.insert(1, '비주거용건물구분', code)
+
+        # *** 지수 기준일 수정시 수정 필수 ***
+        df['자료기준년월'] = '201512'
+        print(tb(df, headers='keys', tablefmt='pretty'))
+
+        df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
+
+    def trans_55_ex24(self):
+        print('55.생산자물가지수(품목별)(2020=100), 외부통계 번호 : 24')
+        file_path1 = f"{self.path}/20일/원천/24.xlsx"
         file_path2 = f"{self.path}/20일/원천_처리후/"
 
         df = pd.read_excel(file_path1, sheet_name='데이터')
