@@ -42,6 +42,8 @@ class FileDown:
         self.d = datetime.strptime(str_d, '%Y%m')
 
         self.y = str_d[:4]
+        self.last_y = str(int(self.y)-1)
+
         self.m = str_d[5:].lstrip('0')
 
         self.func_dict={"1"    : [],#리얼탑KB아파트단지매핑
@@ -52,10 +54,9 @@ class FileDown:
                         "8"    : [self.filedown_8],
                         "9"    : [self.filedown_9,return_y_m_before_n(self.d, 2)],
                         "10"   : [self.filedown_10],
-                        "11"   : [],#리얼탑토지특성정보
+                        "11"   : [],#리얼탑토지특성정보(공개 후 1개월)
                         "32"   : [self.filedown_32_ex1,return_y_m_before_n(self.d, 2)],
                         "33_51": [self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3)],
-                        "37"   : [],#아파트 매매 실거래가격지수_시군구분기별
                         "52"   : [self.filedown_52_ex21],
                         "53"   : [self.filedown_53_ex22],
                         '54'   : [self.filedown_54_ex23],
@@ -65,17 +66,17 @@ class FileDown:
                         "58"   : [self.filedown_58_ex27],
                         "59"   : [self.filedown_59_ex28],
                         "60"   : [self.filedown_60_ex29],
-                        "61"   : [],#연도별 건축허가현황
-                        "62"   : [],#시도별 재건축사업 현황 누계
-                        "63"   : [],#(新)주택보급률
-                        "64"   : [],#주택 멸실현황
+                        "61"   : [],#연도별 건축허가현황(매년 7월말)
+                        "62"   : [],#시도별 재건축사업 현황 누계(매년 7월말)
+                        "63"   : [],#(新)주택보급률(매년 4월20일)
+                        "64"   : [],#주택 멸실현황(매년 3월말일)
                         "65"   : [self.filedown_65_ex34],
-                        "66"   : [],#주택건설실적총괄
+                        "66"   : [],#주택건설실적총괄(매년 3월20일)
                         "67"   : [self.filedown_67_ex36],
-                        "68"   : [],#지역별 주택건설 인허가실적
+                        "68"   : [],#지역별 주택건설 인허가실적(매년 3월20일)
                         "69"   : [self.filedown_69_ex38],
                         "70"   : [self.filedown_70_ex39],
-                        "71"   : [],#미분양현황종합
+                        "71"   : [],#미분양현황종합(매년 2월 20일)
                         "72"   : [self.filedown_72_ex41],
                         "73"   : [self.filedown_73_ex42],
                         "74"   : [self.filedown_74_ex43],
@@ -83,7 +84,7 @@ class FileDown:
                         "76_80": [self.filedown_76_80_ex45_49],
                         "81"   : [self.filedown_81_ex50],
                         "82"   : [self.filedown_82_ex51],
-                        "83"   : [],#전국산업단지현황통계
+                        "83"   : [self.filedown_83_ex52],
                         "84"   : [self.filedown_84_ex53, return_y_m_before_n_v2(self.d, 2)],
                         "85"   : [], #팩토리온 등록공장현황
                         "86"   : [self.filedown_86_ex55, return_y_m_before_n(self.d, 2)],
@@ -630,6 +631,37 @@ class FileDown:
             self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
             self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
+    def filedown_61_ex30(self):
+        file_num = "30"
+        print(f"61.연도별 건축허가현황, 외부통계 번호 : {file_num}")
+        # folder_path = f"{self.path}\\말일\\원천"
+        # browser = self.kosis_init_broswer(folder_path)
+        #
+        # self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1946&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
+        #
+        # # 행렬교체
+        # browser.switch_to.frame('iframe_rightMenu')
+        # browser.switch_to.frame('iframe_centerMenu1')
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+        #
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        #
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시도별상자 클릭
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le4"]').click)
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+        #
+        # self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+        #
+        # # 다운로드
+        # self.kosis_download(browser)
+        # change_last_file(folder_path, file_num)
+
     def filedown_65_ex34(self):
         file_num = "34"
         print(f"65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
@@ -1099,6 +1131,44 @@ class FileDown:
                 break
             else:
                 i+=1
+
+    def filedown_83_ex52(self):
+        '''
+        가장 최근 데이터 크롤링
+        '''
+        month_to_quater = {3:[self.last_y,"4"],
+                           6:[self.y,"1"],
+                           9:[self.y,"2"],
+                           12:[self.y,"3"]}
+
+        base_yy = month_to_quater[int(self.m)][0][2:]
+        quater = month_to_quater[int(self.m)][1]
+
+        file_name = "83.전국산업단지현황통계, 외부통계번호 : 52"
+        print(file_name)
+
+        folder_path = f"{self.path}\\말일\\원천"
+        browser = self.kosis_init_broswer(folder_path)
+        self.delay_after_func(10, browser.get, ('https://www.kicox.or.kr/user/bbs/BD_selectBbsList.do?q_bbsCode=1036&q_clCode=2',))
+
+        is_file = False
+        for i,row in enumerate(browser.find_elements(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr')):
+            if (f"전국산업단지현황통계 통계표({base_yy}.{quater}분기)" in row.text):
+                self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[{i+1}]/td[@class="subject"]').click)
+                # content_href = browser.find_element(By.XPATH, f'//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[{i+1}]/td[@class="subject"]/a').get_attribute('href')
+                # browser.get(content_href)
+                is_file = True
+                break
+
+        if not is_file:
+            print("파일없음")
+            return
+
+        title = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').text
+        down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
+
+        self.delay_after_func(5, browser.get, (down_url,))
+        change_last_file(folder_path, f"52. 산업단지현황조사_{base_yy}.{quater}분기")
 
     def filedown_84_ex53(self,y=None,m=None):
         file_name = "84.국가산업단지산업동향, 외부통계번호 : 53"

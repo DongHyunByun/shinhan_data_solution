@@ -49,7 +49,7 @@ class Trans:
                           "10"   : [self.trans_10,return_y_m_before_n_v2(self.d, 1)],
                           "11"   : [],  # 리얼탑토지특성정보
                           "32"   : [self.trans_32_ex1],
-                          "33_51": [self.trans_33_51_ex2_20],
+                          "33_51": [self.trans_33_51_ex2_20], #37은 없음
                           "37"   : [],  # 아파트 매매 실거래가격지수_시군구분기별
                           "52"   : [self.trans_52_ex21],
                           "53"   : [self.trans_53_ex22],
