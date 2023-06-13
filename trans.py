@@ -12,10 +12,12 @@ import re
 import numpy as np
 from bs4 import BeautifulSoup as bs
 from tabulate import tabulate
+import math
 
 from datetime_func import *
 from file_sys_func import *
 from run_month import *
+from common import *
 
 warnings.filterwarnings('ignore')
 
@@ -37,6 +39,7 @@ class Trans:
         self.d = datetime.strptime(str_d, '%Y%m')
 
         self.y = str_d[:4]
+        self.last_y = str(int(str_d[:4])-1)
         self.m = str_d[5:].lstrip('0')
 
         self.func_dict = {"1"    : [],  # 리얼탑KB아파트단지매핑
@@ -60,7 +63,7 @@ class Trans:
                           "58"   : [self.trans_58_ex27],
                           "59"   : [self.trans_59_ex28],
                           "60"   : [self.trans_60_ex29], # todo 속도issue
-                          "61"   : [],  # 연도별 건축허가현황
+                          "61"   : [self.trans_61_ex30],  # 코드 달라짐
                           "62"   : [],  # 시도별 재건축사업 현황 누계
                           "63"   : [],  # (新)주택보급률
                           "64"   : [],  # 주택 멸실현황
@@ -86,7 +89,6 @@ class Trans:
                           "88"   : [self.trans_88_ex57],
                           }
 
-        self.trans_55_ex24()
         for num, vals in RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
@@ -1154,6 +1156,41 @@ class Trans:
 
         # 자료 저장
         df_fin.to_csv(f'{to_path}/29.rtp_sido_st_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
+
+    def trans_61_ex30(self):
+        file_num = "30"
+        print(f"61.연도별 건축허가현황, 외부통계 번호 : {file_num}")
+        file_path1 = f"{self.path}/말일/원천/{file_num}.xlsx"
+        file_path2 = f"{self.path}/말일/원천_처리후/"
+        mapping_df  = pd.read_csv(f"{self.refer_path}/30_항목코드.dat", sep='|', dtype='str', encoding='ANSI')
+        mapping_dict = {}
+        for i in range(len(mapping_df)):
+            mapping_dict[mapping_df["항목"][i]] = mapping_df["항목코드"][i]
+
+        # df = pd.DataFrame({"base_yyyymm":[],
+        #                    "항목코드":[],
+        #                    "항목":[],
+        #                    "동수별값":[],
+        #                    "연면적별값":[],
+        #                    "base_yyyy":[]})
+
+        origin_df = fill_row(file_path1,["레벨01(1)","레벨02(1)"])
+        origin_df = origin_df[origin_df["레벨02(1)"] != "합계"].reset_index(drop=True)
+        for i in range(len(origin_df)):
+            if origin_df["항목"][i]=="기타":
+                origin_df["항목"][i] = f"{origin_df['레벨02(1)'][i]}_기타"
+
+        origin_df = pd.merge(origin_df[["레벨01(1)","항목",self.last_y]].iloc[:11],origin_df[["레벨01(1)","항목",self.last_y]].iloc[11:],on="항목")[["항목",f"{self.last_y}_x",f"{self.last_y}_y"]]
+
+        # 칼럼넣기
+        origin_df.insert(loc=0, column='base_yyyymm', value=f"{self.last_y}1231")
+        origin_df.insert(loc=1, column='항목코드', value="00")
+        for i in range(len(origin_df)):
+            origin_df["항목코드"][i]=mapping_dict[origin_df["항목"][i]]
+        origin_df["base_yyyy"]=self.last_y # 맨뒤에 넣기
+
+        origin_df = origin_df.rename(columns={f'{self.last_y}_x': '동수별값',f'{self.last_y}_y': '연면적별값'})
+        origin_df.to_csv(f'{file_path2}/30.rtp_year_pm_YYYYMMDD.dat', sep='|', index=False, encoding='ANSI')
 
     def trans_65_ex34(self):
         print('65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : 34')
