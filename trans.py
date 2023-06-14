@@ -57,9 +57,9 @@ class Trans:
                           "52"   : [self.trans_52_ex21],
                           "53"   : [self.trans_53_ex22],
                           '54'   : [self.trans_54_ex23],
-                          "55"   : [],  # 면적별 건축물 현황
-                          "56"   : [],  # 용도별 건축물 현황
-                          "57"   : [],  # 층수별 건축물 현황
+                          "55"   : [self.trans_55_ex24],
+                          "56"   : [self.trans_56_ex25],
+                          "57"   : [self.trans_57_ex26],
                           "58"   : [self.trans_58_ex27],
                           "59"   : [self.trans_59_ex28],
                           "60"   : [self.trans_60_ex29], # todo 속도issue
@@ -984,42 +984,168 @@ class Trans:
         df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
 
     def trans_55_ex24(self):
-        print('55.생산자물가지수(품목별)(2020=100), 외부통계 번호 : 24')
-        file_path1 = f"{self.path}/20일/원천/24.xlsx"
-        file_path2 = f"{self.path}/20일/원천_처리후/"
+        columns = ['자료발표일자', 'KED분류시도구분', '시도명', '면적규모별구분', '면적규모별구분명', '면적별건축물동수', '면적별건축물동수비율', '자료기준년']
 
-        df = pd.read_excel(file_path1, sheet_name='데이터')
-        df.set_index('계정코드별', inplace=True)
-        df = df.T
+        from_path = f"{self.path}/말일/원천/24.xlsx"
+        to_path = f"{self.path}/말일/원천_처리후/24.rtp_sqr_con_yyyymmdd.dat"
 
-        df.columns = [re.sub('[^가-힣]', '', i) for i in df.columns]
+        df = pd.read_excel(from_path, header=[0, 1])
 
-        yyyymm_list = list(df.index)
-        yyyymm_list = [(datetime.strptime(x, '%Y.%m') + relativedelta(months=1)) for x in yyyymm_list]
-        yyyymm_list = [x.strftime('%Y%m%d') for x in yyyymm_list]
-        df.insert(0, '자료발표일자', yyyymm_list)
-        df.sort_values(by='자료발표일자', ascending=False, inplace=True)
+        # 2022년도 데이터 추출 및 가공
+        df_last = df[self.last_y]
+        df_last.set_index(df['시도명(1)']['시도명(1)'], inplace=True)
+        df_last.drop(['합계'], axis=1, inplace=True)
+        temp = df_last.loc['비율'].transpose().reset_index()['비율']
+        # print(temp)
+        df_last.drop(['비율', '기타'], inplace=True)
+        df_last = df_last.rename(index={'합계': '전국'})
+        # print(df_last)
+        # print(df_last.columns)
+        # print(df_last.index)
 
-        df_tp = df.loc[:, ['비주거용건물임대', '비주거용부동산관리']].stack()
-        df_tp = df_tp.reset_index()
-        df_tp = df_tp.set_index('level_0')
+        # 최종 형태의 데이터프레임 생성
+        df_final = pd.DataFrame(index=range(0, (len(df_last.columns)) * (len(df_last.index))), columns=columns)
 
-        yyyymm_list = list(df_tp.index)
-        yyyymm_list = [(datetime.strptime(x, '%Y.%m') + relativedelta(months=1)) for x in yyyymm_list]
-        yyyymm_list = [x.strftime('%Y%m%d') for x in yyyymm_list]
-        df_tp.insert(0, '자료발표일자', yyyymm_list)
+        df_final['자료발표일자'] = f"{self.last_y}1231"
+        df_final['자료기준년'] = self.last_y
 
-        df = pd.merge(df.loc[:, ['자료발표일자', '총지수']], df_tp, how='left', on='자료발표일자')
-        df = df.loc[:, ['자료발표일자', 'level_1', '총지수', 0]]
+        df_last = pd.DataFrame(df_last.stack()).reset_index()
+        df_final[['시도명', '면적규모별구분명', '면적별건축물동수']] = df_last
+        df_final['면적별건축물동수'] = df_final['면적별건축물동수'].astype(int)
+        # print(df_final.loc[df_final['시도명']=='전국', '면적별건축물동수비율'])
+        df_final.loc[(df_final['시도명'] == '전국'), '면적별건축물동수비율'] = temp
 
-        code = [0 if '건물임대' in x else 1 for x in df['level_1']]
-        df.insert(1, '비주거용건물구분', code)
+        # print(df_final)
 
-        # *** 지수 기준일 수정시 수정 필수 ***
-        df['자료기준년월'] = '201512'
-        print(tb(df, headers='keys', tablefmt='pretty'))
+        # 구분 코드
+        refer_sido = pd.read_csv(f'{self.refer_path}/24_KED분류시도구분.dat', sep='|',encoding='ANSI')
+        refer_area = pd.read_csv(f'{self.refer_path}/24_면적규모구분.dat', sep='|', encoding='ANSI')
 
-        df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
+        # 구분 코드 매핑
+        merge = df_final.merge(refer_sido, on='시도명', how='left')
+        merge2 = merge.merge(refer_area, on='면적규모별구분명', how='left')
+
+        merge2 = merge2[['자료발표일자', 'KED분류시도구분_y', '시도명', '면적규모별구분_y', '면적규모별구분명', '면적별건축물동수', '면적별건축물동수비율', '자료기준년']]
+        # print(merge)
+        # print(merge2)
+        merge2['KED분류시도구분_y'] = merge2['KED분류시도구분_y'].apply(lambda x: str(x).zfill(2))
+
+        # print(merge2)
+        merge2.to_csv(to_path,sep='|', header=None, index=False, encoding='ANSI')
+
+    def trans_56_ex25(self):
+        columns = ['자료발표일자', 'KED분류시도구분', '시도명', '용도별구분', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']
+
+        from_path = f"{self.path}/말일/원천/25.xlsx"
+        to_path = f"{self.path}/말일/원천_처리후/25.rtp_yongdo_con_yyyymmdd.dat"
+
+        df = pd.read_excel(from_path, header=[0, 1])
+
+        # 2022년도 데이터 추출 및 가공
+        df_last = df[self.last_y]
+        df_last.set_index(df['시도명(1)']['시도명(1)'], inplace=True)
+        df_last.drop(['계'], axis=1, inplace=True)
+        temp = df_last.loc['비율'].transpose().reset_index()['비율']
+        # print(df_last)
+        # print(temp)
+        df_last.drop(['비율'], inplace=True)
+        df_last = df_last.rename(index={'합계': '전국'}, columns={'교육및사회용': '문교사회용'})
+        # print(df_last)
+        # print(df_last.columns)
+        # print(df_last.index)
+
+        # 최종 형태의 데이터프레임 생성
+        df_final = pd.DataFrame(index=range(0, (len(df_last.columns)) * (len(df_last.index))), columns=columns)
+
+        df_final['자료발표일자'] = f"{self.last_y}1231"
+        df_final['자료기준년'] = self.last_y
+
+        df_last = pd.DataFrame(df_last.stack()).reset_index()
+        df_final[['시도명', '건축물구분명', '건축물동수']] = df_last
+        df_final['건축물동수'] = df_final['건축물동수'].astype(int)
+        # print(df_final.loc[df_final['시도명']=='전국', '면적별건축물동수비율'])
+        df_final.loc[(df_final['시도명'] == '전국'), '건축물동수비율'] = temp
+
+        # print(df_final)
+
+        # 구분 코드
+        refer_sido = pd.read_csv(f'{self.refer_path}/24_KED분류시도구분.dat', sep='|',encoding='ANSI')
+        refer_kind = pd.read_csv(f'{self.refer_path}/25_용도별구분.dat', sep='|',encoding='ANSI')
+
+        # print(refer_sido)
+        # print(refer_area)
+        # 구분 코드 매핑
+        merge = df_final.merge(refer_sido, on='시도명', how='left')
+        merge2 = merge.merge(refer_kind, on='건축물구분명', how='left')
+
+        merge2_columns = ['자료발표일자', 'KED분류시도구분_y', '시도명', '용도별구분_y', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']
+        merge2 = merge2[merge2_columns]
+        # print(merge)
+        # print(merge2)
+        merge2['KED분류시도구분_y'] = merge2['KED분류시도구분_y'].apply(lambda x: str(x).zfill(2))
+
+        # print(merge2)
+        # 작년 데이터 합치기
+        # print(last_year)
+        # print(concat)
+        merge2.to_csv(to_path, sep='|', header=None, index=False, encoding='ANSI')
+
+    def trans_57_ex26(self):
+        columns = ['자료발표일자', 'KED분류시도구분', '시도명', '층수별구분', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']
+
+        from_path = f"{self.path}/말일/원천/26.xlsx"
+        to_path = f"{self.path}/말일/원천_처리후/26.rtp_floor_con_YYYYMMDD.dat"
+
+        df = pd.read_excel(from_path , header=[0, 1])
+
+        # 2022년도 데이터 추출 및 가공
+        df_last = df[self.last_y]
+        df_last.set_index(df['시도명(1)']['시도명(1)'], inplace=True)
+        df_last.drop(['계'], axis=1, inplace=True)
+        temp = df_last.loc['비율'].transpose().reset_index()['비율']
+        # print(df_last)
+        # print(temp)
+        df_last.drop(['비율'], inplace=True)
+        df_last = df_last.rename(index={'합계': '전국'})
+        # print(df_last)
+        # print(df_last.columns)
+        # print(df_last.index)
+
+        # 최종 형태의 데이터프레임 생성
+        df_final = pd.DataFrame(index=range(0, (len(df_last.columns)) * (len(df_last.index))), columns=columns)
+
+        # print(df_last)
+        # print(df_last.columns)
+
+        df_final['자료발표일자'] = f"{self.last_y}1231"
+        df_final['자료기준년'] = self.last_y
+
+        df_last = pd.DataFrame(df_last.stack()).reset_index()
+        df_final[['시도명', '건축물구분명', '건축물동수']] = df_last
+        df_final['건축물동수'] = df_final['건축물동수'].astype(int)
+        # # print(df_final.loc[df_final['시도명']=='전국', '면적별건축물동수비율'])
+        df_final.loc[(df_final['시도명'] == '전국'), '건축물동수비율'] = temp
+
+        # print(df_final)
+
+        # 구분 코드
+        refer_sido = pd.read_csv(f'{self.refer_path}/24_KED분류시도구분.dat', sep='|', encoding='ANSI')
+        refer_floor = pd.read_csv(f'{self.refer_path}/26_층수별구분.dat', sep='|', encoding='ANSI')
+
+        # print(refer_sido)
+        # print(refer_area)
+
+        # 구분 코드 매핑
+        merge = df_final.merge(refer_sido, on='시도명', how='left')
+        merge2 = merge.merge(refer_floor, on='건축물구분명', how='left')
+
+        merge2 = merge2[['자료발표일자', 'KED분류시도구분_y', '시도명', '층수별구분_y', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']]
+        # print(merge)
+        # print(merge2)
+        merge2['KED분류시도구분_y'] = merge2['KED분류시도구분_y'].apply(lambda x: str(x).zfill(2))
+        #
+        # print(merge2)
+        merge2.to_csv(to_path, sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_58_ex27(self):
         print('58.동수별 연면적별 건축착공현황, 외부통계 번호 : 27')

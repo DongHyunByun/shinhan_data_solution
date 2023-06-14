@@ -98,22 +98,37 @@ class FileDown:
                     }
         mkdir_dfs(self.root_path, dir_dict)
 
+        now_month_date = {"num":[],"file_name":[],"day":[],"crawling":[]}
+
         for num,vals in RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
             if int(self.m) in months:
                 print(f"{(num+'.'+file_name).center(60,'-')}")
+                now_month_date["num"].append(num)
+                now_month_date["file_name"].append(file_name)
+                now_month_date["day"].append(day)
                 if self.func_dict[num]:
                     if len(self.func_dict[num])==2:
                         func = self.func_dict[num][0]
                         param = self.func_dict[num][1]
-                        self.try_twice(func,param)
+                        if self.try_twice(func,param):
+                            now_month_date["crawling"].append("성공")
+                        else:
+                            now_month_date["crawling"].append("실패")
                     else:
                         func = self.func_dict[num][0]
-                        self.try_twice(func)
+                        if self.try_twice(func):
+                            now_month_date["crawling"].append("성공")
+                        else:
+                            now_month_date["crawling"].append("실패")
+
                 else:
+                    now_month_date["crawling"].append("함수없음")
                     print("함수없음")
+
+        pd.DataFrame(now_month_date).to_csv(f"{self.root_path}/monthly_file/{self.str_d}.csv", index=False, encoding='ANSI')
 
     def try_twice(self,func,param=(),n=3):
         '''
@@ -123,12 +138,13 @@ class FileDown:
             print(f"{i+1}번째시도 : ",end=" ")
             try:
                 func(*param)
-                break
+                return True
             except:
                 pass
 
             if i==n-1:
                 print("실패", end=" ")
+                return False
 
     def filedown_5(self,y,m):
         file_num = 5
