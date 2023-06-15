@@ -31,15 +31,19 @@ class Trans:
     y = None
     m = None
 
-    def __init__(self,data_path,str_d):
+    def __init__(self,data_path,str_d,work_day):
         self.data_path = data_path
         self.path = f"{data_path}\\{str_d}"
         self.refer_path = f"{data_path}\\refer"
+
         self.str_d = str_d #yyyymm
         self.d = datetime.strptime(str_d, '%Y%m')
+        self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m')
 
         self.y = str_d[:4]
-        self.last_y = str(int(str_d[:4])-1)
+        self.last_y = str(int(str_d[:4]) - 1)
+        self.work_day = work_day
+
         self.m = str_d[5:].lstrip('0')
 
         self.func_dict = {"1"    : [],  # 리얼탑KB아파트단지매핑
@@ -93,7 +97,7 @@ class Trans:
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
-            if int(self.m) in months:
+            if int(self.m) in months and self.work_day == str(day):
                 print(f"{(num+'.'+file_name).center(60,'-')}")
                 if self.func_dict[num]:
                     if len(self.func_dict[num]) == 2:
@@ -155,6 +159,8 @@ class Trans:
 
         file_path = f"{self.path}/20일/원천/8.전국주택 매매가격지수"
         file_path3 = f"{self.path}/20일/원천_처리후/8.전국주택 매매가격지수"
+        last_to_path = f'{self.data_path}/{self.last_str_d}/20일/원천_처리후/rtp_khpi_inf_{self.last_str_d}.txt'
+        to_path = f'{self.path}/20일/원천_처리후/rtp_khpi_inf_{self.str_d}.dat'
 
         start_path = f"{self.path}/20일/원천_처리후/"
         dir_dict = {"8.전국주택 매매가격지수" : None}
@@ -166,6 +172,9 @@ class Trans:
         jutec_class = ['매매가격지수', '전월세통합지수', '전세가격지수', '준전세가격지수', '월세가격지수', '월세통합가격지수', '준월세가격지수']
         class_alpha = ['S', 'T', 'D', 'R4', 'R2', 'R1', 'R3']
 
+        dfs_st = []
+        dfs_lg = []
+        dfs_un = []
         for i in range(4):
             for j in range(7):
                 print(jutec_type[i] + ' ' + jutec_class[j])
@@ -196,8 +205,71 @@ class Trans:
                 jutec = jutec.loc[:, ['지역', '주택유형코드', '주택유형명', '매매전세월세구분', '가격지수값']]
 
                 print(tabulate(jutec.head(20), headers='keys', tablefmt='psql'))
-                jutec.to_csv(f'{file_path3}/{jutec_type[i]}_{class_alpha[j]}.csv', index=False, encoding='ANSI')
-                print('')
+                # jutec.to_csv(f'{file_path3}/{jutec_type[i]}_{class_alpha[j]}.csv', index=False, encoding='ANSI')
+
+                if jutec.shape[0] == 41:
+                    dfs_st.append(jutec)
+                elif jutec.shape[0] == 227:
+                    dfs_lg.append(jutec)
+                else:
+                    dfs_un.append(jutec)
+
+        for i in range(len(dfs_st)):
+            try:
+                dfs_short = pd.concat([dfs_short, dfs_st[i]], axis=0)
+            except:
+                dfs_short = dfs_st[i]
+        print(dfs_short)
+
+        for j in range(len(dfs_lg)):
+            try:
+                dfs_long = pd.concat([dfs_long, dfs_lg[j]], axis=0)
+            except:
+                dfs_long = dfs_lg[j]
+        dfs_long = dfs_long.reset_index(drop=True)
+        print(dfs_long)
+
+        key_41 = pd.read_csv(f"{self.refer_path}/KEY_41.dat", sep='|', dtype='str', encoding='ANSI')
+        key_41.fillna('', inplace=True)
+
+        key_227_1 = pd.read_csv(f"{self.refer_path}/KEY_227_1.dat", header=None, sep='|', dtype='str', encoding='ANSI') # todo.강원자치도
+        key_227_1.columns = ['MAPPING', '기존키값']
+
+        key_227_2 = pd.read_csv(f"{self.refer_path}/KEY_227_2.dat", sep='|', dtype='str', encoding='ANSI') # todo.강원자치도2
+        key_227_2.fillna('', inplace=True)
+
+        df_41 = pd.merge(key_41, dfs_short, how='left', left_on='MAPPING', right_on='지역')
+
+        for k in range(len(dfs_lg)):
+            try:
+                key_227_1_tp = pd.concat([key_227_1_tp, key_227_1], axis=0)
+            except:
+                key_227_1_tp = key_227_1
+        key_227_1_tp = key_227_1_tp.reset_index(drop=True)
+
+        df_227_tp = pd.concat([key_227_1_tp, dfs_long], axis=1)
+        df_227_tp.loc[df_227_tp['기존키값'] != df_227_tp['지역'], :]
+        df_227 = pd.merge(key_227_2, df_227_tp, how='left', on='MAPPING')
+        df_227.drop(columns=['기존키값'], inplace=True)
+
+        df = pd.concat([df_41, df_227], axis=0)
+        df.drop(columns=['MAPPING', '지역'], inplace=True)
+
+        yyyymmdd = f"{self.str_d}01"
+        df.insert(0, '지수발표일자', yyyymmdd)
+
+        df['지수산정일자'] = input('지수산정일자(YYYYMMDD), 현재는 20210601')
+        df['가격지수값'] = df['가격지수값'].apply(lambda x: round(x, 2))
+
+
+        df_bf = pd.read_csv(last_to_path, header=None, dtype='str', sep='|', encoding='ANSI')
+        df_bf.fillna('', inplace=True)
+        df_bf.columns = df.columns
+
+        pd.set_option('display.float_format', '{:g}'.format)
+        df_fin = pd.concat([df, df_bf], axis=0)
+
+        df_fin.to_csv(to_path , sep='|', index=False, header=False, encoding='ANSI')
 
     def trans_9(self,y,m):
         print(f"9.오피스탤 매매가격지수")
@@ -205,7 +277,7 @@ class Trans:
 
         while True:
             file_loc = f"{self.path}/20일/원천/9.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
-            file_path3 = f"{self.path}/말일/원천_처리후/9.op_jisu_20211116.csv"
+            file_path3 = f"{self.path}/20일/원천_처리후/9.op_jisu_20211116.csv"
 
             cnt1_11 = int(input('1_11 시트의 데이터 개수를 입력해주세요 ex) 17 : '))
             cnt2_11 = int(input('2_11 시트의 데이터 개수를 입력해주세요 ex) 66 : '))
@@ -314,6 +386,8 @@ class Trans:
 
             print('작업 완료')
             break
+
+
 
     def trans_10(self,y,m):
         print(f"10.용도지역별 지가지수")
@@ -455,6 +529,7 @@ class Trans:
 
         jiga['값'].replace('-', '', inplace=True)
         jiga.drop_duplicates(inplace=True)
+        jiga.insert(0, 'base_dt', f"{self.last_str_d}01")
 
         jiga.to_csv(f'{file_path3}/1.rtp_usecase_jg_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
 
@@ -474,7 +549,7 @@ class Trans:
 
         jibang = pd.read_csv(f'{self.refer_path}/지방도.dat', dtype='str', sep='|', encoding='ANSI')
 
-        # 33번
+        # 2번
         print("33.공동주택 통합 매매 실거래가격지수, 외부통계 번호 : 2")
         df1 = pd.read_excel(file_path1, dtype='str', header=1, sheet_name=sheets[0][0], engine='openpyxl')
         df1.columns = [re.sub('[^가-힣]', '', col) for col in df1.columns]
@@ -1393,7 +1468,7 @@ class Trans:
         print(tb(unsold.head(10), headers='keys', tablefmt='pretty'))
         print(tb(unsold.tail(10), headers='keys', tablefmt='pretty'))
 
-        unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.csv',sep='|', header=False, index=False, encoding='ANSI')
+        unsold.to_csv(file_path2 + '38.rtp_gsat_us_' + unsold['자료발표일자'][0] + '.dat',sep='|', header=False, index=False, encoding='ANSI')
 
     def trans_70_ex39(self):
         print('70.규모별 미분양현황, 외부통계 번호 : 39')
@@ -2447,4 +2522,5 @@ class Trans:
 
 if __name__ == "__main__":
     str_d = "202306"
-    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d)
+    work_day = "20"
+    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d,work_day)

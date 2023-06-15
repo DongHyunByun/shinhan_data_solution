@@ -35,8 +35,9 @@ class FileDown:
     browser = None
     path = None
 
-    def __init__(self,str_d,path):
+    def __init__(self,str_d,path,work_day):
         self.root_path = path
+        self.work_day = work_day
         self.path = f"{path}\\{str_d}"
         self.str_d = str_d
         self.d = datetime.strptime(str_d, '%Y%m')
@@ -631,13 +632,13 @@ class FileDown:
         for i in range(1,7):
             print(L[i-1])
             if i!=1:
-                self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
-            self.delay_after_func(2, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i+1}]/span').click)
+                self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
+            self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i+1}]/span').click)
             self.delay_after_func(3, browser.switch_to.alert.accept)
 
             self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
             mk_time = time.time()
-            self.delay_after_func(15, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
+            self.delay_after_func(30, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
 
             if file_check_func(folder_path,mk_time):
                 change_last_file(folder_path, f"{file_num}_{L[i-1]}")

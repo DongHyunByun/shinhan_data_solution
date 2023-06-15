@@ -107,7 +107,7 @@ def file_check_func(folder_path, mk_time):
     return False
 
 if __name__ == "__main__":
-    path = "C:\\Users\\KODATA\\Desktop\\20230430_다운로드"
+    path = "C:\\Users\\KODATA\\Desktop\\데이터운영부_20230620"
     nubmering(path)
 
 
