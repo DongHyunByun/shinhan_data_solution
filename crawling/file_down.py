@@ -35,16 +35,18 @@ class FileDown:
     browser = None
     path = None
 
-    def __init__(self,str_d,path,work_day):
-        self.root_path = path
-        self.work_day = work_day
-        self.path = f"{path}\\{str_d}"
+    def __init__(self,str_d,project_path,work_day):
         self.str_d = str_d
+        self.project_path = project_path
+        self.work_day = work_day
+
+        self.data_path = f"{self.project_path}\\data"
+        self.path = f"{self.project_path}\\data\\{str_d}"
+
         self.d = datetime.strptime(str_d, '%Y%m')
 
         self.y = str_d[:4]
         self.last_y = str(int(self.y)-1)
-
         self.m = str_d[5:].lstrip('0')
 
         self.func_dict={"1"    : [],#리얼탑KB아파트단지매핑
@@ -97,7 +99,7 @@ class FileDown:
                              "20일": {"원천":None, "원천_처리후":None},
                              "말일": {"원천":None, "원천_처리후":None},}
                     }
-        mkdir_dfs(self.root_path, dir_dict)
+        mkdir_dfs(self.data_path, dir_dict)
 
         now_month_date = {"num":[],"file_name":[],"day":[],"crawling":[]}
 
@@ -105,7 +107,7 @@ class FileDown:
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
-            if int(self.m) in months:
+            if (int(self.m) in months) and (self.work_day in (str(day),"all")):
                 print(f"{(num+'.'+file_name).center(60,'-')}")
                 now_month_date["num"].append(num)
                 now_month_date["file_name"].append(file_name)
@@ -129,7 +131,7 @@ class FileDown:
                     now_month_date["crawling"].append("함수없음")
                     print("함수없음")
 
-        pd.DataFrame(now_month_date).to_csv(f"{self.root_path}/monthly_file/{self.str_d}.csv", index=False, encoding='ANSI')
+        pd.DataFrame(now_month_date).to_csv(f"{self.project_path}/monthly_file/{self.str_d}{self.work_day}.csv", index=False, encoding='ANSI')
 
     def try_twice(self,func,param=(),n=3):
         '''

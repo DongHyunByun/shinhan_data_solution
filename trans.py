@@ -31,19 +31,20 @@ class Trans:
     y = None
     m = None
 
-    def __init__(self,data_path,str_d,work_day):
-        self.data_path = data_path
-        self.path = f"{data_path}\\{str_d}"
-        self.refer_path = f"{data_path}\\refer"
+    def __init__(self,project_path,str_d,work_day):
+        self.project_path = project_path
+        self.str_d = str_d  # yyyymm
+        self.work_day = work_day
 
-        self.str_d = str_d #yyyymm
+        self.data_path = f"{self.project_path}\\data"
+        self.path = f"{self.project_path}\\data\\{str_d}"
+        self.refer_path = f"{self.project_path}\\refer"
+
         self.d = datetime.strptime(str_d, '%Y%m')
         self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m')
 
         self.y = str_d[:4]
         self.last_y = str(int(str_d[:4]) - 1)
-        self.work_day = work_day
-
         self.m = str_d[5:].lstrip('0')
 
         self.func_dict = {"1"    : [],  # 리얼탑KB아파트단지매핑
@@ -97,7 +98,7 @@ class Trans:
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
-            if int(self.m) in months and self.work_day == str(day):
+            if (int(self.m) in months) and (self.work_day in (str(day),"all")) :
                 print(f"{(num+'.'+file_name).center(60,'-')}")
                 if self.func_dict[num]:
                     if len(self.func_dict[num]) == 2:
@@ -258,7 +259,7 @@ class Trans:
         yyyymmdd = f"{self.str_d}01"
         df.insert(0, '지수발표일자', yyyymmdd)
 
-        df['지수산정일자'] = input('지수산정일자(YYYYMMDD), 현재는 20210601')
+        df['지수산정일자'] = input('지수산정일자(YYYYMMDD), 현재는 20210601 : ')
         df['가격지수값'] = df['가격지수값'].apply(lambda x: round(x, 2))
 
 
@@ -277,7 +278,7 @@ class Trans:
 
         while True:
             file_loc = f"{self.path}/20일/원천/9.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
-            file_path3 = f"{self.path}/20일/원천_처리후/9.op_jisu_20211116.csv"
+            file_path3 = f"{self.path}/20일/원천_처리후/9.op_jisu_{self.str_d}20.csv"
 
             cnt1_11 = int(input('1_11 시트의 데이터 개수를 입력해주세요 ex) 17 : '))
             cnt2_11 = int(input('2_11 시트의 데이터 개수를 입력해주세요 ex) 66 : '))
@@ -387,7 +388,12 @@ class Trans:
             print('작업 완료')
             break
 
-
+        # 추후 sas처리를 파이썬으로 바꾸는 작업
+        # opi = opi[(opi["class1"]!="전국")&(opi["class1"]!="수도권")]
+        # opi = opi[["date","a1","a2","a3","class1","class2"]].drop_duplicates()
+        #
+        # space_mapping_df  = pd.read_csv(f"{self.refer_path}/9_면적매핑.dat", encoding='ANSI')
+        
 
     def trans_10(self,y,m):
         print(f"10.용도지역별 지가지수")
@@ -2523,4 +2529,4 @@ class Trans:
 if __name__ == "__main__":
     str_d = "202306"
     work_day = "20"
-    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',str_d,work_day)
+    trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data',str_d,work_day)

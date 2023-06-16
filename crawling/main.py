@@ -8,10 +8,10 @@ if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument("--d", type=str, default=datetime.today().strftime("%Y%m"),
                       help="크롤링을 시작할 날짜. YYYYMM")
-    args.add_argument("--path", type=str, default=f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data',
-                      help="날짜별 폴더가 저장될 폴더")
+    args.add_argument("--path", type=str, default=f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data',
+                      help="프로젝트 폴더")
     args.add_argument("--work_day", type=str, default='all',
-                      help="작업대상 일자(5일, 20일, 말일)")
+                      help="작업대상 일자(05, 20, 30)")
     config = args.parse_args()
 
     str_d = config.d
