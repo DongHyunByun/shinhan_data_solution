@@ -35,10 +35,11 @@ class FileDown:
     browser = None
     path = None
 
-    def __init__(self,str_d,project_path,work_day):
+    def __init__(self,project_path,str_d,work_day,RUN_SCHEDULE):
         self.str_d = str_d
         self.project_path = project_path
         self.work_day = work_day
+        self.RUN_SCHEDULE = RUN_SCHEDULE
 
         self.data_path = f"{self.project_path}\\data"
         self.path = f"{self.project_path}\\data\\{str_d}"
@@ -95,8 +96,8 @@ class FileDown:
                         "88"   : [self.filedown_88_ex57],
         }
 
-        dir_dict = {str_d : {"5일" : {"원천":None, "원천_처리후":None},
-                             "20일": {"원천":None, "원천_처리후":None},
+        dir_dict = {str_d : {"5" : {"원천":None, "원천_처리후":None},
+                             "20": {"원천":None, "원천_처리후":None},
                              "말일": {"원천":None, "원천_처리후":None},}
                     }
         mkdir_dfs(self.data_path, dir_dict)
@@ -107,7 +108,7 @@ class FileDown:
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
-            if (int(self.m) in months) and (self.work_day in (str(day),"all")):
+            if (int(self.m) in months) and (self.work_day in (day,"all")):
                 print(f"{(num+'.'+file_name).center(60,'-')}")
                 now_month_date["num"].append(num)
                 now_month_date["file_name"].append(file_name)
@@ -152,6 +153,7 @@ class FileDown:
     def filedown_5(self,y,m):
         file_num = 5
         print(f"{file_num}.산단격차율")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
 
         urls = ["https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do",
                 "https://www.factoryon.go.kr/bbs/frtblRecsroomBbsList.do?pageIndex=2"] # 크롤링할 싸이트
@@ -179,7 +181,7 @@ class FileDown:
                 file_name = soup.select("table.cellType_a.inpCell.lastLine>tbody>tr")[3].a.text
                 down_url = f"https://www.factoryon.go.kr{down_url_last}"
 
-                request.urlretrieve(down_url, f"{self.path}/5일/원천/5.산단격차율_{file_name}")
+                request.urlretrieve(down_url, f"{self.path}/{day_folder_name}/원천/5.산단격차율_{file_name}")
                 break
             else:
                 continue
@@ -188,6 +190,7 @@ class FileDown:
     def filedown_8(self):
         file_num=8
         print(f"{file_num}.전국주택 매매가격지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
 
         file_dir_dict = {
             "단독":
@@ -225,7 +228,7 @@ class FileDown:
         }
 
         # 폴더 경로생성
-        start_path = f"{self.path}/20일/원천/"
+        start_path = f"{self.path}/{day_folder_name}/원천/"
         dir_dict = {"8.전국주택 매매가격지수": {"단독": None, "아파트": None, "연립": None, "종합": None}}
         mkdir_dfs(start_path, dir_dict)
 
@@ -233,13 +236,15 @@ class FileDown:
             name_url_dict = file_dir_dict[folder]
             for file_name, url in name_url_dict.items():
                 print(file_name)
-                request.urlretrieve(url, f"{self.path}/20일/원천/8.전국주택 매매가격지수/{folder}/{file_name}")
+                request.urlretrieve(url, f"{self.path}/{day_folder_name}/원천/8.전국주택 매매가격지수/{folder}/{file_name}")
 
     def filedown_9(self, y, m):
-        print(f"9.오피스탤 매매가격지수")
-        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=OFST"
+        file_num="9"
+        print(f"{file_num}.오피스탤 매매가격지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
 
-        folder_path = f"{self.path}/20일/원천"
+        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=OFST"
         page = self.try_request(url)
         soup = bs(page.text, "html.parser")
 
@@ -277,10 +282,12 @@ class FileDown:
         #     request.urlretrieve(down_url, f"{folder_path}/9.{file_name}")
 
     def filedown_10(self,y=None,m=None):
-        print(f"10.용도지역별 지가지수")
-        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR"
+        file_num = "10"
+        print(f"{file_num}.용도지역별 지가지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
 
-        folder_path = f"{self.path}/말일/원천"
+        url = "https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR"
         page = self.try_request(url)
         soup = bs(page.text, "html.parser")
 
@@ -318,9 +325,12 @@ class FileDown:
 
 
     def filedown_32_ex1(self,y,m):
-        file_num = 1
-        print(f"32.이용상황별 지가변동률 , 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}/20일/원천"
+        file_num = "32"
+        ex_file_num = "1"
+        print(f"{file_num}.이용상황별 지가변동률 , 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
+
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
         soup.select('tr>td>a.nttInfoBtn')
@@ -344,12 +354,15 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url,f"{folder_path}/{file_num}.{file_type}")
+                request.urlretrieve(down_url,f"{folder_path}/{ex_file_num}.{file_type}")
 
     def filedown_33_51_ex2_20(self,y,m):
-        file_num = "2-20"
-        print(f"33-51.공동주택 통합 매매 실거래가격지수~연립 다세대 매매 평균가격 , 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}/20일/원천"
+        file_num="33-51"
+        ex_file_num = "2-20"
+        print(f"{file_num}.공동주택 통합 매매 실거래가격지수~연립 다세대 매매 평균가격 , 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
+
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=TSPIA')
         soup = bs(page.text, "html.parser")
 
@@ -371,7 +384,7 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url,f"{folder_path}/{file_num}.xlsm")
+                request.urlretrieve(down_url,f"{folder_path}/{ex_file_num}.xlsm")
 
         # # 시트나누기
         # row_down_path = f"{folder_path}/{file_name}"
@@ -396,9 +409,12 @@ class FileDown:
         # pd.read_excel(row_down_path, sheet_name='매매 평균_연립 다세대').to_csv(f"{folder_path}/20.csv", index=False, encoding='cp949')
 
     def filedown_52_ex21(self):
-        file_num = "21"
-        print(f"52.경기종합지수, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "52"
+        ex_file_num = "21"
+        print(f"{file_num}.경기종합지수, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1C8015&orgId=101&listId=J1_1&dbUser=NSI.&language=ko',))
 
@@ -408,12 +424,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path,file_num)
+        change_last_file(folder_path,ex_file_num)
 
     def filedown_53_ex22(self):
-        file_num = "22"
-        print(f"53.품목별 소비자물가지수, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "53"
+        ex_file_num = "22"
+        print(f"{file_num}.품목별 소비자물가지수, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_1J20112&orgId=101&listId=P2_6&dbUser=NSI.&language=ko',))
 
@@ -448,12 +467,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_54_ex23(self):
-        file_num = "23"
-        print(f"54.생산자물가지수(품목별), 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "54"
+        ex_file_num = "23"
+        print(f"{file_num}.생산자물가지수(품목별), 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_404Y016&orgId=301&listId=P2_301002&dbUser=NSI.&language=ko',))
 
@@ -477,12 +499,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_55_ex24(self):
-        file_num = "24"
-        print(f"55.면적별 건축물 현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "55"
+        ex_file_num = "24"
+        print(f"{file_num}.면적별 건축물 현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_540&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
 
@@ -498,12 +523,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_56_ex25(self):
-        file_num = "25"
-        print(f"56.용도별 건축물 현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "56"
+        ex_file_num = "25"
+        print(f"{file_num}.용도별 건축물 현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_522&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
 
@@ -519,12 +547,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_57_ex26(self):
-        file_num = "26"
-        print(f"57.층수별 건축물 현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "57"
+        ex_file_num = "26"
+        print(f"{file_num}.층수별 건축물 현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_524&orgId=116&listId=M1_5&dbUser=NSI.&language=ko',))
 
@@ -540,12 +571,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_58_ex27(self):
-        file_num = "27"
-        print(f"58.동수별 연면적별 건축착공현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "58"
+        ex_file_num = "27"
+        print(f"{file_num}.동수별 연면적별 건축착공현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6905&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
 
@@ -564,12 +598,14 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_59_ex28(self):
-        file_num = "28"
-        print(f"59.동수별 연면적별 건축허가현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "59"
+        ex_file_num = "28"
+        print(f"59.동수별 연면적별 건축허가현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(30,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6906&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
 
@@ -588,12 +624,14 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_60_ex29(self):
-        file_num = "29"
-        print(f"60.시도별 건축물착공현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "60"
+        ex_file_num = "29"
+        print(f"{file_num}.시도별 건축물착공현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(25,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_2200&orgId=116&listId=M1_6&dbUser=NSI.&language=ko',))
 
@@ -634,28 +672,30 @@ class FileDown:
         for i in range(1,7):
             print(L[i-1])
             if i!=1:
-                self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
-            self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i+1}]/span').click)
-            self.delay_after_func(3, browser.switch_to.alert.accept)
+                self.delay_after_func(5, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i}]/span').click)
+            self.delay_after_func(5, browser.find_element(By.XPATH, f'//*[@id="ft-id-1"]/li[{i+1}]/span').click)
+            self.delay_after_func(5, browser.switch_to.alert.accept)
 
-            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
+            self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="searchImg2"]').click)
             mk_time = time.time()
             self.delay_after_func(30, browser.find_element(By.XPATH, '//*[@id="downLargeBtn"]').click)
 
             if file_check_func(folder_path,mk_time):
-                change_last_file(folder_path, f"{file_num}_{L[i-1]}")
+                change_last_file(folder_path, f"{ex_file_num}_{L[i-1]}")
             else:
                 print("실패!")
 
-            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
-            self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
+            self.delay_after_func(4, browser.find_element(By.XPATH, '//*[@id="pop_downglarge2"]/div[@class="pop_top"]/span[@class="closeBtn"]').click)  # 취소
+            self.delay_after_func(4, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) #설정창열기
 
     def filedown_61_ex30(self):
-        file_num = "30"
-        print(f"61.연도별 건축허가현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
-        browser = self.kosis_init_broswer(folder_path)
+        file_num = "61"
+        ex_file_num = "30"
+        print(f"61.연도별 건축허가현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
 
+        browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6920&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
 
         browser.switch_to.frame('iframe_rightMenu')
@@ -663,14 +703,16 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_62_ex31(self):
-        file_num = "31"
-        print(f"62.시도별 재건축사업 현황 누계, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
-        browser = self.kosis_init_broswer(folder_path)
+        file_num = "62"
+        ex_file_num = "31"
+        print(f"{file_num}.시도별 재건축사업 현황 누계, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
 
+        browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_6192&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
 
         browser.switch_to.frame('iframe_rightMenu')
@@ -678,12 +720,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_65_ex34(self):
-        file_num = "34"
-        print(f"65.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "65"
+        ex_file_num = "34"
+        print(f"{file_num}.부문별 주택건설 인허가실적(월별누계), 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1946&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
 
@@ -708,12 +753,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_67_ex36(self):
-        file_num = "36"
-        print(f"67.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "67"
+        ex_file_num = "36"
+        print(f"{file_num}.주택규모별 주택건설 인허가실적(월별누계), 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_1952&orgId=116&listId=116_11626_001&dbUser=NSI.&language=ko',))
 
@@ -752,12 +800,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_69_ex38(self):
-        file_num = "38"
-        print(f"69.공사완료후 미분양현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = '69'
+        ex_file_num = "38"
+        print(f"{file_num}.공사완료후 미분양현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=5328&hDivEng=&month_yn=',))
 
@@ -768,12 +819,15 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_70_ex39(self):
-        file_num = "39"
-        print(f"70.규모별 미분양현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "70"
+        ex_file_num = "39"
+        print(f"70.규모별 미분양현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2080&hDivEng=&month_yn=',))
 
@@ -784,7 +838,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_39_kosis(self):
         file_num = "39"
@@ -816,9 +870,12 @@ class FileDown:
         change_last_file(folder_path, file_num)
 
     def filedown_72_ex41(self):
-        file_num = "41"
-        print(f"72.시군구별 미분양현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num="72"
+        ex_file_num = "41"
+        print(f"{file_num}.시군구별 미분양현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(15, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=32&hFormId=2082&hDivEng=&month_yn=',))
 
@@ -829,7 +886,7 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_41_kosis(self):
         file_num = "41"
@@ -856,9 +913,12 @@ class FileDown:
         change_last_file(folder_path, file_num)
 
     def filedown_73_ex42(self):
-        file_num = "42"
-        print(f"73.공동주택현황, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "73"
+        ex_file_num = "42"
+        print(f"{file_num}.공동주택현황, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://stat.molit.go.kr/portal/cate/statView.do?hRsId=419&hFormId=5882&hDivEng=&month_yn=',))
 
@@ -870,12 +930,15 @@ class FileDown:
         self.delay_after_func(1, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
         self.delay_after_func(3, browser.find_element(By.XPATH,'//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_74_ex43(self):
-        file_num = "43"
-        print(f"74.주택유형별 주택준공실적_ 다가구구분, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "74"
+        ex_file_num = "43"
+        print(f"74.주택유형별 주택준공실적_ 다가구구분, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5373&orgId=116&listId=116_11626_003&dbUser=NSI.&language=ko',))
 
@@ -908,12 +971,15 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser, "xlsx")
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_75_ex44(self):
-        file_num = "44"
-        print(f"75.주택유형별 착공실적다가구 구분, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\말일\\원천"
+        file_num = "75"
+        ex_file_num = "44"
+        print(f"{file_num}.주택유형별 착공실적다가구 구분, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(45,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_MLTM_5387&orgId=116&listId=116_11626_002&dbUser=NSI.&language=ko',))
 
@@ -939,9 +1005,11 @@ class FileDown:
 
         # 다운로드(시점후 바로 다운로드창으로)
         self.kosis_download(browser, "xlsx")
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_76_80_ex45_49(self):
+        file_num = "76-80"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
         index_to_file_num={2:"45", 3:"46",6:"47",4:"48",5:"49"}
         index_to_file_name={2:"76.부동산시장 소비심리지수",
                             3:"77.주택시장 소비심리지수",
@@ -949,14 +1017,14 @@ class FileDown:
                             5:"79.주택매매시장 소비심리지수",
                             6:"80.주택전세시장 소비심리지수"}
 
-        folder_path = f"{self.path}\\말일\\원천"
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://kremap.krihs.re.kr/grid/grid?jisu=167',))
 
         # 45~49 하나씩 다운로드
         for i in range(2,7):
-            file_num = index_to_file_num[i]
-            print(f"{index_to_file_name[i]}, 외부통계 번호 : {file_num}")
+            ex_file_num = index_to_file_num[i]
+            print(f"{index_to_file_name[i]}, 외부통계 번호 : {ex_file_num}")
 
             self.delay_after_func(3, browser.find_element(By.XPATH, f'//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[{i}]').click)  # 조회클릭
 
@@ -965,7 +1033,7 @@ class FileDown:
             # 엑셀다운로드
             button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_excel_down"]')
             self.delay_after_func(3, ActionChains(browser).move_to_element(button).click(button).perform)
-            change_last_file(folder_path, file_num)
+            change_last_file(folder_path, ex_file_num)
 
         # browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]/option[4]').click()  # n번째
         # button = browser.find_element(By.XPATH, '//*[@id="Middle_ContentPlaceHolder2_Data_kind2"]')
@@ -1053,11 +1121,13 @@ class FileDown:
          8월 : 2분기
         11월 : 3분기
         '''
-        file_num = "50"
-        print(f"81.국토부 상가수익률, 외부통계 번호 : {file_num}")
-        month_to_quater = {"2":4,"5":1,"8":2,"11":3}
+        file_num = "81"
+        ex_file_num = "50"
+        print(f"81.국토부 상가수익률, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
 
-        folder_path = f"{self.path}/말일/원천"
+        month_to_quater = {"2": 4, "5": 1, "8": 2, "11": 3}
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=RCS')
         soup = bs(page.text, "html.parser")
 
@@ -1075,13 +1145,15 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_name}")
+                request.urlretrieve(down_url, f"{folder_path}/{ex_file_num}.{file_name}")
                 break
 
 
     def filedown_82_ex51(self):
-        file_num = "51"
-        print(f"82.K-REMAP지수, 외부통계 번호 : {file_num}")
+        file_num = "82"
+        ex_file_num = "51"
+        print(f"{file_num}.K-REMAP지수, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
 
         ua = UserAgent()
         headers = {
@@ -1089,7 +1161,7 @@ class FileDown:
         }
 
         # [전국, 수도권, 비수도권 값]
-        folder_path = f"{self.path}\\말일\\원천"
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://kremap.krihs.re.kr/grid/grid?jisu=166',))
 
@@ -1143,7 +1215,7 @@ class FileDown:
                                            float(kremap_refer[kremap_refer["지역명"]  == "비수도권"][f"{yyyy}-{mm}"])]
                                    })
             df = pd.concat([df, df_add], axis=0, ignore_index=True)
-            df.to_csv(f"{self.path}\\말일\\원천\\51.KREMAP_CRW.csv", index=False, encoding='ANSI')
+            df.to_csv(f"{self.path}\\{day_folder_name}\\원천\\{ex_file_num}.KREMAP_CRW.csv", index=False, encoding='ANSI')
 
             if yyyymm=="201108":
                 break
@@ -1162,10 +1234,13 @@ class FileDown:
         base_yy = month_to_quater[int(self.m)][0][2:]
         quater = month_to_quater[int(self.m)][1]
 
-        file_name = "83.전국산업단지현황통계, 외부통계번호 : 52"
+        file_num = "83"
+        ex_file_num = "52"
+        file_name = f"{file_num}.전국산업단지현황통계, 외부통계번호 : {ex_file_num}"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
         print(file_name)
 
-        folder_path = f"{self.path}\\말일\\원천"
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://www.kicox.or.kr/user/bbs/BD_selectBbsList.do?q_bbsCode=1036&q_clCode=2',))
 
@@ -1186,13 +1261,16 @@ class FileDown:
         down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
 
         self.delay_after_func(5, browser.get, (down_url,))
-        change_last_file(folder_path, f"52. 산업단지현황조사_{base_yy}.{quater}분기")
+        change_last_file(folder_path, f"{ex_file_num}. 산업단지현황조사_{base_yy}.{quater}분기")
 
     def filedown_84_ex53(self,y=None,m=None):
-        file_name = "84.국가산업단지산업동향, 외부통계번호 : 53"
+        file_num = "84"
+        ex_file_num = "53"
+        file_name = f"{file_num}.국가산업단지산업동향, 외부통계번호 : {ex_file_num}"
         print(file_name)
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
 
-        folder_path = f"{self.path}\\말일\\원천"
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ('https://www.kicox.or.kr/user/bbs/BD_selectBbsList.do?q_bbsCode=1036&q_clCode=1',))
 
@@ -1207,12 +1285,15 @@ class FileDown:
 
         down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
         self.delay_after_func(5, browser.get, (down_url,))
-        change_last_file(folder_path, f"53.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
+        change_last_file(folder_path, f"{ex_file_num}.주요 국가산업단지 산업동향({y[2:]}.{m}월 공시용)")
 
     def filedown_86_ex55(self, y, m):
-        file_num = "55"
-        print(f"86.이용상황별 지가지수, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}/20일/원천"
+        file_num = "86"
+        ex_file_num = "55"
+        print(f"{file_num}.이용상황별 지가지수, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}/{day_folder_name}/원천"
+
         page = self.try_request('https://www.reb.or.kr/r-one/na/ntt/selectNttList.do?mi=9509&bbsId=1106&searchCate=LFR')
         soup = bs(page.text, "html.parser")
 
@@ -1234,24 +1315,29 @@ class FileDown:
                         down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
                         break
 
-                request.urlretrieve(down_url, f"{folder_path}/{file_num}.{file_type}")
+                request.urlretrieve(down_url, f"{folder_path}/{ex_file_num}.{file_type}")
 
     def filedown_87_ex56(self):
-        file_num = "56"
-        print(f"87.주요정책사업(혁신도시) 지가지수, 외부통계 번호 : {file_num}")
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "87"
+        ex_file_num = "56"
+        print(f"{file_num}.주요정책사업(혁신도시) 지가지수, 외부통계 번호 : {ex_file_num}")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
+
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(10, browser.get, ("https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=LFR_13200",))
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="S_FileBox"]').click)
 
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def filedown_88_ex57(self):
-        folder_path = f"{self.path}\\20일\\원천"
+        file_num = "88"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        folder_path = f"{self.path}\\{day_folder_name}\\원천"
 
         # 첫번째
-        file_num = "57_1"
-        print(f"88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {file_num}")
+        ex_file_num = "57_1"
+        print(f"{file_num}.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {ex_file_num}")
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20, browser.get, ('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y003&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
@@ -1260,11 +1346,11 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
         # 두번째
-        file_num = "57_2"
-        print(f"88.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {file_num}")
+        ex_file_num = "57_2"
+        print(f"{file_num}.예금취급기관의 가계대출[주택담보대출+기타대출] 지역별(월별), 외부통계 번호 : {ex_file_num}")
         browser = self.kosis_init_broswer(folder_path)
         self.delay_after_func(20,browser.get,('https://kosis.kr/statHtml/statHtml.do?vwCd=MT_ZTITLE&tblId=DT_151Y006&orgId=301&listId=S1_301006_003_006&dbUser=NSI.&language=ko',))
 
@@ -1286,7 +1372,7 @@ class FileDown:
 
         # 다운로드
         self.kosis_download(browser)
-        change_last_file(folder_path, file_num)
+        change_last_file(folder_path, ex_file_num)
 
     def kosis_init_broswer(self,folder_path):
         chrome_options = webdriver.ChromeOptions()
@@ -1296,7 +1382,7 @@ class FileDown:
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True
         })
-        browser = webdriver.Chrome(chrome_options=chrome_options, executable_path="../chromedriver.exe")
+        browser = webdriver.Chrome(chrome_options=chrome_options, executable_path="chromedriver.exe")
         return browser
 
     def kosis_download(self,browser,type="excel"):

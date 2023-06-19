@@ -31,10 +31,11 @@ class Trans:
     y = None
     m = None
 
-    def __init__(self,project_path,str_d,work_day):
+    def __init__(self,project_path,str_d,work_day, RUN_SCHEDULE):
         self.project_path = project_path
         self.str_d = str_d  # yyyymm
         self.work_day = work_day
+        self.RUN_SCHEDULE = RUN_SCHEDULE
 
         self.data_path = f"{self.project_path}\\data"
         self.path = f"{self.project_path}\\data\\{str_d}"
@@ -46,6 +47,8 @@ class Trans:
         self.y = str_d[:4]
         self.last_y = str(int(str_d[:4]) - 1)
         self.m = str_d[5:].lstrip('0')
+
+        self.to_day = {"말일":return_last_day_of_yyyymm(self.y,self.m)}
 
         self.func_dict = {"1"    : [],  # 리얼탑KB아파트단지매핑
                           "2"    : [],  # 리얼탑 kb아파트평형시세매핑(sas)
@@ -112,10 +115,14 @@ class Trans:
                     print("함수없음")
 
     def trans_5(self, yyyy, m):
-        print("5.산단격차율")
+        file_num = "5"
+        print(f"{file_num}.산단격차율")
+        day_folder_name  = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2],self.RUN_SCHEDULE[file_num][2])
+
         while True:
-            file_loc = f"{self.path}/5일/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
-            file_path3 = f"{self.path}/5일/원천_처리후"
+            file_loc = f"{self.path}/{day_folder_name}/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
+            file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
             # 엑셀 파일 읽기
             jisic = pd.read_excel(file_loc)
@@ -155,15 +162,19 @@ class Trans:
             break
 
     def trans_8(self):
-        print(f"8.전국주택 매매가격지수")
+        file_num = "8"
+        print(f"{file_num}.전국주택 매매가격지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         pd.options.display.float_format = '{:.15f}'.format
 
-        file_path = f"{self.path}/20일/원천/8.전국주택 매매가격지수"
-        file_path3 = f"{self.path}/20일/원천_처리후/8.전국주택 매매가격지수"
-        last_to_path = f'{self.data_path}/{self.last_str_d}/20일/원천_처리후/rtp_khpi_inf_{self.last_str_d}.txt'
-        to_path = f'{self.path}/20일/원천_처리후/rtp_khpi_inf_{self.str_d}.dat'
 
-        start_path = f"{self.path}/20일/원천_처리후/"
+        file_path = f"{self.path}/{day_folder_name}/원천/8.전국주택 매매가격지수"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후/8.전국주택 매매가격지수"
+        last_to_path = f'{self.data_path}/{self.last_str_d}/{day_folder_name}/원천_처리후/rtp_khpi_inf_{self.last_str_d}.txt'
+        to_path = f'{self.path}/{day_folder_name}/원천_처리후/rtp_khpi_inf_{self.str_d}.dat'
+
+        start_path = f"{self.path}/{day_folder_name}/원천_처리후/"
         dir_dict = {"8.전국주택 매매가격지수" : None}
         mkdir_dfs(start_path, dir_dict)
 
@@ -273,12 +284,15 @@ class Trans:
         df_fin.to_csv(to_path , sep='|', index=False, header=False, encoding='ANSI')
 
     def trans_9(self,y,m):
-        print(f"9.오피스탤 매매가격지수")
+        file_num = "9"
+        print(f"{file_num}.오피스탤 매매가격지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         pd.options.display.float_format = '{:.20f}'.format
 
         while True:
-            file_loc = f"{self.path}/20일/원천/9.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
-            file_path3 = f"{self.path}/20일/원천_처리후/9.op_jisu_{self.str_d}20.csv"
+            file_loc = f"{self.path}/{day_folder_name}/원천/{file_num}.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
+            file_path3 = f"{self.path}/{day_folder_name}/원천_처리후/{file_num}.op_jisu_{self.str_d}{day_file_name}.csv"
 
             cnt1_11 = int(input('1_11 시트의 데이터 개수를 입력해주세요 ex) 17 : '))
             cnt2_11 = int(input('2_11 시트의 데이터 개수를 입력해주세요 ex) 66 : '))
@@ -396,10 +410,13 @@ class Trans:
         
 
     def trans_10(self,y,m):
-        print(f"10.용도지역별 지가지수")
+        file_num = "10"
+        print(f"{file_num}.용도지역별 지가지수")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
 
-        file_path = f"{self.path}/말일/원천/10.{y}년 {m}월 지가지수.xls"
-        file_path3 = f"{self.path}/말일/원천_처리후"
+        file_path = f"{self.path}/{day_folder_name}/원천/10.{y}년 {m}월 지가지수.xls"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         # 엑셀 불러오기 (멀티 컬럼이라 header를 그냥 3으로 설정)
         df = pd.read_excel(file_path, dtype='str', header=3)
@@ -479,12 +496,16 @@ class Trans:
         print('KEY값 중복 확인')
         print(df_tp.iloc[:, [0, 1, -1]].drop_duplicates())
 
-        df_tp.to_csv(f"{file_path3}/10.rtp_landpi_inf_{yyyymm}.dat", sep='|', header=None, index=False, encoding='ANSI')
+        df_tp.to_csv(f"{file_path3}/rtp_landpi_inf_{yyyymm}.txt", sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_32_ex1(self):
-        print("32.이용상황별 지가변동률 , 외부통계 번호 : 1")
-        file_path1 = f"{self.path}/20일/원천/1.xls"
-        file_path3 = f"{self.path}/20일/원천_처리후"
+        file_num="32"
+        print(f"{file_num}.이용상황별 지가변동률 , 외부통계 번호 : 1")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
+
+        file_path1 = f"{self.path}/{day_folder_name}/원천/1.xls"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         jiga = pd.read_excel(file_path1, header=3, dtype='str')
 
@@ -537,13 +558,16 @@ class Trans:
         jiga.drop_duplicates(inplace=True)
         jiga.insert(0, 'base_dt', f"{self.last_str_d}01")
 
-        jiga.to_csv(f'{file_path3}/1.rtp_usecase_jg_yyyymmdd.dat', sep='|', index=False, encoding='ANSI')
+        jiga.to_csv(f'{file_path3}/1.rtp_usecase_jg_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
 
     def trans_33_51_ex2_20(self):
-        print(f"33-51 , 외부통계 번호 : 2-20")
+        file_num = "33-51"
+        print(f"{file_num} , 외부통계 번호 : 2-20")
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         # 파일 경로 설정
-        file_path1 = f"{self.path}/20일/원천/2-20.xlsm"
-        file_path3 = f"{self.path}/20일/원천_처리후"
+        file_path1 = f"{self.path}/{day_folder_name}/원천/2-20.xlsm"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         no_list = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         sheets = [['매매_공동주택', '매매 증감률_공동주택'], '매매_공동주택_계절조정', '규모별 매매_아파트', '규모별 전세_아파트', ['매매_아파트', '매매 증감률_아파트'],
@@ -579,7 +603,7 @@ class Trans:
         df = df.merge(jibang, how='inner', left_on='KED시도구분명', right_on='cdnm')
         df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '잠정증감율', '자료기준년월']].sort_values(by = ['자료발표일자', 'cd'], ascending = [False, True])
 
-        df.to_csv(f'{file_path3}/2.rtp_gdhse_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/2.rtp_gdhse_t_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 3번
         print("34.공동주택 통합 매매 계절조정지수, 외부통계 번호 : 3")
@@ -594,7 +618,7 @@ class Trans:
                                                                                 ascending=[False, True])
 
         scale_cd = pd.read_csv(f'{self.refer_path}/규모시군구.dat', sep='|', dtype='str', encoding='ANSI')
-        df.to_csv(f'{file_path3}/3.rtp_gdhse_sea_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/3.rtp_gdhse_sea_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 4번
         print("35.규모별 아파트 매매 실거래 가격지수, 외부통계 번호 : 4")
@@ -615,7 +639,7 @@ class Trans:
         df = df[['자료발표일자', 'cd_x', 'KED시도구분명', 'cd_y', 'cdnm_y', '실거래가격지수값', '지수기준년월']]
         df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/4.rtp_sz_apt_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/4.rtp_sz_apt_t_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 5번 데이터
         print("36.규모별 아파트 전세 실거래가격지수, 외부통계 번호 : 5")
@@ -635,7 +659,7 @@ class Trans:
         df['지수기준년월'] = '201711'
         df = df[['자료발표일자', 'cd_x', 'KED시도구분명', 'cd_y', 'cdnm_y', '실거래가격지수값', '지수기준년월']]
         df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
-        df.to_csv(f'{file_path3}/5.rtp_sz_apt_js_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/5.rtp_sz_apt_js_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         sido_cd = pd.read_csv(f'{self.refer_path}/시도.dat', sep='|', dtype='str', encoding='ANSI')
 
@@ -685,7 +709,7 @@ class Trans:
         df = df.merge(sido_cd, how='inner', left_on='KED시도구분명', right_on='cdnm')
         df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '잠정증감율', '지수기준년월']].sort_values(by=['자료발표일자', 'cd'],
                                                                                          ascending=[False, True])
-        df.to_csv(f'{file_path3}/7.rtp_apt_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/7.rtp_apt_t_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 8번 데이터
         print("39.아파트 전세 실거래가격지수, 외부통계 번호 : 8")
@@ -713,7 +737,7 @@ class Trans:
         df['지수기준년월'] = '201711'
         df = df.merge(sido_cd, how='inner', left_on='KED시도구분명', right_on='cdnm')
         df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '지수기준년월']].sort_values(by=['자료발표일자', 'cd'], ascending=[False, True])
-        df.to_csv(f'{file_path3}/8.rtp_apt_js_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/8.rtp_apt_js_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 9번 데이터
         print('40.아파트 규모별 매매 중위가격, 외부통게 번호 : 9')
@@ -735,7 +759,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=2)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/9.rtp_apt_sz_mid_yyyymmdd.dat', sep = '|', encoding = 'ANSI', index = False)
+        df.to_csv(f'{file_path3}/9.rtp_apt_sz_mid_{self.str_d}{day_file_name}.txt', sep = '|', encoding = 'ANSI', index = False)
 
         # 10번 데이터
         print("41.아파트 규모별 매매 평균가격, 외부통계 번호 : 10")
@@ -757,7 +781,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=2)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd_x', 'cd_y'], ascending=[False, True, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/10.rtp_apt_sz_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/10.rtp_apt_sz_avg_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 11번 데이터
         print('42.아파트 매매 중위가격, 외부통계 번호 : 11')
@@ -782,7 +806,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=2)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd'], ascending=[False, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/11.rtp_apt_t_mid_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/11.rtp_apt_t_mid_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 12번 데이터
         print('43.아파트 매매 평균가격, 외부통계 번호 : 12')
@@ -806,7 +830,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=2)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd'], ascending=[False, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/12.rtp_apt_t_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/12.rtp_apt_t_avg_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 13번 데이터
         print('44.아파트 전세 중위가격, 외부통계 번호 : 13')
@@ -830,7 +854,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=3)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd'], ascending=[False, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/13.rtp_apt_js_mid_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/13.rtp_apt_js_mid_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 14번 데이터
         print('45.아파트 전세 평균가격, 외부통계 번호 : 14')
@@ -854,7 +878,7 @@ class Trans:
         df = df.loc[df['자료발표일자'] == (datetime.now() - relativedelta(months=3)).strftime('%Y%m01'), :]
         df.sort_values(by=['자료발표일자', 'cd'], ascending=[False, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/14.rtp_apt_js_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/14.rtp_apt_js_avg_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 15번 데이터
         print('46.규모별 연립 다세대 매매 실거래가격지수, 외부통계 번호 : 15')
@@ -869,7 +893,7 @@ class Trans:
         df['지수기준년월'] = '201711'
         df.sort_values(by=['자료발표일자', '규모코드'], ascending=[False, True], inplace=True)
 
-        df.to_csv(f'{file_path3}/15.rtp_sz_yd_s_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/15.rtp_sz_yd_s_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 16번 데이터
         print('47.연립다세대 매매 실거래가격지수, 외부통계 번호 : 16')
@@ -894,7 +918,7 @@ class Trans:
         df = df.merge(jibang, how='inner', left_on='KED시도구분명', right_on='cdnm')
         df = df[['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값', '잠정증감율', '자료기준년월']].sort_values(by=['자료기준년월', '자료발표일자', 'cd'],
                                                                                          ascending=[False, False, True])
-        df.to_csv(f'{file_path3}/16.rtp_yd_t_inf_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/16.rtp_yd_t_inf_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 17번 데이터
         print('48.연립 다세대 규모별 매매 중위가격, 외부통계 번호 : 17')
@@ -907,7 +931,7 @@ class Trans:
         df.loc[df['규모'] == '60㎡초과', '규모코드'] = '1'
         df['지수기준년월'] = (datetime.now() - relativedelta(months=2)).strftime('%Y%m')
 
-        df.to_csv(f'{file_path3}/17.rtp_yd_sz_mid_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/17.rtp_yd_sz_mid_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 18번 데이터
         print('49.연립 다세대 규모별 매매 평균가격, 외부통계 번호 : 18')
@@ -920,7 +944,7 @@ class Trans:
         df.loc[df['규모'] == '60㎡초과', '규모코드'] = '1'
         df['지수기준년월'] = (datetime.now() - relativedelta(months=2)).strftime('%Y%m')
 
-        df.to_csv(f'{file_path3}/18.rtp_yd_sz_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/18.rtp_yd_sz_avg_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 19번 데이터
         print('50.연립다세대 매매 중위가격, 외부통계 번호 : 19')
@@ -934,7 +958,7 @@ class Trans:
             ['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값']]
         df['지수기준년월'] = (datetime.now() - relativedelta(months=2)).strftime('%Y%m')
 
-        df.to_csv(f'{file_path3}/19.rtp_yd_t_mid_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/19.rtp_yd_t_mid_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
         # 20번 데이터
         print('51.연립다세대 매매 평균가격, 외부통계 번호 : 20')
@@ -947,12 +971,15 @@ class Trans:
             ['자료발표일자', 'cd', 'KED시도구분명', '실거래가격지수값']]
         df['지수기준년월'] = (datetime.now() - relativedelta(months=2)).strftime('%Y%m')
 
-        df.to_csv(f'{file_path3}/20.rtp_yd_t_avg_yyyymmdd.dat', sep='|', encoding='ANSI', index=False)
+        df.to_csv(f'{file_path3}/20.rtp_yd_t_avg_{self.str_d}{day_file_name}.txt', sep='|', encoding='ANSI', index=False)
 
     def trans_52_ex21(self):
-        print('52.경기종합지수(2015=100) (10차), 외부통계 번호 : 21')
-        file_name1 = f"{self.path}/20일/원천/21.xlsx"
-        file_path2 = f"{self.path}/20일/원천_처리후/"
+        file_num = "52"
+        print(f'{file_num}.경기종합지수(2015=100) (10차), 외부통계 번호 : 21')
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
+        file_name1 = f"{self.path}/{day_folder_name}/원천/21.xlsx"
+        file_path2 = f"{self.path}/{day_folder_name}/원천_처리후/"
 
         df = pd.read_excel(file_name1, dtype='str', engine='openpyxl', sheet_name='데이터')
         df.columns = [re.sub('[ p)]', '', x) for x in df.columns]
@@ -977,14 +1004,17 @@ class Trans:
             print(tb(df, headers='keys', tablefmt='pretty'))
             print(df.shape)
 
-        df.to_csv(f"{file_path2}/21.rtp_cei_inf_yyyymmdd.dat",sep='|', index=False, encoding='ANSI')
+        df.to_csv(f"{file_path2}/21.rtp_cei_inf_{self.str_d}{day_file_name}.txt",sep='|', index=False, encoding='ANSI')
 
     def trans_53_ex22(self):
-        print('53.품목별 소비자물가지수(품목성질별: 2020=100), 외부통계 번호 : 22')
+        file_num = "53"
+        print(f'{file_num}.품목별 소비자물가지수(품목성질별: 2020=100), 외부통계 번호 : 22')
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         pd.set_option('display.float_format', '{:, %g}'.format)
 
-        file_path1 = f"{self.path}/20일/원천/22.xlsx"
-        file_path2 = f"{self.path}/20일/원천_처리후"
+        file_path1 = f"{self.path}/{day_folder_name}/원천/22.xlsx"
+        file_path2 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         # 원천 파일 불러오기
         df = pd.read_excel(file_path1, sheet_name='데이터', engine='openpyxl')
@@ -1017,7 +1047,7 @@ class Trans:
         out['자료기준년월'] = '202012'
         print(tb(out, headers='keys', tablefmt='pretty'))
 
-        out.to_csv(f"{file_path2}/22.rtp_item_cpi1_inf_yyyymm.dat", index=False, sep='|', header=None, encoding='ANSI')
+        out.to_csv(f"{file_path2}/22.rtp_item_cpi1_inf_{self.str_d}{day_file_name}.txt", index=False, sep='|', header=None, encoding='ANSI')
 
     def trans_54_ex23(self):
         '''
@@ -1027,9 +1057,12 @@ class Trans:
         비주거용건물임대 (2015=100)	103.66	103.66
         비주거용부동산관리 (2015=100)	108.29	108.43
         '''
+        file_num = "54"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         print('54.생산자물가지수(품목별)(2020=100), 외부통계 번호 : 23')
-        file_path1 = f"{self.path}/20일/원천/23.xlsx"
-        file_path2 = f"{self.path}/20일/원천_처리후/"
+        file_path1 = f"{self.path}/{day_folder_name}/원천/23.xlsx"
+        file_path2 = f"{self.path}/{day_folder_name}/원천_처리후/"
 
         df = pd.read_excel(file_path1, sheet_name='데이터')
         df.set_index('계정코드별', inplace=True)
@@ -1062,13 +1095,16 @@ class Trans:
         df['자료기준년월'] = '201512'
         print(tb(df, headers='keys', tablefmt='pretty'))
 
-        df.to_csv(file_path2 + '23.rtp_item_ppi_inf_yyyymmdd.dat',sep='|', index=False, encoding='ANSI')
+        df.to_csv(file_path2 + f'23.rtp_item_ppi_inf_{self.str_d}{day_file_name}.txt',sep='|', index=False, encoding='ANSI')
 
     def trans_55_ex24(self):
+        file_num = "55"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         columns = ['자료발표일자', 'KED분류시도구분', '시도명', '면적규모별구분', '면적규모별구분명', '면적별건축물동수', '면적별건축물동수비율', '자료기준년']
 
-        from_path = f"{self.path}/말일/원천/24.xlsx"
-        to_path = f"{self.path}/말일/원천_처리후/24.rtp_sqr_con_yyyymmdd.dat"
+        from_path = f"{self.path}/{day_folder_name}/원천/24.xlsx"
+        to_path = f"{self.path}/{day_folder_name}/원천_처리후/24.rtp_sqr_con_{self.str_d}{day_file_name}.txt"
 
         df = pd.read_excel(from_path, header=[0, 1])
 
@@ -1115,10 +1151,14 @@ class Trans:
         merge2.to_csv(to_path,sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_56_ex25(self):
+        file_num = "56"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
+
         columns = ['자료발표일자', 'KED분류시도구분', '시도명', '용도별구분', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']
 
-        from_path = f"{self.path}/말일/원천/25.xlsx"
-        to_path = f"{self.path}/말일/원천_처리후/25.rtp_yongdo_con_yyyymmdd.dat"
+        from_path = f"{self.path}/{day_folder_name}/원천/25.xlsx"
+        to_path = f"{self.path}/{day_folder_name}/원천_처리후/25.rtp_yongdo_con_{self.str_d}{day_file_name}.txt"
 
         df = pd.read_excel(from_path, header=[0, 1])
 
@@ -1172,10 +1212,13 @@ class Trans:
         merge2.to_csv(to_path, sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_57_ex26(self):
+        file_num = "57"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         columns = ['자료발표일자', 'KED분류시도구분', '시도명', '층수별구분', '건축물구분명', '건축물동수', '건축물동수비율', '자료기준년']
 
-        from_path = f"{self.path}/말일/원천/26.xlsx"
-        to_path = f"{self.path}/말일/원천_처리후/26.rtp_floor_con_YYYYMMDD.dat"
+        from_path = f"{self.path}/{day_folder_name}/원천/26.xlsx"
+        to_path = f"{self.path}/{day_folder_name}/원천_처리후/26.rtp_floor_con_{self.str_d}{day_file_name}.txt"
 
         df = pd.read_excel(from_path , header=[0, 1])
 
@@ -1229,9 +1272,12 @@ class Trans:
         merge2.to_csv(to_path, sep='|', header=None, index=False, encoding='ANSI')
 
     def trans_58_ex27(self):
+        file_num = "58"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         print('58.동수별 연면적별 건축착공현황, 외부통계 번호 : 27')
-        file_path1 = f"{self.path}/말일/원천/27.xlsx"
-        file_path2 = f"{self.path}/말일/원천_처리후/"
+        file_path1 = f"{self.path}/{day_folder_name}/원천/27.xlsx"
+        file_path2 = f"{self.path}/{day_folder_name}/원천_처리후/"
 
         df = pd.read_excel(file_path1, dtype='str',sheet_name='데이터', engine='openpyxl')
         df.fillna(method='ffill', inplace=True)
@@ -1258,7 +1304,7 @@ class Trans:
         df = df[['날짜', 'code1', 'code2', '레벨', '항목', '값', '기준년월']]
         print(tb(df, headers='keys', tablefmt='pretty'))
 
-        df.to_csv(f'{file_path2}/27.rtp_d_alsqr_st_yyyymm.dat', sep='|', index=False, header=None, encoding='ANSI')
+        df.to_csv(f'{file_path2}/27.rtp_d_alsqr_st_{self.str_d}{day_file_name}.txt', sep='|', index=False, header=None, encoding='ANSI')
 
     def trans_59_ex28(self):
         print('59.동수별 연면적별 건축허가현황, 외부통계 번호 : 28')

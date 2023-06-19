@@ -39,10 +39,69 @@ def fill_row(file_path, columns):
 
     return df_origin
 
+def khapi_gangwon_change():
+    '''
+    오피스텔 전체 데이터 강원도 코드 변경
+    '''
+    path = "C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\final\\202306\\20일자\\오피스텔, 주택매매\\rtp_khpi_inf_202306.txt"
+    to_path = "C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\final\\202306\\20일자\\오피스텔, 주택매매\\rtp_khpi_inf_202306_new.txt"
+    df_origin = pd.read_csv(path, encoding='CP949', header=None, sep='|',dtype='str')
+
+
+    df = pd.DataFrame()
+    days = sorted(df_origin[0].unique(),reverse=True)
+
+    for d in days:
+        # d일의 강원도->강원특별자치도로 바꾼 데이터
+        new_gangwon_df = df_origin[(df_origin[0] == str(d))&(df_origin[2]=="강원도")]
+        new_gangwon_df[1] = "51" + new_gangwon_df[1].str[2:]
+        # new_gangwon_df[2].loc[(new_gangwon_df[2] == "강원도")] = "강원특별자치도"
+        new_gangwon_df[2] = ["강원특별자치도" for _ in range(len(new_gangwon_df))]
+
+        # d일의 강원도 + 강원자치도
+        d_df = df_origin[(df_origin[0] == str(d))]
+        d_df = pd.concat([d_df,new_gangwon_df]).drop_duplicates().sort_values(by=1)
+
+        # 전체 concoat
+        df = pd.concat([df, d_df])
+
+    df.to_csv(to_path , sep='|', index=False, header=False, encoding='ANSI')
+
+def ofpi_gangwon_change():
+    '''
+    주택매매 전체 데이터 강원도 코드 변경
+    '''
+
+    path = "C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\final\\202306\\20일자\\오피스텔, 주택매매\\rtp_ofpi_inf_202306.txt"
+    to_path = "C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\final\\202306\\20일자\\오피스텔, 주택매매\\rtp_ofpi_inf_202306_new.txt"
+    df_origin = pd.read_csv(path, encoding='CP949', header=None, sep='|',dtype='str')
+
+
+    df = pd.DataFrame()
+    days = sorted(df_origin[0].unique())
+
+    for d in days:
+        # d일의 강원도->강원특별자치도로 바꾼 데이터
+        new_gangwon_df = df_origin[(df_origin[0] == str(d))&(df_origin[2]=="강원도")]
+        new_gangwon_df[1] = "51" + new_gangwon_df[1].str[2:]
+        # new_gangwon_df[2].loc[(new_gangwon_df[2] == "강원도")] = "강원특별자치도"
+        new_gangwon_df[2] = ["강원특별자치도" for _ in range(len(new_gangwon_df))]
+
+        # d일의 강원도 + 강원자치도
+        d_df = df_origin[(df_origin[0] == str(d))]
+        d_df = pd.concat([d_df,new_gangwon_df]).drop_duplicates().sort_values(by=1)
+
+        # 전체 concoat
+        df = pd.concat([df, d_df])
+
+    df.to_csv(to_path , sep='|', index=False, header=False, encoding='ANSI')
+
 if __name__ == "__main__":
-    path = "C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\원천_처리후"
+    # path = "C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\원천_처리후"
+    # file_name = "8.rtp_apt_js_inf_yyyymmdd.dat" #!!!!!!!
+    # digit_col = "실거래가격지수값" #!!!!!!!
+    #
+    # round_digit(f"{path}\\{file_name}",digit_col,10)
 
-    file_name = "8.rtp_apt_js_inf_yyyymmdd.dat" #!!!!!!!
-    digit_col = "실거래가격지수값" #!!!!!!!
-
-    round_digit(f"{path}\\{file_name}",digit_col,10)
+    khapi_gangwon_change()
+    ofpi_gangwon_change()
