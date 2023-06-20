@@ -103,5 +103,5 @@ if __name__ == "__main__":
     #
     # round_digit(f"{path}\\{file_name}",digit_col,10)
 
-    khapi_gangwon_change()
+    # khapi_gangwon_change()
     ofpi_gangwon_change()

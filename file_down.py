@@ -60,7 +60,7 @@ class FileDown:
                         "10"   : [self.filedown_10],
                         "11"   : [],#리얼탑토지특성정보(공개 후 1개월)
                         "32"   : [self.filedown_32_ex1,return_y_m_before_n(self.d, 2)],
-                        "33_51": [self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3)],
+                        "33-51": [self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3)],
                         "52"   : [self.filedown_52_ex21],
                         "53"   : [self.filedown_53_ex22],
                         '54'   : [self.filedown_54_ex23],
@@ -85,7 +85,7 @@ class FileDown:
                         "73"   : [self.filedown_73_ex42],
                         "74"   : [self.filedown_74_ex43],
                         "75"   : [self.filedown_75_ex44],
-                        "76_80": [self.filedown_76_80_ex45_49],
+                        "76-80": [self.filedown_76_80_ex45_49],
                         "81"   : [self.filedown_81_ex50],
                         "82"   : [self.filedown_82_ex51],
                         "83"   : [self.filedown_83_ex52],
@@ -103,7 +103,6 @@ class FileDown:
         mkdir_dfs(self.data_path, dir_dict)
 
         now_month_date = {"num":[],"file_name":[],"day":[],"crawling":[]}
-
         for num,vals in RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
@@ -147,11 +146,11 @@ class FileDown:
                 pass
 
             if i==n-1:
-                print("실패", end=" ")
+                print("실패")
                 return False
 
     def filedown_5(self,y,m):
-        file_num = 5
+        file_num = "5"
         print(f"{file_num}.산단격차율")
         day_folder_name = self.RUN_SCHEDULE[file_num][2]
 
@@ -188,7 +187,7 @@ class FileDown:
 
 
     def filedown_8(self):
-        file_num=8
+        file_num="8"
         print(f"{file_num}.전국주택 매매가격지수")
         day_folder_name = self.RUN_SCHEDULE[file_num][2]
 
@@ -739,13 +738,13 @@ class FileDown:
 
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le2"]').click) # 시점선택
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
 
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시도별상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시도별상자 클릭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le4"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
 
@@ -772,14 +771,14 @@ class FileDown:
 
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le4"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click) #시점 클릭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
 
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시도별상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 규모상자 클릭
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le3"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
 
@@ -884,7 +883,7 @@ class FileDown:
         self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="main"]/div/div[@class="search-wrap"]/div[@class="search-form unfold"]/div[@class="search-item-detail"]/div[@class="search-item-group"]/div[@class="search-form-item"]/div[@class="mu-item-group"]/button').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="fileDownBtn"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-body"]/ul[@class="mu-check-list horizontal"]/li[2]').click)
-        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
+        self.delay_after_func(10, browser.find_element(By.XPATH, '//*[@id="file-download-modal"]/div[@class="mu-dialog"]/div[@class="mu-dialog-foot"]/button').click)
 
         change_last_file(folder_path, ex_file_num)
 
@@ -947,11 +946,11 @@ class FileDown:
         browser.switch_to.frame('iframe_centerMenu1')
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
 
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 대분류
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click) # 중분류
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click) # 소분류
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
         self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
 
@@ -988,11 +987,11 @@ class FileDown:
         browser.switch_to.frame('iframe_centerMenu1')
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
 
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)  # 대분류
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri2"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click) # 중분류
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
-        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri3"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri1"]').click)
         self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
         self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
 

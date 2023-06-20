@@ -23,4 +23,4 @@ if __name__ == "__main__":
     FileDown(path, str_d, work_day, RUN_SCHEDULE)
 
     # 데이터 전처리
-    # Trans(path, str_d, work_day, RUN_SCHEDULE)
+    Trans(path, str_d, work_day, RUN_SCHEDULE)
