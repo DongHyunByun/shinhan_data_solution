@@ -56,7 +56,7 @@ class FileDown:
                         "5"    : [self.filedown_5,return_y_m_before_n(self.d, 2)],
                         "6"    : [],#토지격차율(sas)
                         "8"    : [self.filedown_8],
-                        "9"    : [self.filedown_9,return_y_m_before_n(self.d, 2)],
+                        "9"    : [self.filedown_9,return_y_m_before_n(self.d, 1)],
                         "10"   : [self.filedown_10],
                         "11"   : [],#리얼탑토지특성정보(공개 후 1개월)
                         "32"   : [self.filedown_32_ex1,return_y_m_before_n(self.d, 2)],

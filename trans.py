@@ -56,7 +56,7 @@ class Trans:
                           "5"    : [self.trans_5, return_y_m_before_n_v2(self.d, 2)],
                           "6"    : [],  # 토지격차율(sas)
                           "8"    : [self.trans_8],
-                          "9"    : [self.trans_9, return_y_m_before_n_v2(self.d, 2)],
+                          "9"    : [self.trans_9, return_y_m_before_n_v2(self.d, 1)],
                           "10"   : [self.trans_10,return_y_m_before_n_v2(self.d, 1)],
                           "11"   : [],  # 리얼탑토지특성정보
                           "32"   : [self.trans_32_ex1],
@@ -2451,7 +2451,7 @@ class Trans:
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
             total.to_csv(f'{file_path2}/53.python_sandan_{yyyymm}25.dat', sep='|', index=False, encoding='ANSI')
-
+            break
         '''
         00 계
         01 기계
