@@ -57,7 +57,7 @@ class FileDown:
                         "6"    : [],#토지격차율(sas)
                         "8"    : [self.filedown_8],
                         "9"    : [self.filedown_9,return_y_m_before_n(self.d, 1)],
-                        "10"   : [self.filedown_10],
+                        "10"   : [self.filedown_10,return_y_m_before_n(self.d, 1)],
                         "11"   : [],#리얼탑토지특성정보(공개 후 1개월)
                         "32"   : [self.filedown_32_ex1,return_y_m_before_n(self.d, 2)],
                         "33-51": [self.filedown_33_51_ex2_20, return_y_m_before_n(self.d, 3)],
@@ -1280,7 +1280,9 @@ class FileDown:
                     self.delay_after_func(1, browser.find_element(By.XPATH,f'//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[{i+1}]').click)
                     break
         else:
-            self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[1]').click)
+            print("날짜없음")
+            return
+            # self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="table"]/table/tbody/tr[1]').click)
 
         down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
         self.delay_after_func(5, browser.get, (down_url,))

@@ -90,7 +90,7 @@ class Trans:
                           "81"   : [self.trans_81_ex50],
                           "82"   : [self.trans_82_ex51],
                           "83"   : [],  # 전국산업단지현황통계
-                          "84"   : [self.trans_84_ex53,return_y_m_before_n_v2(self.d, 2)], # todo 속도이슈, 메모리이슈
+                          "84"   : [self.trans_84_ex53,return_y_m_before_n_v2(self.d, 2)],
                           "85"   : [],  # 팩토리온 등록공장현황
                           "86"   : [self.trans_86_ex55],
                           "87"   : [self.trans_87_ex56],
@@ -2406,20 +2406,20 @@ class Trans:
                 p_df.fillna('', inplace=True)
 
                 print(tb(p_df, headers='keys', tablefmt='psql'))
-            #     conf = input('데이터가 올바르게 들어갔으면 y, 그렇지 않으면 n : ')
-            #     if conf == 'n':
-            #         break
-            #
-            # if conf == 'n':
-            #     break
+                conf = input('데이터가 올바르게 들어갔으면 y, 그렇지 않으면 n : ')
+                if conf == 'n':
+                    break
+
+            if conf == 'n':
+                break
 
             print()
             print('산업단지 명이 달라지는지 확인')
             time.sleep(2)
             print(tb(danji_df, headers='keys', tablefmt='psql'))
-            # conf1 = input('문제가 없으면 y, 수정이 필요하면 n : ')
-            # if conf1 == 'n':
-            #     break
+            conf1 = input('문제가 없으면 y, 수정이 필요하면 n : ')
+            if conf1 == 'n':
+                break
             print()
             yyyymm = y+m
             danji_df['작업년월'] = yyyymm
@@ -2428,10 +2428,9 @@ class Trans:
             yyyymm_bf = datetime.strptime(yyyymm, '%Y%m') - relativedelta(months=1)
             danji_nm_bf_tp = danji_nm_bf.loc[danji_nm_bf['작업년월'] == yyyymm_bf.strftime('%Y%m'), :]
 
-            print(tb(pd.concat([danji_nm, danji_nm_bf_tp]).drop_duplicates(subset='산업단지', keep=False),
-                           headers='keys', tablefmt='pretty'))
-            # if input('빈 데이터 프레임이 나오지 않으면 추가된 산업단지가 있다는 말임. 추가된 산업단지가 없다면 y, 있으면 n : ') == 'n':
-            #     break
+            print(tb(pd.concat([danji_nm, danji_nm_bf_tp]).drop_duplicates(subset='산업단지', keep=False), headers='keys', tablefmt='pretty'))
+            if input('빈 데이터 프레임이 나오지 않으면 추가된 산업단지가 있다는 말임. 추가된 산업단지가 없다면 y, 있으면 n : ') == 'n':
+                break
             danji_nm = pd.concat([danji_nm, danji_nm_bf])
             danji_nm.to_csv(f'{self.refer_path}/danji_nm.csv',index=False, encoding='ANSI')
 
@@ -2450,7 +2449,7 @@ class Trans:
                 pass
             print(tb(total.tail(50), headers='keys', tablefmt='psql'))
             # 파일 위치 확인
-            total.to_csv(f'{file_path2}/53.python_sandan_{yyyymm}25.dat', sep='|', index=False, encoding='ANSI')
+            total.to_csv(f'{file_path2}/53.python_sandan_{self.str_d}25.dat', sep='|', index=False, encoding='ANSI')
             break
         '''
         00 계
