@@ -1222,9 +1222,6 @@ class FileDown:
                 i+=1
 
     def filedown_83_ex52(self):
-        '''
-        가장 최근 데이터 크롤링
-        '''
         month_to_quater = {3:[self.last_y,"4"],
                            6:[self.y,"1"],
                            9:[self.y,"2"],

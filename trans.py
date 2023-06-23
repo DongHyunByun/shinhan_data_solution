@@ -42,7 +42,7 @@ class Trans:
         self.refer_path = f"{self.project_path}\\refer"
 
         self.d = datetime.strptime(str_d, '%Y%m')
-        self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m')
+        self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m') # 지난달 yyyymm
 
         self.y = str_d[:4]
         self.last_y = str(int(str_d[:4]) - 1)
@@ -2526,6 +2526,8 @@ class Trans:
 
         jiga['값'].replace('-', '', inplace=True)
         jiga.drop_duplicates(inplace=True)
+        jiga.insert(0, '자료발표일자', f"{self.last_str_d}01")
+        jiga['자료기준년월'] = "202009"
 
         print(tb(jiga, headers='keys', tablefmt='pretty'))
         jiga.to_csv(f"{file_path3}/55.rtp_usecase_jg_index_inf_{self.str_d}{day_file_name}.txt", sep='|', index=False, encoding='ANSI')
@@ -2567,6 +2569,7 @@ class Trans:
         df_fin['지수기준년월'] = '202210'
 
         df_fin = df_fin[['자료기준년월', '지역코드', '지역', '값', '지수기준년월']]
+        df_fin = df_fin.sort_values(by=['자료기준년월', '지역코드'], ascending=[False, True])
         print(tb(df_fin, headers='keys', tablefmt='pretty'))
 
         df_fin.to_csv(f"{file_path2}/56.rtp_hyuksin_city_jg_index_inf_{self.str_d}{day_file_name}.txt", sep='|', index=False,header=None, encoding='ANSI')
