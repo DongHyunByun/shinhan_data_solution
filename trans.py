@@ -89,7 +89,7 @@ class Trans:
                           "76-80": [self.trans_76_80_ex45_49],
                           "81"   : [self.trans_81_ex50],
                           "82"   : [self.trans_82_ex51],
-                          "83"   : [],  # 전국산업단지현황통계
+                          "83"   : [self.trans_83_ex52],
                           "84"   : [self.trans_84_ex53,return_y_m_before_n_v2(self.d, 2)],
                           "85"   : [],  # 팩토리온 등록공장현황
                           "86"   : [self.trans_86_ex55],
@@ -415,7 +415,7 @@ class Trans:
         day_folder_name = self.RUN_SCHEDULE[file_num][2]
         day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
 
-        file_path = f"{self.path}/{day_folder_name}/원천/10.{y}년 {m}월 지가지수.xls"
+        file_path = f"{self.path}/{day_folder_name}/원천/10.{y}년 {m}월 지가변동률.xls"
         file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         # 엑셀 불러오기 (멀티 컬럼이라 header를 그냥 3으로 설정)
@@ -2281,6 +2281,215 @@ class Trans:
         print(tb(fin, headers='keys', tablefmt='pretty'))
         fin.to_csv(f'{file_path2}/51.rtp_k_remap_{self.str_d}{day_file_name}.txt',encoding='ANSI', header=False, index=False)
 
+    def trans_83_ex52(self):
+        month_to_quater = {3: [self.last_y, "4"],
+                           6: [self.y, "1"],
+                           9: [self.y, "2"],
+                           12: [self.y, "3"]}
+        ex_file_num = "52"
+        base_yy = month_to_quater[int(self.m)][0][2:]
+        quater = month_to_quater[int(self.m)][1]
+        file_num = "83"
+
+        file_name = f"{ex_file_num}.산업단지현황조사_{base_yy}.{quater}분기.xlsx"
+        print(f"{file_num}.전국산업단지현황통계, 외부통계번호 : {ex_file_num}")
+
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
+        from_path = f"{self.path}/{day_folder_name}/원천/{file_name}"
+        to_path = f"{self.path}/{day_folder_name}/원천_처리후/{ex_file_num}.ked_sandan_st_{self.str_d}{day_file_name}.dat"
+
+        df_raw = pd.read_excel(from_path, sheet_name="전국산업단지현황",dtype='object')
+        map1_col = "산단공코드5(최종)"
+        df_map1 = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="mapping1", dtype='object')[["key", map1_col, "단지분할코드1"]]
+        map2_col = "SANDAN_CD"
+        df_map2 = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="mapping2", dtype='object')[["key", map2_col, "단지분할코드2"]]
+
+        df_sandan_code = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="sandancode", dtype='object')
+        df_sandangong_sigungu = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="산단공 시군구", dtype='object')
+        df_josung_mapping = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="조성상태_매핑", dtype='object')
+        df_typecode_mapping = pd.read_excel(f"{self.refer_path}/83_mapping.xlsx", sheet_name="유형코드_매핑", dtype='object')
+
+
+        df_raw = df_raw.loc[5:].reset_index(drop=True)
+        df_raw.columns = ["유형", "시도", "시군", "단지명", "조성상태", "지정면적", "관리면적", "전체면적", "분양대상", "분양",
+                          "미분양", "분양률", "입주업체", "가동업체", "남", "여", "계", "누계생산(백만원)", "누계수출(천달러)"]
+
+
+        final_col = ["기준년월", "산단공_관리코드", "단지분할코드", "단지명", "산업단지유형", "시도",
+               "시군구", "조성상태", "지정면적", "관리면적", "전체면적", "분양대상면적", "분양면적", "미분양면적",
+               "분양률", "입주업체수", "가동업체수", "고용현황_남", "고용현황_여", "고용현황_계", "누계생산금액", "누계수출금액",
+               "단지코드", "시도코드", "시군구코드1", "단지명CLN", "유형코드", "조성상태코드", "고용현황 미공개 여부",
+               "생산수출 미공개 여부", "시군구코드2", "시군구코드3", "시군구코드4", "시군구개수"]
+
+        # 제공 형태로 변경
+        df = pd.DataFrame(columns=final_col)
+
+        col_mapping = {"유형": "산업단지유형",
+                       "시군": "시군구",
+                       "분양대상": "분양대상면적",
+                       "분양": "분양면적",
+                       "미분양": "미분양면적",
+                       "입주업체": "입주업체수",
+                       "가동업체": "가동업체수",
+                       "남": "고용현황_남",
+                       "여": "고용현황_여",
+                       "계": "고용현황_계",
+                       "누계생산(백만원)": "누계생산금액",
+                       "누계수출(천달러)": "누계수출금액",
+                       }
+        for col in df_raw:
+            to_col = col_mapping.get(col, col)
+            df[to_col] = df_raw[col]
+
+        # 칼럼들 추가하기
+        df["원천단지명"] = df["단지명"]
+
+        df["단지명(스페이스삭제)"] = df["단지명"]
+        df["단지명(스페이스삭제)"] = df["단지명(스페이스삭제)"].str.strip()
+        df["단지명(스페이스삭제)"] = df["단지명(스페이스삭제)"].str.replace("\xa0", "")
+        df["단지명(스페이스삭제)"] = df["단지명(스페이스삭제)"].str.replace(" ", "")
+
+        df["key"] = df["단지명(스페이스삭제)"] + df["산업단지유형"] + df["시도"] + df["시군구"]
+        df["단지분할코드"] = df["원천단지명"].str.startswith('\xa0\xa0')  # 하위단지 구분을 위해 표시(merge하면 앞 빈칸이 없어짐)
+
+        df_origin = pd.DataFrame(df)
+        df = pd.merge(df, df_map1, left_on=['key', "단지분할코드"], right_on=['key', "단지분할코드1"],how='left').rename(columns={map1_col: "산단공코드1"})
+        df = pd.merge(df, df_map2, left_on=['key', "단지분할코드"], right_on=['key', "단지분할코드2"],how='left').rename(columns={map2_col: "산단공코드2"})
+        df_check = pd.DataFrame(df)
+
+        # 하나만 N/A
+        def empty_one(df):
+            for i in df[df["산단공코드1"].isnull() & df["산단공코드2"]].index:
+                df["산단공코드1"][i] = df["산단공코드2"][i]
+
+            for i in df[df["산단공코드2"].isnull() & df["산단공코드1"]].index:
+                df["산단공코드2"][i] = df["산단공코드1"][i]
+
+            return df
+
+        df = empty_one(df)
+
+        # # 개수가 다르면 다른 row 확인
+        # for i in range(len(df_check)):
+        #     is_same = True
+        #     for col in df_check:
+        #         if col in  ("산단공코드1","산단공코드2"):
+        #             continue
+        #         if (df_origin[col][i] == df_origin[col][i]) and (df_origin[col][i] != df_check[col][i]):
+        #             is_same = False
+        #             break
+        #     if not is_same:
+        #         print(i, df_check.loc[i])
+
+        # 같지않은것(둘다 NaN인것도 포함) 중에서 채울 수 있는것을 채운다
+        while (1):
+            print(df[df["산단공코드1"] != df["산단공코드2"]][["단지명","시도","시군구","key"]])
+            print("------------계속 진행? (Y, N)-----------")
+            flag = input()
+
+            if flag == "N":
+                break
+
+            input_key = input("key : ")
+            input_code = input("code : ")
+            print(df[df["key"] == input_key])
+            print()
+            input("------------값확인(enter)-----------")
+            df.loc[df["key"] == input_key, "산단공코드1"] = input_code
+            df.loc[df["key"] == input_key, "산단공코드2"] = input_code
+
+        # 컬럼들 채우기
+        df["기준년월"] = self.str_d
+        df["단지분할코드"] = df["단지분할코드2"]
+        df["산단공_관리코드"] = df["산단공코드1"]
+
+        print("다음 건들을 수기로 매핑해야한다!")
+        print(df[df["산단공코드1"] != df["산단공코드2"]])
+
+        df = df[final_col]
+
+        def left_join_overwrite(df_a,df_b,key_col,overwrite_col):
+            df_b = df_b[[key_col,overwrite_col]]
+            df = pd.merge(df_a, df_b, on=[key_col], how='left')
+            df[f"{overwrite_col}_x"] = df[f"{overwrite_col}_y"]
+
+            df = df.drop([f"{overwrite_col}_y"],axis=1)
+            df = df.rename(columns={f"{overwrite_col}_x": overwrite_col})
+
+            return df
+
+        def left_join_overwrite(df_left,df_right,key_col,col_left,col_right):
+            '''
+            key_col을 키로 하여 df_left left join df_right을 한후 col_left을 col_right로 덮어쓴다
+            '''
+            if col_left==col_right:
+                df_right = df_right[[key_col, col_right]]
+                df = pd.merge(df_left, df_right, on=[key_col], how='left')
+                df[f"{col_left}_x"] = df[f"{col_left}_y"]
+
+                df = df.drop([f"{col_left}_y"], axis=1)
+                df = df.rename(columns={f"{col_left}_x": col_left})
+            else:
+                df_right = df_right[[key_col,col_right]]
+                df = pd.merge(df_left, df_right, on=[key_col], how='left')
+
+                df[col_left] = df[col_right]
+                df = df.drop([col_right],axis=1)
+
+            return df
+
+        df = left_join_overwrite(df, df_sandan_code, "산단공_관리코드", "시도코드","최종_시도코드")
+        df = left_join_overwrite(df, df_sandan_code, "산단공_관리코드", "단지코드","최종_단지코드")
+        df = left_join_overwrite(df, df_sandangong_sigungu, "산단공_관리코드", "시군구코드1", "신한최종확정_시군구코드1")
+        df = left_join_overwrite(df, df_sandangong_sigungu, "산단공_관리코드", "시군구코드2", "신한최종확정_시군구코드2")
+        df = left_join_overwrite(df, df_sandangong_sigungu, "산단공_관리코드", "시군구코드3", "신한최종확정_시군구코드3")
+        df = left_join_overwrite(df, df_sandangong_sigungu, "산단공_관리코드", "시군구코드4", "신한최종확정_시군구코드4")
+        df = left_join_overwrite(df, df_sandangong_sigungu, "산단공_관리코드", "시군구개수", "시군구개수")
+        df = left_join_overwrite(df, df_typecode_mapping, "산업단지유형", "유형코드", "유형코드")
+        df = left_join_overwrite(df, df_josung_mapping, "조성상태", "조성상태코드", "조성상태코드")
+
+        size = len(df)
+        for i in range(size):
+            un_open="0"
+            if df["고용현황_남"][i]=="X":
+                un_open="1"
+                df["고용현황_남"][i]=""
+            if df["고용현황_여"][i]=="X":
+                un_open="1"
+                df["고용현황_여"][i]=""
+            if df["고용현황_계"][i]=="X":
+                un_open="1"
+                df["고용현황_계"][i]=""
+            df["고용현황 미공개 여부"][i] = un_open
+
+        for i in range(size):
+            un_open="0"
+            if df["누계생산금액"][i]=="X":
+                un_open="1"
+                df["누계생산금액"][i]=""
+            if df["누계수출금액"][i]=="X":
+                un_open="1"
+                df["누계수출금액"][i]=""
+            df["생산수출 미공개 여부"][i] = un_open
+
+        df["단지명"] = df["단지명"].str.replace("▷", "")
+        df["단지명"] = df["단지명"].str.replace("\xa0", "")
+        df["단지명"] = df["단지명"].str.replace(" ", "")
+        # def make_col_a_b(df, col_a,col_b,mapping_dict):
+        #     '''
+        #     df의 col_a가 key일때 col_b는 value
+        #     '''
+        #
+        #     size = len(df)
+        #     for i in range(size):
+        #         df[col_b][i] = mapping_dict[df[col_a]][i]
+        #
+        #     return df
+
+        # make_col_a_b(df,"산업단지유형","유형코드",{"국가":1,"일반":2,"도시첨단":3,"농공":""})
+        df.to_csv(to_path, sep='|', index=False, encoding="ANSI")
+
     def trans_84_ex53(self,y=None, m=None):
         file_num = "84"
         day_folder_name = self.RUN_SCHEDULE[file_num][2]
@@ -2639,5 +2848,5 @@ class Trans:
 
 if __name__ == "__main__":
     str_d = "202306"
-    work_day = "20"
+    work_day = "말일"
     trans = Trans(f'C:\\Users\\KODATA\\Desktop\\project\\shinhan_data',str_d,work_day)

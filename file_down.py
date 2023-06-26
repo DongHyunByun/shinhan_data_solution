@@ -308,7 +308,7 @@ class FileDown:
                     down_key = file["dwldUrl"]
                     down_url = f"https://www.reb.or.kr/r-one/common/nttFileDownload.do?fileKey={down_key}"
 
-                    request.urlretrieve(down_url, f"{folder_path}/{file_name}")
+                    request.urlretrieve(down_url, f"{folder_path}/10.{file_name}")
         else:
             post_id = soup.select('tr>td>a.nttInfoBtn')[0]["data-id"]
             down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
@@ -1257,7 +1257,7 @@ class FileDown:
         down_url = browser.find_element(By.XPATH, '//*[@id="contents"]/div[@class="cont-body"]/div[@class="detail-area"]/div[@class="util"]/span[@class="file-download-list"]/span[1]/a').get_attribute('href')
 
         self.delay_after_func(5, browser.get, (down_url,))
-        change_last_file(folder_path, f"{ex_file_num}. 산업단지현황조사_{base_yy}.{quater}분기")
+        change_last_file(folder_path, f"{ex_file_num}.산업단지현황조사_{base_yy}.{quater}분기")
 
     def filedown_84_ex53(self,y=None,m=None):
         file_num = "84"
