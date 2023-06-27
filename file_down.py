@@ -26,7 +26,6 @@ from urllib import request,parse
 # 링커
 from datetime_func import *
 from file_sys_func import *
-from run_month import *
 
 warnings.filterwarnings(action='ignore')
 class FileDown:
@@ -35,11 +34,11 @@ class FileDown:
     browser = None
     path = None
 
-    def __init__(self,project_path,str_d,work_day,RUN_SCHEDULE):
+    def __init__(self,project_path,str_d,work_day,base_v):
         self.str_d = str_d
         self.project_path = project_path
         self.work_day = work_day
-        self.RUN_SCHEDULE = RUN_SCHEDULE
+        self.RUN_SCHEDULE = base_v.RUN_SCHEDULE
 
         self.data_path = f"{self.project_path}\\data"
         self.path = f"{self.project_path}\\data\\{str_d}"
@@ -103,7 +102,7 @@ class FileDown:
         mkdir_dfs(self.data_path, dir_dict)
 
         now_month_date = {"num":[],"file_name":[],"day":[],"crawling":[]}
-        for num,vals in RUN_SCHEDULE.items():
+        for num,vals in self.RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
             day = vals[2]

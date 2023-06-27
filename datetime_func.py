@@ -21,6 +21,9 @@ def return_y_m_before_n_v2(d, n):
     return (str(n_month_before_d.year),str(n_month_before_d.month))
 
 def return_last_day_of_yyyymm(yyyy,mm):
+    '''
+    yyyy,mm 의 마지막일을 반환한다
+    '''
     input_dt = datetime(int(yyyy), int(mm),1)
     res = calendar.monthrange(input_dt.year, input_dt.month)
     return res[1]

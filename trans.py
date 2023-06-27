@@ -16,7 +16,6 @@ import math
 
 from datetime_func import *
 from file_sys_func import *
-from run_month import *
 from common import *
 
 warnings.filterwarnings('ignore')
@@ -27,15 +26,14 @@ class Trans:
     str_d = None
     d = None
     today = datetime.now().strftime('%Y.%m월')
-    refer = "refer"
     y = None
     m = None
 
-    def __init__(self,project_path,str_d,work_day, RUN_SCHEDULE):
+    def __init__(self,project_path,str_d,work_day, base_v):
         self.project_path = project_path
         self.str_d = str_d  # yyyymm
         self.work_day = work_day
-        self.RUN_SCHEDULE = RUN_SCHEDULE
+        self.RUN_SCHEDULE = base_v.RUN_SCHEDULE
 
         self.data_path = f"{self.project_path}\\data"
         self.path = f"{self.project_path}\\data\\{str_d}"
@@ -97,7 +95,7 @@ class Trans:
                           "88"   : [self.trans_88_ex57],
                           }
 
-        for num, vals in RUN_SCHEDULE.items():
+        for num, vals in self.RUN_SCHEDULE.items():
             file_name = vals[0]
             months = vals[1]
             day = vals[2]
@@ -1417,7 +1415,7 @@ class Trans:
         df_fin.dropna(inplace=True)
 
         # 자료 저장
-        df_fin.to_csv(f'{to_path}/29.rtp_sido_st_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df_fin.to_csv(f'{to_path}/29.rtp_sido_st_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_61_ex30(self):
         file_num = "61"
@@ -1491,7 +1489,7 @@ class Trans:
         df = df.loc[df['시점'].apply(lambda x: x == (datetime.now() - relativedelta(months=1)).strftime('%Y%m01')), :]
         df['지수기준년월'] = df['시점'].apply(lambda x: (datetime.now() - relativedelta(months=1)).strftime('%Y%m'))
 
-        df.to_csv(f'{file_path2}/34.rtp_field_hse_pm_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df.to_csv(f'{file_path2}/34.rtp_field_hse_pm_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_69_ex38(self):
         file_num = "69"
@@ -1625,7 +1623,7 @@ class Trans:
 
         print(tb(unsold, headers='keys', tablefmt='pretty'))
 
-        unsold.to_csv(f'{file_path3}/41.rtp_sigungu_us_{self.str_d}{day_file_name}.txt',  sep='|', index=False, encoding='ANSI')
+        unsold.to_csv(f'{file_path3}/41.rtp_sigungu_us_{self.str_d}{day_file_name}.txt',  sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_73_ex42(self):
         file_num = "73"
@@ -1692,7 +1690,7 @@ class Trans:
         df = df.loc[df['시점'].apply(lambda x: x == (datetime.now() - relativedelta(months=1)).strftime('%Y%m01')), :]
         df['지수기준년월'] = df['시점'].apply(lambda x: (datetime.now() - relativedelta(months=1)).strftime('%Y%m'))
 
-        df.to_csv(f'{file_path2}/36.rtp_hse_sz_pm_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df.to_csv(f'{file_path2}/36.rtp_hse_sz_pm_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_74_ex43(self):
         file_num = "74"
@@ -1733,7 +1731,7 @@ class Trans:
                     ['자료기준년월', '시도코드', '구  분(1)', '분류코드', '분류', 0]].sort_values(by=['시도코드', '분류코드'])
         df['지수기준년월'] = df['자료기준년월'].apply(lambda x: x[:6])
 
-        df.to_csv(file_path2 + f'43.rtp_hse_ut_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df.to_csv(file_path2 + f'43.rtp_hse_ut_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_75_ex44(self):
         file_num = "75"
@@ -1774,7 +1772,7 @@ class Trans:
                     ['자료기준년월', '시도코드', '구  분(1)', '분류코드', '분류', 0]].sort_values(by=['시도코드', '분류코드'])
         df['지수기준년월'] = df['자료기준년월'].apply(lambda x: x[:6])
 
-        df.to_csv(f'{file_path2}/44.rtp_hse_st_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df.to_csv(f'{file_path2}/44.rtp_hse_st_m_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_76_80_ex45_49(self):
         '''
@@ -1858,7 +1856,7 @@ class Trans:
             ldf.columns = ['자료발표일', 'KED시장시도구분', 'KED시장시도구분명', '소비심리지수값', '자료기준년월']
             sy = pd.concat([sy, ldf], axis=0, ignore_index=True)
 
-            sy.to_csv(f'{file_path3}/{fn_2}{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+            sy.to_csv(f'{file_path3}/{fn_2}{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_81_ex50(self):
         file_num = "81"
@@ -2279,7 +2277,7 @@ class Trans:
         fin = fin[['날짜', 'code', 'Lev', 'value', '기준년월']]
         fin.fillna('', inplace=True)
         print(tb(fin, headers='keys', tablefmt='pretty'))
-        fin.to_csv(f'{file_path2}/51.rtp_k_remap_{self.str_d}{day_file_name}.txt',encoding='ANSI', header=False, index=False)
+        fin.to_csv(f'{file_path2}/51.rtp_k_remap_{self.str_d}{day_file_name}.txt',encoding='ANSI', header=False, index=False, sep='|')
 
     def trans_83_ex52(self):
         month_to_quater = {3: [self.last_y, "4"],

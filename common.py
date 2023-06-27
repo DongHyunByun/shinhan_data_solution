@@ -20,6 +20,13 @@ def round_digit(path, column, digit):
 
     df.to_csv(path,encoding="CP949",sep='|',index=False)
 
+def get_key_by_val(dic,val):
+    for k,v in dic.items():
+        if v==val:
+            return k
+
+    return False
+
 def fill_row(file_path, columns):
     '''
     file_path파일의 column컬럼중 none값인 것을 위에서 부터 채운다

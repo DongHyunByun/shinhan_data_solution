@@ -1,7 +1,7 @@
 from file_down import FileDown
 from datetime import datetime
 from trans import Trans
-from run_month import RUN_SCHEDULE
+from base_val import BaseVal
 
 import argparse
 
@@ -19,8 +19,11 @@ if __name__ == "__main__":
     str_d = config.d
     work_day = config.work_day
 
-    # 크롤링
-    FileDown(path, str_d, work_day, RUN_SCHEDULE)
+    # 기초 변수 설정
+    base_v = BaseVal(str_d)
 
-    # 데이터 전처리
-    Trans(path, str_d, work_day, RUN_SCHEDULE)
+    # 크롤링
+    # FileDown(path, str_d, work_day, base_v)
+
+    # # 데이터 전처리
+    Trans(path, str_d, work_day, base_v)
