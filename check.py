@@ -1,3 +1,10 @@
+# 데이터를 검증한다
+# todo. 추가적으로 검증할 사항들
+# 1. 이전달꺼를 누적해서 보내야 하는 데이터들이 있는지
+# 2. 원천데이터들의 날짜가 맞는지
+# 3. 원천의 기준년월이 달라지지 않았는지
+
+
 import time
 import datetime
 import base_val
@@ -43,7 +50,7 @@ class Check:
         files = os.listdir(file_path)
         for file in files:
             print(file, end=" ")
-            df = pd.read_csv(f"{self.path}/{file}", encoding="CP949", header=None, sep='|')
+            df = pd.read_csv(f"{self.path}/{file}", encoding="CP949", header=None, sep='|', low_memory=False)
 
             # 실제 데이터 가장최근값의 개수
             file_num = get_key_by_val(self.FINAL_FILE_NAME_DICT, file)
@@ -69,7 +76,7 @@ class Check:
             print(file, end=" ")
 
             # 실제데이터 최근날짜
-            df = pd.read_csv(f"{self.path}/{file}", encoding="CP949", header=None, sep='|')
+            df = pd.read_csv(f"{self.path}/{file}", encoding="CP949", header=None, sep='|', low_memory=False)
             latest_d = str(df[0].sort_values(ascending=False)[0])
             latest_d_yyyymm = latest_d[:6]
 
@@ -79,7 +86,11 @@ class Check:
             if not self.MONTH_DIFF[file_num]:
                 print("수기확인필요")
                 continue
-            before_month_n = self.MONTH_DIFF[file_num] - 1
+            if file_num in ("84"): # 원천과 똑같다
+                before_month_n = self.MONTH_DIFF[file_num]
+            else:
+                before_month_n = self.MONTH_DIFF[file_num] - 1
+
             yyyy,m = return_y_m_before_n_v2(self.d,before_month_n)
             mm = m.zfill(2)
             yyyymm = yyyy+mm
@@ -98,7 +109,7 @@ class Check:
             is_check = False
             for set_num,file_name in self.FINAL_FILE_NAME_DICT.items():
                 if (file==file_name) and (set_num in self.EX_KEY_DICT):
-                    df = pd.read_csv(f"{self.path}/{file}",encoding="CP949",header=None,sep='|')
+                    df = pd.read_csv(f"{self.path}/{file}",encoding="CP949",header=None,sep='|', low_memory=False)
                     index_list = self.EX_KEY_DICT[set_num]
 
                     print(df.duplicated(index_list).sum())

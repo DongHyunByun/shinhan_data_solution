@@ -42,9 +42,10 @@ class Trans:
         self.d = datetime.strptime(str_d, '%Y%m')
         self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m') # 지난달 yyyymm
 
-        self.y = str_d[:4]
-        self.last_y = str(int(str_d[:4]) - 1)
-        self.m = str_d[5:].lstrip('0')
+        self.y = self.str_d[:4]
+        self.m = self.str_d[4:].lstrip('0')
+        self.last_y = self.last_str_d[:4]
+        self.last_m = self.last_str_d[4:].lstrip('0')
 
         self.to_day = {"말일":return_last_day_of_yyyymm(self.y,self.m)}
 
@@ -413,7 +414,8 @@ class Trans:
         day_folder_name = self.RUN_SCHEDULE[file_num][2]
         day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
 
-        file_path = f"{self.path}/{day_folder_name}/원천/10.{y}년 {m}월 지가변동률.xls"
+        file_path = f"{self.path}/{day_folder_name}/원천/10.{y}년 {m}월 지가지수.xls"
+        last_file_path = f"{self.data_path}/{self.last_str_d}/{day_folder_name}/원천_처리후/rtp_landpi_inf_{self.last_str_d}.txt"
         file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
         # 엑셀 불러오기 (멀티 컬럼이라 header를 그냥 3으로 설정)
@@ -497,6 +499,10 @@ class Trans:
 
         print('KEY값 중복 확인')
         print(df_tp.iloc[:, [0, 1, -1]].drop_duplicates())
+
+        last_df = pd.read_csv(last_file_path, dtype='str', header=None, sep="|", encoding="CP949")
+        df_tp.columns = last_df.columns
+        df_tp = pd.concat([df_tp,last_df],ignore_index=True)
 
         df_tp.to_csv(f"{file_path3}/rtp_landpi_inf_{yyyymm}.txt", sep='|', header=None, index=False, encoding='ANSI')
 

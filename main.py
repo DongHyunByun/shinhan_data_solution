@@ -23,7 +23,7 @@ if __name__ == "__main__":
     base_v = BaseVal(str_d)
 
     # 크롤링
-    # FileDown(path, str_d, work_day, base_v)
+    FileDown(path, str_d, work_day, base_v)
 
     # # 데이터 전처리
     Trans(path, str_d, work_day, base_v)

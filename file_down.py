@@ -300,7 +300,7 @@ class FileDown:
                     post_id = a["data-id"]
                     down_file_response = f"https://www.reb.or.kr/r-one/na/ntt/fileDownChk.do?qt=&divId=r-one&sysName=부동산통계정보세스템&currPage=&bbsId=1106&nttSn={post_id}&mi=9509&selectType=&cnrsBbsUseAt=&searchCate=LFR&listCo=10&searchType=sj&searchValue="
 
-                    file = self.try_request(down_file_response).json()["nttFileList"][0]
+                    file = self.try_request(down_file_response).json()["nttFileList"][1]
 
                     file_name = file["fileNm"]
                     file_type = file_name.split('.')[-1]
