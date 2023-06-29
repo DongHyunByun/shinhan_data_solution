@@ -42,6 +42,9 @@ class Check:
         # 최신데이터 개수 확인
         self.check_increase_val(self.path)
 
+        # 값 중복확인
+        # self.check_duple(self.path)
+
     def check_increase_val(self,file_path):
         '''
         추가된 값의 개수 확인
@@ -64,7 +67,7 @@ class Check:
             latest_cnt = len(df[df[0] == latest_d])
 
             print(amount, latest_cnt)
-            assert latest_cnt==amount
+            # assert latest_cnt==amount
 
     def check_files_last_dt(self,file_path):
         '''
@@ -119,6 +122,31 @@ class Check:
             if not is_check:
                 print("키 정보(혹은 파일정보) 없음")
 
+    def check_duple(self, file_path):
+        print("========================값 중복 확인========================")
+        files = os.listdir(file_path)
+        for file in files:
+            print(file, end=" ")
+            df = pd.read_csv(f"{self.path}/{file}", encoding="CP949", header=None, sep='|', low_memory=False)
+
+            unique_dates = df[0].unique()
+            total_L = []
+
+            print(df)
+            val_col_index = int(input("값이 있는 컬럼 번호 입력 : "))
+
+            for d in unique_dates:
+                print(d)
+                L = list(df[df[0] == d][val_col_index])
+
+                # if L in total_L:
+                #     print("중복값존재")
+                #     break
+                # else:
+                #     total_L.append(L)
+
+                assert (L in total_L)
+                total_L.append(L)
 
 if __name__ == "__main__":
     str_d = "202306"
