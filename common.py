@@ -103,6 +103,26 @@ def ofpi_gangwon_change():
 
     df.to_csv(to_path , sep='|', index=False, header=False, encoding='ANSI')
 
+def left_join_overwrite(df_left, df_right, key_col, col_left, col_right):
+    '''
+    key_col을 키로 하여 df_left left join df_right을 한후 col_left을 col_right로 덮어쓴다
+    '''
+    if col_left == col_right:
+        df_right = df_right[[key_col, col_right]]
+        df = pd.merge(df_left, df_right, on=[key_col], how='left')
+        df[f"{col_left}_x"] = df[f"{col_left}_y"]
+
+        df = df.drop([f"{col_left}_y"], axis=1)
+        df = df.rename(columns={f"{col_left}_x": col_left})
+    else:
+        df_right = df_right[[key_col, col_right]]
+        df = pd.merge(df_left, df_right, on=[key_col], how='left')
+
+        df[col_left] = df[col_right]
+        df = df.drop([col_right], axis=1)
+
+    return df
+
 if __name__ == "__main__":
     # path = "C:\\Users\\KODATA\\Desktop\\project\\신한은행\\5월\\20일\\원천_처리후"
     # file_name = "8.rtp_apt_js_inf_yyyymmdd.dat" #!!!!!!!

@@ -18,6 +18,7 @@ from datetime_func import *
 from file_sys_func import *
 from common import *
 
+from common import *
 warnings.filterwarnings('ignore')
 
 class Trans:
@@ -34,6 +35,7 @@ class Trans:
         self.str_d = str_d  # yyyymm
         self.work_day = work_day
         self.RUN_SCHEDULE = base_v.RUN_SCHEDULE
+        self.FINAL_FILE_NAME_DICT = base_v.FINAL_FILE_NAME_DICT
 
         self.data_path = f"{self.project_path}\\data"
         self.path = f"{self.project_path}\\data\\{str_d}"
@@ -41,6 +43,7 @@ class Trans:
 
         self.d = datetime.strptime(str_d, '%Y%m')
         self.last_str_d = (self.d - relativedelta(months=1)).strftime('%Y%m') # 지난달 yyyymm
+        self.last_month_path = f"{self.project_path}\\data\\{self.last_str_d}"
 
         self.y = self.str_d[:4]
         self.m = self.str_d[4:].lstrip('0')
@@ -119,10 +122,10 @@ class Trans:
         day_folder_name  = self.RUN_SCHEDULE[file_num][2]
         day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2],self.RUN_SCHEDULE[file_num][2])
 
-        while True:
-            file_loc = f"{self.path}/{day_folder_name}/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
-            file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
+        file_loc = f"{self.path}/{day_folder_name}/원천/5.산단격차율_({yyyy}.{m.zfill(2)}월말기준)_전국_지식산업센터현황.xlsx"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후"
 
+        while True:
             # 엑셀 파일 읽기
             jisic = pd.read_excel(file_loc)
             print(tabulate(jisic.iloc[:, :10].head(), headers='keys', tablefmt='psql'))
@@ -289,10 +292,13 @@ class Trans:
         day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
         pd.options.display.float_format = '{:.20f}'.format
 
-        while True:
-            file_loc = f"{self.path}/{day_folder_name}/원천/{file_num}.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
-            file_path3 = f"{self.path}/{day_folder_name}/원천_처리후/{file_num}.op_jisu_{self.str_d}{day_file_name}.csv"
+        file_loc = f"{self.path}/{day_folder_name}/원천/{file_num}.{y}년 {m}월 오피스텔가격동향조사 통계표.xlsx"
+        file_path3 = f"{self.path}/{day_folder_name}/원천_처리후/{file_num}.op_jisu_{self.str_d}{day_file_name}.csv"
+        file_final_path = f"{self.path}/{day_folder_name}/원천_처리후/{self.FINAL_FILE_NAME_DICT[file_num]}"
 
+        file_last_path = f"{self.last_month_path}/{day_folder_name}/원천_처리후/rtp_ofpi_inf_{self.last_str_d}.txt"
+
+        while True:
             cnt1_11 = int(input('1_11 시트의 데이터 개수를 입력해주세요 ex) 17 : '))
             cnt2_11 = int(input('2_11 시트의 데이터 개수를 입력해주세요 ex) 66 : '))
 
@@ -394,7 +400,6 @@ class Trans:
                 new_cnt = pd.DataFrame({'작업월': [date], '개수': [len(opi)]})
                 pd.concat([m_cnt, new_cnt], ignore_index=True).to_csv(f'{self.refer_path}/오피스텔_매매지수_데이터수.csv',encoding='ANSI', index=False)
 
-
             print()
             opi.to_csv(file_path3, sep='|', index=False, encoding='ANSI')
 
@@ -402,11 +407,43 @@ class Trans:
             break
 
         # 추후 sas처리를 파이썬으로 바꾸는 작업
-        # opi = opi[(opi["class1"]!="전국")&(opi["class1"]!="수도권")]
-        # opi = opi[["date","a1","a2","a3","class1","class2"]].drop_duplicates()
-        #
-        # space_mapping_df  = pd.read_csv(f"{self.refer_path}/9_면적매핑.dat", encoding='ANSI')
-        
+        opi["class2"] = opi["class2"].str.rstrip()
+        opi["class2"] = opi["class2"].str.lstrip()
+
+        # k2데이터
+
+        k2 = opi[(opi["class1"]!="전국")&(opi["class1"]!="수도권")]
+
+        # a1매핑
+        a1 = k2[["date","a1","a2","a3","class1"]].drop_duplicates()
+        space_mapping_df  = pd.read_csv(f"{self.refer_path}/9_면적매핑.dat", encoding='ANSI',sep="|", dtype="str")
+
+        a1['key'] = 1
+        space_mapping_df['key'] = 1
+        a1 = pd.merge(a1, space_mapping_df, on='key').drop(columns='key')
+
+        # k3데이터
+        k3 = pd.merge(a1, k2, on=["a1", "a2", "a3", "class1", "class2"], how='left')
+        b1 = pd.read_csv(f"{self.refer_path}/오피스텔매매지수_시군구코드_202107.dat", encoding='ANSI',sep="|", dtype="str")
+
+        on_price_region_db_df = pd.merge(k3, b1, left_on=["class1"], right_on=["오피스텔매매가격지수_지역명"])
+        on_price_region_db_df = on_price_region_db_df[~on_price_region_db_df["시군구코드현행화"].isnull()]
+        on_price_region_db_df = on_price_region_db_df[["date_x", "시군구코드현행화", "시도명현행화", "시군구명현행화", "class3", "class2", "value"]]
+        on_price_region_db_df["indaclcdt"] = "2020601"
+
+        on_price_region_db_df["value"] = on_price_region_db_df["value"].fillna(0)
+        on_price_region_db_df["value"] = list(on_price_region_db_df["value"].round(2))
+
+        last_df = pd.read_csv(file_last_path, encoding='ANSI',sep="|", dtype="str", header=None)
+
+        on_price_region_db_df.columns = [i for i in range(len(on_price_region_db_df.columns))]
+        last_df.columns = [i for i in range(len(last_df.columns))]
+        df = pd.concat([last_df,on_price_region_db_df])
+
+        print("규모명 특이한값확인")
+        print(df[5].unique())
+
+        df.to_csv(file_final_path, sep='|', index=False, encoding='ANSI', header=None)
 
     def trans_10(self,y,m):
         file_num = "10"
@@ -2412,36 +2449,6 @@ class Trans:
         print(df[df["산단공코드1"] != df["산단공코드2"]])
 
         df = df[final_col]
-
-        def left_join_overwrite(df_a,df_b,key_col,overwrite_col):
-            df_b = df_b[[key_col,overwrite_col]]
-            df = pd.merge(df_a, df_b, on=[key_col], how='left')
-            df[f"{overwrite_col}_x"] = df[f"{overwrite_col}_y"]
-
-            df = df.drop([f"{overwrite_col}_y"],axis=1)
-            df = df.rename(columns={f"{overwrite_col}_x": overwrite_col})
-
-            return df
-
-        def left_join_overwrite(df_left,df_right,key_col,col_left,col_right):
-            '''
-            key_col을 키로 하여 df_left left join df_right을 한후 col_left을 col_right로 덮어쓴다
-            '''
-            if col_left==col_right:
-                df_right = df_right[[key_col, col_right]]
-                df = pd.merge(df_left, df_right, on=[key_col], how='left')
-                df[f"{col_left}_x"] = df[f"{col_left}_y"]
-
-                df = df.drop([f"{col_left}_y"], axis=1)
-                df = df.rename(columns={f"{col_left}_x": col_left})
-            else:
-                df_right = df_right[[key_col,col_right]]
-                df = pd.merge(df_left, df_right, on=[key_col], how='left')
-
-                df[col_left] = df[col_right]
-                df = df.drop([col_right],axis=1)
-
-            return df
 
         df = left_join_overwrite(df, df_sandan_code, "산단공_관리코드", "시도코드","최종_시도코드")
         df = left_join_overwrite(df, df_sandan_code, "산단공_관리코드", "단지코드","최종_단지코드")

@@ -3,6 +3,7 @@ from datetime_func import *
 
 class BaseVal:
     str_d = None
+    y = None
     last_day = None
 
     RUN_SCHEDULE = None # RUN_SCHEDULE = {순번 : [파일명, (나가는 월들), 나가는일자, 수행날짜와 원천의 차이]
@@ -14,6 +15,7 @@ class BaseVal:
 
     def __init__(self, str_d):
         self.str_d = str_d  # yyyymm
+        self.y = str_d[:4]
         self.last_day = return_last_day_of_yyyymm(str_d[:4],str_d[4:])
         EVERY_MONTH = (1,2,3,4,5,6,7,8,9,10,11,12)
 
@@ -22,7 +24,7 @@ class BaseVal:
                         "1"    :["리얼탑KB아파트단지매핑",EVERY_MONTH, "25", None],
                         "2"    :["리얼탑 kb아파트평형시세매핑(sas)",EVERY_MONTH,"25", None],
                         "4"    :["건축물신축단가관리(excel)",(1,),"말일", None, None],
-                        "5"    :["산단격차율",EVERY_MONTH,"5", 2,],
+                        "5"    :["산단격차율",EVERY_MONTH,"5", 2],
                         "6"    :["토지격차율(sas)",(1,8),"말일", None],
                         "8"    :["전국주택 매매가격지수",EVERY_MONTH,"20",1],
                         "9"    :["오피스텔 매매가격지수",EVERY_MONTH,"20",1],
@@ -75,15 +77,15 @@ class BaseVal:
                         "5"    :None,
                         "6"    :None,
                         "8"    :None,
-                        "9"    :None,
+                        "9"    :f"rtp_ofpi_inf_{self.str_d}.txt",
                         "10"   :f"rtp_landpi_inf_{self.str_d}.txt",
-                        "11"   :None, #공개 후 1개월 이내
+                        "11"   :f"YCL_RTP_TOJI_CHRT_INF_{self.y}.txt", #공개 후 1개월 이내
                         "32"   :f"1.rtp_usecase_jg_{self.str_d}20.txt",
                         "33"   :f"2.rtp_gdhse_t_inf_{self.str_d}20.txt",
                         "34"   :f"3.rtp_gdhse_sea_inf_{self.str_d}20.txt",
                         "35"   :f"4.rtp_sz_apt_t_inf_{self.str_d}20.txt",
                         "36"   :f"5.rtp_sz_apt_js_inf_{self.str_d}20.txt",
-                        "37"   :None,
+                        "37"   :f"6.rtp_apt_signgu_inf_{self.str_d}20.txt ",
                         "38"   :f"7.rtp_apt_t_inf_{self.str_d}20.txt",
                         "39"   :f"8.rtp_apt_js_inf_{self.str_d}20.txt",
                         "40"   :f"9.rtp_apt_sz_mid_{self.str_d}20.txt",
@@ -107,17 +109,17 @@ class BaseVal:
                         "58"   :f"27.rtp_d_alsqr_st_{self.str_d}{self.last_day}.txt",
                         "59"   :f"28.rtp_d_alsqr_pm_{self.str_d}{self.last_day}.txt",
                         "60"   :f"29.rtp_sido_st_{self.str_d}{self.last_day}.txt",
-                        "61"   :None,
-                        "62"   :None,
-                        "63"   :None,
-                        "64"   :None,
+                        "61"   :f"30.rtp_year_pm_{self.str_d}{self.last_day}.txt",
+                        "62"   :f"31.rtp_sido_recon_{self.str_d}{self.last_day}.txt",
+                        "63"   :f"32.rtp_new_hse_sp_{self.str_d}20.txt",
+                        "64"   :f"33.rtp_hse_msnow_{self.str_d}{self.last_day}.txt",
                         "65"   :f"34.rtp_field_hse_pm_m_{self.str_d}{self.last_day}.txt",
-                        "66"   :None,
+                        "66"   :f"35.rtp_hse_con_{self.str_d}20.txt",
                         "67"   :f"36.rtp_hse_sz_pm_{self.str_d}{self.last_day}.txt",
-                        "68"   :None,
+                        "68"   :f"37.rtp_re_hse_pm_{self.str_d}20.txt",
                         "69"   :f"38.rtp_gsat_us_{self.str_d}20.txt",
                         "70"   :f"39.rtp_sz_us_{self.str_d}{self.last_day}.txt",
-                        "71"   :None,
+                        "71"   :f"40.rtp_us_total_{self.str_d}20.txt",
                         "72"   :f"41.rtp_sigungu_us_{self.str_d}{self.last_day}.txt",
                         "73"   :f"42.rtp_gdhse_now_{self.str_d}20.txt",
                         "74"   :f"43.rtp_hse_ut_m_{self.str_d}{self.last_day}.txt",
@@ -127,7 +129,7 @@ class BaseVal:
                         "78"   :f"47.rtp_ld_csi_inf_{self.str_d}{self.last_day}.txt",
                         "79"   :f"48.rtp_hse_t_csi_inf_{self.str_d}{self.last_day}.txt",
                         "80"   :f"49.rtp_hse_js_csi_inf_{self.str_d}{self.last_day}.txt",
-                        "81"   :None,
+                        "81"   :f"50.rtp_sg_rtrate_{self.str_d}{self.last_day}.txt",
                         "82"   :f"51.rtp_k_remap_{self.str_d}{self.last_day}.txt",
                         "83"   :f"52.ked_sandan_st_{self.str_d}{self.last_day}.txt",
                         "84"   :f"53.ked_sandan_in_{self.str_d}{self.last_day}.txt",
@@ -140,6 +142,7 @@ class BaseVal:
 
         # 외부통계 key 컬럼 인덱스 번호
         EX_KEY_DICT = {
+            "9":[0,1,2],
             "32":[0,1,4],
             "33":[0,1,5],
             "34":[0,1,4],
@@ -279,7 +282,7 @@ class BaseVal:
             "5": None,
             "6": None,
             "8": None,
-            "9": None,
+            "9": 2922, #강원도 반영됨
             "10": 366,
             "11": None,
             "32": 2009,
