@@ -47,7 +47,7 @@ class Trans:
 
         self.y = self.str_d[:4]
         self.m = self.str_d[4:].lstrip('0')
-        self.last_y = self.last_str_d[:4]
+        self.last_y = str(int(self.y)-1)
         self.last_m = self.last_str_d[4:].lstrip('0')
 
         self.to_day = {"말일":return_last_day_of_yyyymm(self.y,self.m)}
@@ -74,16 +74,16 @@ class Trans:
                           "59"   : [self.trans_59_ex28],
                           "60"   : [self.trans_60_ex29], # todo 속도issue
                           "61"   : [self.trans_61_ex30],  # 코드 달라짐
-                          "62"   : [],  # 시도별 재건축사업 현황 누계
+                          "62"   : [self.trans_62_ex31],  # 시도별 재건축사업 현황 누계
                           "63"   : [],  # (新)주택보급률
-                          "64"   : [],  # 주택 멸실현황
+                          "64"   : [],  # 주택 멸실현황, 3월 말일
                           "65"   : [self.trans_65_ex34],
-                          "66"   : [],  # 주택건설실적총괄
+                          "66"   : [],  # 주택건설실적총괄, 3월 20일
                           "67"   : [self.trans_67_ex36],
-                          "68"   : [],  # 지역별 주택건설 인허가실적
+                          "68"   : [],  # 지역별 주택건설 인허가실적, 3월 20일
                           "69"   : [self.trans_69_ex38],
                           "70"   : [self.trans_70_ex39],
-                          "71"   : [],  # 미분양현황종합
+                          "71"   : [],  # 미분양현황종합, 2월20일
                           "72"   : [self.trans_72_ex41],
                           "73"   : [self.trans_73_ex42],
                           "74"   : [self.trans_74_ex43],
@@ -1482,7 +1482,8 @@ class Trans:
         #                    "연면적별값":[],
         #                    "base_yyyy":[]})
 
-        origin_df = fill_row(file_path1,["레벨01(1)","레벨02(1)"])
+        df_origin = pd.read_excel(file_path1, dtype='str', engine='openpyxl')
+        origin_df = fill_row(df_origin,["레벨01(1)","레벨02(1)"])
         origin_df = origin_df[origin_df["레벨02(1)"] != "합계"].reset_index(drop=True)
         for i in range(len(origin_df)):
             if origin_df["항목"][i]=="기타":
@@ -1499,6 +1500,38 @@ class Trans:
 
         origin_df = origin_df.rename(columns={f'{self.last_y}_x': '동수별값',f'{self.last_y}_y': '연면적별값'})
         origin_df.to_csv(f'{file_path2}/30.rtp_year_pm_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+
+    def trans_62_ex31(self):
+        file_num = "62"
+        day_folder_name = self.RUN_SCHEDULE[file_num][2]
+        day_file_name = self.to_day.get(self.RUN_SCHEDULE[file_num][2], self.RUN_SCHEDULE[file_num][2])
+        ex_file_num = "31"
+        print(f"62.시도별 재건축사업 현황 누계, 외부통계 번호 : {ex_file_num}")
+
+        file_path = f'{self.path}/{day_folder_name}/원천/{ex_file_num}.xlsx'
+        to_path = f"{self.path}/{day_folder_name}/원천_처리후/{self.FINAL_FILE_NAME_DICT[file_num]}"
+
+        df = pd.read_excel(file_path, dtype='str')
+        size = len(df)
+
+        for i in range(size):
+            if df["레벨02(1)"][i] == "공급주택":
+                df["레벨02(1)"][i] = df["레벨02(1)"][i] + "_" + df["항목"][i]
+
+        df["시점"] = f"{self.last_y}1231"
+        df["year"] = self.last_y
+        df = fill_row(df,["구분(1)","레벨01(1)","레벨02(1)"])
+
+        df_sido_mapping = pd.read_csv(f"{self.refer_path}/31_sido_code_mapping.dat", dtype='str', sep='|',encoding="ANSI")
+        df_level1_mapping = pd.read_csv(f"{self.refer_path}/31_level1_code_mapping.dat",dtype='str', sep='|',encoding="ANSI")
+        df_level2_mapping = pd.read_csv(f"{self.refer_path}/31_level2_code_mapping.dat",dtype='str', sep='|',encoding="ANSI")
+
+        df = pd.merge(df, df_sido_mapping, on="구분(1)", how="left")
+        df = pd.merge(df, df_level1_mapping, on="레벨01(1)", how="left")
+        df = pd.merge(df, df_level2_mapping, on="레벨02(1)", how="left")
+
+        df = df[["시점","시도코드","구분(1)","레벨1코드","레벨2코드","레벨01(1)","레벨02(1)","데이터","year"]]
+        df.to_csv(f"{to_path}", sep='|',encoding="ANSI",header=None, index=False)
 
     def trans_65_ex34(self):
         file_num = "65"
@@ -2283,7 +2316,7 @@ class Trans:
 
         df_fin3 = pd.concat([df_fin.loc[df_fin['분기'] == max(df_fin['분기']), :], df_fin2], axis=0, ignore_index=False)
 
-        df_fin3.to_csv(f'{file_path2}/50.rtp_sg_rtrate_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI')
+        df_fin3.to_csv(f'{file_path2}/50.rtp_sg_rtrate_{self.str_d}{day_file_name}.txt', sep='|', index=False, encoding='ANSI',heador=None)
 
     def trans_82_ex51(self):
         pd.options.display.float_format = '{:.15f}'.format

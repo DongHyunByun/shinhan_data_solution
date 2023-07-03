@@ -149,6 +149,6 @@ class Check:
                 total_L.append(L)
 
 if __name__ == "__main__":
-    str_d = "202306"
+    str_d = "202307"
     base_v = BaseVal(str_d)
-    Check(f"C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data\\{str_d}\\말일\\원천_처리후\\check",str_d,base_v)
+    Check(f"C:\\Users\\KODATA\\Desktop\\project\\shinhan_data\\data\\{str_d}\\5\\원천_처리후\\check",str_d,base_v)

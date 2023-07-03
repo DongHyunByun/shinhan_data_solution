@@ -716,6 +716,37 @@ class FileDown:
         browser.switch_to.frame('iframe_rightMenu')
         browser.switch_to.frame('iframe_centerMenu1')
 
+        # 설정
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_querySetting"]').click) # 설정상자
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="ft-id-1"]/li[3]/span').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_1"]').click)  # 구분탭
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="ft-id-2"]/li[1]/span').click)
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="tabClassText_2"]').click)  # 레벨01텝
+        self.delay_after_func(5, browser.find_element(By.XPATH, '//*[@id="ft-id-3"]/li[1]/span').click)
+
+        self.delay_after_func(3, browser.find_element(By.XPATH, '//*[@id="btnSearch"]').click)
+
+        # 행렬전환
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="ico_swap"]').click)
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 시점상자 클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Le1"]').click)  # 시점클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[2]/a[1]').click)  # 위쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click) # 레벨1클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 레벨2클릭
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="Ri0"]').click)  # 항목
+        self.delay_after_func(1, browser.find_element(By.XPATH, '//*[@id="rEmpty"]/div[1]/a[1]').click)  # 왼쪽으로
+
+        self.delay_after_func(10, browser.find_element(By.XPATH, '//*[@id="btn_definite"]').click)  # 적용
+
         # 다운로드
         self.kosis_download(browser)
         change_last_file(folder_path, ex_file_num)

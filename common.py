@@ -27,12 +27,11 @@ def get_key_by_val(dic,val):
 
     return False
 
-def fill_row(file_path, columns):
+def fill_row(df_origin, columns):
     '''
     file_path파일의 column컬럼중 none값인 것을 위에서 부터 채운다
     61.연도별 건축허가현황, 외부통계 번호 : 30 참고
     '''
-    df_origin = pd.read_excel(file_path, dtype='str', engine='openpyxl')
     size = len(df_origin)
 
     for column in columns:
